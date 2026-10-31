@@ -496,3 +496,31 @@
     flex-basis: calc(100% - 54px);
   }
 }
+
+/* ---- shell: the rail's logo row and the page header share one height and one divider ---- */
+@media (min-width: 861px) {
+  .app {
+    --header-h: 92px;
+  }
+  .app .rail {
+    padding-top: 0;
+    gap: 20px;
+  }
+  .app .rail .brand {
+    height: var(--header-h);
+    flex: none;
+    margin: 0 -14px;
+    padding: 0 22px;
+    border-bottom: 1px solid oklch(1 0 0 / 0.1);
+  }
+  .app .main {
+    padding-top: 0;
+  }
+  .app .main .top {
+    min-height: var(--header-h);
+    align-items: center;
+    margin: 0 -32px 20px;
+    padding: 12px 32px;
+    border-bottom: 1px solid var(--line);
+  }
+}
