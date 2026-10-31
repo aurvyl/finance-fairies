@@ -1,3 +1,7 @@
+<h2 align="center">✨ <a href="https://finance-fairies-ui.vercel.app/">Try Finance Fairies live → finance-fairies-ui.vercel.app</a> ✨</h2>
+
+<p align="center"><a href="https://finance-fairies-ui.vercel.app/"><img src="https://img.shields.io/badge/Try%20it%20live-finance--fairies--ui.vercel.app-14b8a6?style=for-the-badge&logo=vercel&logoColor=white" alt="Try it live at finance-fairies-ui.vercel.app" /></a></p>
+
 <p align="center"><img src="docs/media/readme-hero.png" alt="Finance Fairies. You set the rules. Gemini does the thinking. The maths keeps it honest." width="100%" /></p>
 
 https://github.com/user-attachments/assets/11821931-f869-4646-a48f-5a00912fb6c4
