@@ -1,5 +1,6 @@
 import { Activity as ActivityIcon, FlaskConical, History, LayoutDashboard, Settings, ShieldCheck, Table2, TrendingDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useConnection } from './api/useEngine'
 import { Activity } from './components/Activity'
 import { Allocation } from './components/Allocation'
@@ -15,6 +16,8 @@ import { ScenarioStory } from './components/ScenarioStory'
 import { SettingsView } from './components/SettingsView'
 import { VoicePanel } from './components/VoicePanel'
 import { WhatIfView } from './components/WhatIfView'
+import { Tooltips } from './components/Tooltips'
+import { useGlide } from './motion'
 import { compactMoney, money, pct } from './engine/format'
 import { sim } from './engine/sim'
 import type { Snapshot } from './engine/types'
@@ -57,13 +60,15 @@ function EngineStatus({ onOpen }: { onOpen: () => void }) {
 function Rail({ s, view, setView }: { s: Snapshot; view: View; setView: (v: View) => void }) {
   const pending = s.activity.filter((a) => a.pending).length
   const watch = { auto: 'On watch', ask: 'Asking first', paused: 'Paused' }[s.autonomy]
+  const { ref: railRef, style: glideStyle, live: glideLive } = useGlide<HTMLElement>(".nav button[aria-current='page']", view)
   return (
-    <nav className="rail" aria-label="Main">
+    <nav className="rail" aria-label="Main" ref={railRef}>
+      <span className={`nav-glide ${glideLive ? 'glide-on' : ''}`} style={glideStyle} aria-hidden />
       <div className="brand">
         <FairyMark size={34} />
         <span>Finance Fairies</span>
       </div>
-      <ul className="nav">
+      <ul className="nav glides">
         {NAV.map((n, i) => (
           <li key={n.id} className={n.group && n.group !== NAV[i - 1]?.group ? `nav-${n.group}` : undefined}>
             <button title={n.title} aria-current={view === n.id ? 'page' : undefined} onClick={() => setView(n.id)}>
@@ -93,6 +98,7 @@ function Headline({ s, period, setPeriod }: { s: Snapshot; period: Period; setPe
   const base = period === '1D' ? s.open : s.daily[Math.max(0, s.daily.length - { '1W': 5, '1M': 21, '3M': 63, '1Y': 252 }[period as '1W'])]?.v
   const change = s.value - base
   const up = change >= 0
+  const { ref: tabsRef, style: pillStyle, live: pillLive } = useGlide<HTMLDivElement>("[aria-selected='true']", period)
   return (
     <div className="headline">
       <div>
@@ -103,7 +109,8 @@ function Headline({ s, period, setPeriod }: { s: Snapshot; period: Period; setPe
           <span className="delta-period">{period === '1D' ? 'today' : `over ${period}`}</span>
         </p>
       </div>
-      <div className="tabs" role="tablist" aria-label="Chart period">
+      <div className="tabs glides" role="tablist" aria-label="Chart period" ref={tabsRef}>
+        <span className={`tab-glide ${pillLive ? 'glide-on' : ''}`} style={pillStyle} aria-hidden />
         {(['1D', '1W', '1M', '3M', '1Y'] as Period[]).map((p) => (
           <button key={p} role="tab" aria-selected={period === p} onClick={() => setPeriod(p)}>
             {p}
@@ -144,6 +151,16 @@ function Legend({ period }: { period: Period }) {
   )
 }
 
+/**
+ * Swap views as a short cross-fade with a small rise of the new page (View Transitions where the
+ * browser has them, an instant swap where it doesn't). The rail is held still so only the page moves.
+ */
+function turnPage(update: () => void, animate: boolean) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown }
+  if (!animate || !doc.startViewTransition || document.hidden) return update()
+  doc.startViewTransition(() => flushSync(update))
+}
+
 export default function App() {
   const s = useSim()
   const [view, setViewState] = useState<View>(viewFromHash)
@@ -155,14 +172,16 @@ export default function App() {
   const [seed, setSeed] = useState<{ q: string; n: number } | null>(null)
 
   const setView = (v: View) => {
-    setViewState(v)
+    turnPage(() => {
+      setViewState(v)
+      window.scrollTo({ top: 0 })
+    }, v !== view)
     if (viewFromHash() !== v) window.history.pushState(null, '', v === 'overview' ? window.location.pathname + window.location.search : `#${v}`)
     document.getElementById('main')?.focus({ preventScroll: true })
-    window.scrollTo({ top: 0 })
   }
 
   useEffect(() => {
-    const onHash = () => setViewState(viewFromHash())
+    const onHash = () => turnPage(() => setViewState(viewFromHash()), true)
     window.addEventListener('hashchange', onHash)
     window.addEventListener('popstate', onHash)
     return () => {
@@ -304,6 +323,7 @@ export default function App() {
           {view === 'settings' && <SettingsView />}
         </main>
         <VoicePanel open={voiceOpen} onClose={() => setVoiceOpen(false)} seed={seed} />
+        <Tooltips />
       </div>
     </UIContext.Provider>
   )

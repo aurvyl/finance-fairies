@@ -6,6 +6,7 @@ import { LimitGauge, limitLines } from './LimitGauge'
 import { sim } from '../engine/sim'
 import type { Autonomy, Snapshot } from '../engine/types'
 import { useUI } from '../store'
+import { TweenNumber } from './TweenNumber'
 
 type Key = 'dailyLoss' | 'maxDrawdown'
 
@@ -135,7 +136,10 @@ function Summary({ s }: { s: Snapshot }) {
           <>Limit reached</>
         ) : (
           <>
-            {pct(near.room, 2, false)} <span>{compactMoney(s.value - near.at)}</span>
+            <TweenNumber value={near.room} format={(v) => pct(v, 2, false)} />{' '}
+            <span>
+              <TweenNumber value={s.value - near.at} format={compactMoney} />
+            </span>
           </>
         )}
       </p>

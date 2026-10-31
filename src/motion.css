@@ -1,0 +1,398 @@
+/* Micro-motion: feedback, state and continuity. Product speed (DESIGN.md): 160 ms feedback,
+   260 ms state, var(--ease). Rules here are prefixed with `html` where they override index.css or
+   visuals.css, because this file can load before them. Every effect has a reduced-motion path below. */
+
+/* ---------------- page turns (View Transitions) ---------------- */
+
+.main {
+  view-transition-name: page;
+}
+.rail {
+  view-transition-name: rail;
+}
+/* the rail stays put; only its own indicator moves */
+::view-transition-old(rail) {
+  display: none;
+}
+::view-transition-new(rail) {
+  animation: none;
+}
+::view-transition-old(page) {
+  animation: vt-out 120ms var(--ease) both;
+}
+::view-transition-new(page) {
+  animation: vt-in 320ms var(--ease) backwards;
+}
+::view-transition-group(page) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease);
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---------------- rail: one highlight that glides to the page you picked ---------------- */
+
+.nav-glide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--r-sm);
+  background: var(--ink-3);
+  pointer-events: none;
+}
+.nav-glide.glide-on {
+  transition:
+    transform 340ms var(--ease),
+    width 340ms var(--ease),
+    height 340ms var(--ease),
+    opacity var(--fast) var(--ease);
+}
+html .nav.glides {
+  position: relative;
+}
+html .nav.glides button[aria-current='page'] {
+  background: transparent;
+}
+html .nav button:active {
+  transform: scale(0.97);
+}
+html .nav button {
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    transform 120ms var(--ease);
+}
+html .nav button svg {
+  transition: transform var(--mid) var(--ease);
+}
+html .nav button:hover svg {
+  transform: translateY(-1px);
+}
+html .nav button[aria-current='page']::before {
+  animation: nav-mark 360ms var(--ease) backwards;
+}
+@keyframes nav-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+html .nav-badge {
+  animation: badge-in 420ms var(--ease) backwards;
+}
+@keyframes badge-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+}
+
+/* ---------------- chart period tabs: a pill that slides ---------------- */
+
+html .tabs.glides {
+  position: relative;
+}
+.tab-glide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 7px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px oklch(0.25 0.06 258 / 0.12);
+  pointer-events: none;
+}
+.tab-glide.glide-on {
+  transition:
+    transform 300ms var(--ease),
+    width 300ms var(--ease);
+}
+html .tabs.glides button {
+  position: relative;
+}
+html .tabs.glides button[aria-selected='true'] {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ---------------- press and hover feedback ---------------- */
+
+html .tabs button:active,
+html .segmented button:active,
+html .chip:active {
+  transform: scale(0.96);
+}
+html .tabs button,
+html .segmented button,
+html .chip {
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease),
+    transform 120ms var(--ease);
+}
+html .btn.ghost:hover:not(:disabled) {
+  background: var(--sunk);
+}
+html .btn svg {
+  transition: transform var(--mid) var(--ease);
+}
+/* the sell-off button's arrow dips, as a hint of what it does */
+html .top-actions .btn.ghost:hover:not(:disabled) svg {
+  transform: translateY(1px) rotate(-6deg);
+}
+html .link {
+  transition:
+    color var(--fast) var(--ease),
+    text-decoration-color var(--fast) var(--ease);
+}
+html .link:active {
+  opacity: 0.7;
+}
+
+/* ---------------- tooltips ---------------- */
+
+.tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  max-width: min(300px, calc(100vw - 16px));
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-wrap: pretty;
+  box-shadow: var(--shadow-lift);
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 3px;
+  scale: 0.98;
+  transition:
+    opacity 120ms var(--ease),
+    translate 120ms var(--ease),
+    scale 120ms var(--ease);
+}
+.tip[data-side='below'] {
+  translate: 0 -3px;
+}
+.tip.on {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+  transition-duration: var(--fast);
+}
+
+/* ---------------- numbers that count ---------------- */
+
+.tween {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------- limit dials ---------------- */
+
+/* the needle travels along the arc in JS (useTween), so the CSS chord transitions are off */
+html .dial-fill,
+html .dial-pin {
+  transition: none;
+}
+/* the fairy wakes when the needle reaches the point where it steps in */
+html .dial-fairy {
+  transition:
+    box-shadow var(--mid) var(--ease),
+    color var(--mid) var(--ease);
+}
+html .dial-fairy.awake {
+  box-shadow:
+    0 0 0 1px var(--trim),
+    0 0 0 4px var(--trim-soft);
+  animation: fairy-wake 700ms var(--ease);
+}
+@keyframes fairy-wake {
+  30% {
+    transform: translate(-50%, -50%) scale(1.22) rotate(-8deg);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(0.96) rotate(3deg);
+  }
+}
+/* a new zone (calm, selling, limit) swaps its icon and word in, so the change is noticed */
+html .dial-icon,
+html .safety-icon {
+  animation: zone-in 420ms var(--ease) backwards;
+}
+html .dial-center strong {
+  animation: zone-word 320ms var(--ease) backwards;
+}
+@keyframes zone-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-12deg);
+  }
+}
+@keyframes zone-word {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+/* ---------------- speed meters ---------------- */
+
+html .speed-fill {
+  transform-origin: left;
+  animation: grow-x 800ms var(--ease) backwards;
+}
+html .speed li:nth-child(2) .speed-fill {
+  animation-delay: 80ms;
+}
+html .speed li:nth-child(3) .speed-fill {
+  animation-delay: 160ms;
+}
+html .speed li.hit .speed-flag {
+  animation: flag-hit 600ms var(--ease);
+}
+html .speed-sum {
+  transition: color var(--mid) var(--ease);
+}
+@keyframes flag-hit {
+  40% {
+    transform: scaleY(1.7);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Guardrails meters fill from empty when the page opens */
+html .meter-fill {
+  animation: grow-x 900ms var(--ease) backwards;
+}
+
+/* ---------------- decision cards ---------------- */
+
+html .decisions .decision {
+  animation: card-in 460ms var(--ease) backwards;
+  transition:
+    border-color var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+html .decisions .decision.hover {
+  box-shadow: var(--shadow);
+}
+html .decisions .decision:nth-child(2) {
+  animation-delay: 60ms;
+}
+html .decisions .decision:nth-child(3) {
+  animation-delay: 120ms;
+}
+html .decisions .decision-icon {
+  animation: icon-pop 520ms var(--ease) 120ms backwards;
+}
+/* the "after" bar starts as long as "before", then shrinks: you watch the risk come off */
+html .decisions .risk-after {
+  animation: risk-cut 900ms var(--ease) 380ms backwards;
+}
+html .decisions .risk-used {
+  transform-origin: left;
+  animation: grow-x 800ms var(--ease) 200ms backwards;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+@keyframes icon-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+}
+@keyframes risk-cut {
+  from {
+    width: 100%;
+  }
+}
+
+/* ---------------- replay comparison bars ---------------- */
+
+html .cmp-bar {
+  transform-origin: left;
+  animation: grow-x 700ms var(--ease) backwards;
+}
+html .cmp-bar[style*='right'] {
+  transform-origin: right;
+}
+html .cmp-bars li:nth-child(2) .cmp-bar {
+  animation-delay: 70ms;
+}
+html .cmp-bars li:nth-child(3) .cmp-bar {
+  animation-delay: 140ms;
+}
+
+/* ---------------- reduced motion ---------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* entrances become instant; bars and dials show their values without travelling */
+  html .speed-fill,
+  html .meter-fill,
+  html .cmp-bar,
+  html .decisions .decision,
+  html .decisions .decision-icon,
+  html .decisions .risk-after,
+  html .decisions .risk-used,
+  html .dial-fairy.awake,
+  html .dial-icon,
+  html .safety-icon,
+  html .dial-center strong,
+  html .nav-badge,
+  html .nav button[aria-current='page']::before,
+  html .speed li.hit .speed-flag {
+    animation: none;
+  }
+  ::view-transition-new(page) {
+    animation-name: vt-out;
+    animation-direction: reverse;
+  }
+  ::view-transition-group(page) {
+    animation: none;
+  }
+  .nav-glide.glide-on,
+  .tab-glide.glide-on {
+    transition: opacity var(--fast) var(--ease);
+  }
+  .tip,
+  .tip[data-side='below'] {
+    translate: none;
+    scale: none;
+  }
+  html .nav button:active,
+  html .tabs button:active,
+  html .segmented button:active,
+  html .chip:active,
+  html .nav button:hover svg,
+  html .top-actions .btn.ghost:hover:not(:disabled) svg {
+    transform: none;
+  }
+}
