@@ -176,6 +176,8 @@ def analyze(req: AnalyzeIn, x_llm_key: str | None = Header(None)) -> dict:
     best = pick_best(plans)
     route, why = approval_route(best, policy) if best else ("none", ["no plan passed the checks"])
     route, why = escalate_on_disagreement(route, why, agent_note, best.source if best else None)
+    if not ctx["trigger"].kind:  # the engine only trades when a limit check fires (as in the replay)
+        route, why = "none", ["no limit check fired, so Guardian holds"]
     agrees = len(plans) == 2 and plans[0].actions == plans[1].actions
     out = jsonable({
         "snapshot": snapshot(ctx),

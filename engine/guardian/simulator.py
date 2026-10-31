@@ -157,6 +157,10 @@ def replay(
         # 4. Guardian.
         trig = evaluate(g_nav, r_hist, w_prev, policy)
         window = MarketWindow(returns=r_hist, close=close.loc[:day], volume=volume.loc[:day])
+        if trig.kind == "emergency" and policy.agent_mode == "paused":
+            log({"date": str(day.date()), "strategy": "guardian", "kind": "trigger", "reasons": trig.reasons, "values": trig.values,
+                 "chosen": None, "approval": "blocked", "approval_reasons": ["agent is paused"]})
+            continue  # a paused agent trades nothing, not even an emergency exit
         if trig.kind == "emergency":
             pending["guardian"] = "CASH"
             last_trade_i = i
