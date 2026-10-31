@@ -85,7 +85,7 @@ export function localAnswer(q: string, s: Snapshot): Answer {
   if (/\b(close|headroom|limit|safe|risk|room|budget|guardrail)\b/i.test(text)) {
     return {
       source: 'agent',
-      text: `You’ve used ${pct(dailyUsed, 0, false)} of today’s ${pct(s.guardrails.dailyLoss, 1, false)} loss budget and ${pct(ddUsed, 0, false)} of your ${pct(s.guardrails.maxDrawdown, 0, false)} maximum drop. I step in at ${pct(s.guardrails.actAt, 0, false)} of either.`,
+      text: `You’ve used ${pct(dailyUsed, 0, false)} of today’s ${pct(s.guardrails.dailyLoss, 1, false)} loss budget and ${pct(ddUsed, 0, false)} of your ${pct(s.guardrails.maxDrawdown, 0, false)} maximum drop. I step in if you’re down ${pct(s.guardrails.dailyLoss * s.guardrails.actAt, 1, false)} today or ${pct(s.guardrails.maxDrawdown * s.guardrails.actAt, 1, false)} from your best day.`,
     }
   }
   if (/\b(best|worst|top|biggest|movers?|winners?|losers?)\b/i.test(text)) {

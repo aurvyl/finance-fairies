@@ -309,8 +309,8 @@ export default function App() {
                 <div className="how">
                   <h2>How the agent keeps you inside your limits</h2>
                   <p>
-                    It measures the whole portfolio, not single positions. When either limit is {pct(s.guardrails.actAt, 0, false)} used, it sells a slice of the
-                    positions that add the most risk per dollar and parks the money in short-dated Treasuries. At 85% it cuts deeper, and at the limit it moves most
+                    It measures the whole portfolio, not single positions. When you’re down {pct(s.guardrails.dailyLoss * s.guardrails.actAt, 1, false)} in a day, or {pct(s.guardrails.maxDrawdown * s.guardrails.actAt, 0, false)} from your best day, it sells a slice of the
+                    positions that add the most risk per dollar and parks the money in short-dated Treasuries. If the fall keeps going it cuts deeper, and at the limit it moves most
                     risk out and stops adding risk until the next day.
                   </p>
                   <p>Every trade appears in Activity with the numbers behind it. Ask “why” by tapping, or out loud.</p>

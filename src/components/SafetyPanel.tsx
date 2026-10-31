@@ -61,7 +61,10 @@ const laneZone = (l: Lane, actAt: number) => (l.used >= 1 ? 'sell' : l.used >= a
 const laneTip = (l: Lane, actAt: number) =>
   [
     `${l.name} (limit ${pct(l.limit, 1, false)}): ${l.used <= 0.005 ? 'no loss yet' : `${pct(Math.min(l.used, 1), 0, false)} of your limit used`}.`,
-    `Your fairy steps in at ${pct(actAt, 0, false)} of the limit (${compactMoney(l.trimAt)}${l.roomToTrim > 0 ? `, ${compactMoney(l.roomToTrim)} away` : ', passed'}).`,
+    l.roomToTrim > 0
+      ? `Your fairy steps in if you’re down ${compactMoney(l.roomToTrim)} more (portfolio at ${compactMoney(l.trimAt)}, down ${pct(l.limit * actAt, 1, false)} ${l.key === 'daily' ? 'today' : 'from your best day'}).`
+      : `Your fairy stepped in at ${compactMoney(l.trimAt)}.`,
+    `That’s ${pct(actAt, 0, false)} of your limit.`,
     `Hard sell-off at ${compactMoney(l.sellAt)}${l.roomToSell > 0 ? `, ${compactMoney(l.roomToSell)} away` : ', reached'}.`,
   ].join(' ')
 
@@ -108,7 +111,9 @@ function LaneGauge({ l, actAt }: { l: Lane; actAt: number }) {
         </div>
       </div>
       <p className="dial-name">{l.name}</p>
-      <p className="dial-hint">{l.hint}</p>
+      <p className="dial-hint">
+        {l.roomToTrim > 0 ? `Fairy steps in at ${compactMoney(l.trimAt)}` : `Hard sell-off at ${compactMoney(l.sellAt)}`}
+      </p>
     </div>
   )
 }
@@ -156,7 +161,7 @@ export function SafetyPanel({ s }: { s: Snapshot }) {
       </div>
       <ul className="dial-key" aria-label="Key">
         <li>
-          <i className="k-safe" /> Calm
+          <i className="k-safe" /> Safe
         </li>
         <li>
           <span className="k-fairy" aria-hidden>
@@ -182,7 +187,9 @@ export function SafetyPanel({ s }: { s: Snapshot }) {
                   {l.used <= 0.005 ? 'No loss yet' : `${pct(Math.min(l.used, 1), 0, false)} of your ${pct(l.limit, l.key === 'daily' ? 1 : 0, false)} limit used`}
                 </td>
                 <td>
-                  Fairy steps in at {pct(a, 0, false)}: {l.roomToTrim > 0 ? `${compactMoney(l.roomToTrim)} away` : 'passed'}
+                  {l.roomToTrim > 0
+                    ? `Fairy steps in if you’re down ${compactMoney(l.roomToTrim)} more (at ${compactMoney(l.trimAt)})`
+                    : `Fairy stepped in at ${compactMoney(l.trimAt)}`}
                 </td>
                 <td>
                   Hard sell-off at {compactMoney(l.sellAt)}: {l.roomToSell > 0 ? `${compactMoney(l.roomToSell)} away` : 'reached'}
@@ -279,7 +286,7 @@ function DecisionCard({ a }: { a: ActivityItem }) {
     d !== 'hold' ? `To protect ${what}.` : '',
     symbols.length ? `Sold: ${symbols.join(', ')}.` : '',
     risk ? `If markets fell 10% you’d lose ${pct(risk[0] * 0.1, 1, false)} before and ${pct(risk[1] * 0.1, 1, false)} after.` : '',
-    a.usedBefore !== undefined ? `${pct(Math.min(a.usedBefore, 1), 0, false)} of the limit was used.` : '',
+
   ]
     .filter(Boolean)
     .join(' ')

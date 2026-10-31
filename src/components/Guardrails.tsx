@@ -147,7 +147,7 @@ function Summary({ s }: { s: Snapshot }) {
         {hit
           ? `Your ${near.name.toLowerCase()} has been reached. I’ve moved risk to Treasuries and won’t add any back ${near.key === 'dailyLoss' ? 'until tomorrow' : 'until you recover'}.`
           : `left before your ${near.name.toLowerCase()} ${when}. ${
-              acting ? `I’m already reducing risk: your ${actingOn!.name.toLowerCase()} is past ${pct(s.guardrails.actAt, 0, false)}.` : `I’ll start reducing risk after a further ${pct(near.roomActs, 2, false)} fall.`
+              acting ? `I’m already reducing risk: you’re past ${compactMoney(actingOn!.actAt)}, where I step in.` : `I’ll step in if you’re down ${compactMoney(s.value - near.actAt)} more (portfolio at ${compactMoney(near.actAt)}).`
             }`}
       </p>
     </div>

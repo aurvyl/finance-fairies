@@ -152,7 +152,7 @@ export class Simulation {
         summary: `You changed the ${parts.join(' and ')}.`,
         why: [
           `Headroom now: ${pct(1 - this.dailyUsed(), 0, false)} of today’s loss budget and ${pct(1 - this.ddUsed(), 0, false)} of your drawdown budget remain.`,
-          `I start reducing risk when either reaches ${pct(this.guardrails.actAt, 0, false)} of its limit.`,
+          `I step in if you’re down ${pct(this.guardrails.dailyLoss * this.guardrails.actAt, 1, false)} in a day or ${pct(this.guardrails.maxDrawdown * this.guardrails.actAt, 1, false)} from your best day.`,
         ],
         value: this.value(),
       })
@@ -466,7 +466,7 @@ export class Simulation {
     const verb = ['Trimmed', 'Cut', 'Moved most risk out of'][level]
     const story = this.storyFor(sells.map((t) => t.symbol), sold)
     const why = [
-      `You’ve used ${pct(used, 0, false)} of your ${pct(limit, rule === 'daily' ? 1 : 0, false)} ${ruleName}. I act at ${pct(LEVELS[level], 0, false)}.`,
+      `You’re down ${pct(used * limit, 1, false)} ${rule === 'daily' ? 'today' : 'from your best day'}, against a ${pct(limit, rule === 'daily' ? 1 : 0, false)} ${ruleName}. I step in at ${pct(LEVELS[level] * limit, 1, false)}.`,
       story?.cause ?? `${moves.map((m) => `${m.sector} (${pct(m.pct)})`).join(' and ')} caused most of the fall.`,
       story?.sold ??
         `I sold ${compactMoney(sold)} across ${sells.length} positions that add the most risk per dollar, and parked it in 0–3 month Treasuries.`,
@@ -480,7 +480,7 @@ export class Simulation {
       t: this.now,
       rule,
       title: `${this.autonomy === 'ask' ? 'Proposed: ' : ''}${verb} ${names.join(', ')}${sells.length > 3 ? ` +${sells.length - 3}` : ''}`,
-      summary: `${story ? `${story.short}: ` : ''}${ruleName} at ${pct(used, 0, false)} of limit. ${this.autonomy === 'ask' ? 'Waiting for your OK.' : `Moved ${compactMoney(sold)} to Treasuries.`}`.replace(/^./, (c) => c.toUpperCase()),
+      summary: `${story ? `${story.short}: ` : ''}down ${pct(used * limit, 1, false)} ${rule === 'daily' ? 'today' : 'from your best day'}. ${this.autonomy === 'ask' ? 'Waiting for your OK.' : `Moved ${compactMoney(sold)} to Treasuries.`}`.replace(/^./, (c) => c.toUpperCase()),
       why,
       trades,
       usedBefore: used,
@@ -584,9 +584,9 @@ export class Simulation {
       t: this.dayStart - 3 * day + 5.2 * 60 * MIN,
       rule: 'drawdown',
       title: 'Trimmed NVDA, BTC, AMD',
-      summary: 'Maximum drop at 61% of limit. Moved $96.4k to Treasuries.',
+      summary: 'Down 6.1% from your best day. Moved $96.4k to Treasuries.',
       why: [
-        'You’d used 61% of your 10% maximum drop. I act at 60%.',
+        'You were down 6.1% from your best day, against a 10% maximum drop. I step in at 6%.',
         'Semiconductors (−4.8%) and Crypto (−6.1%) caused most of the pullback from the peak.',
         'I sold $96.4k across 8 positions that add the most risk per dollar, and parked it in 0–3 month Treasuries.',
         'Portfolio beta dropped from 1.21 to 1.14.',
