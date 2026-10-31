@@ -16,6 +16,7 @@ import pandas as pd
 
 from . import metrics as m
 from .config import Policy
+from .agent import escalate_on_disagreement
 from .attribution import attribute_day
 from .rotation import MarketWindow, Plan, actions_between, approval_route, check_plan, engine_plan, pick_best
 from .triggers import classify_shock, evaluate, recovery_ok
@@ -180,6 +181,7 @@ def replay(
                     plans.append(agent_plan)
             best = pick_best(plans)
             route, route_reasons = approval_route(best, policy) if best else ("none", [])
+            route, route_reasons = escalate_on_disagreement(route, route_reasons, ctx.get("agent_note"), best.source if best else None)
             log({
                 "date": str(day.date()),
                 "strategy": "guardian",

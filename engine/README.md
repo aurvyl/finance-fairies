@@ -31,7 +31,7 @@ uv run --project . python scripts/replay_demo.py
 ## API
 
 ```bash
-cp .env.local.example .env.local   # add GEMINI_API_KEY (or another provider's key)
+bash scripts/set_gemini_key.sh      # stores GEMINI_API_KEY in .env.local and checks it
 uv run --project . uvicorn guardian.api:app --port 8000 --reload
 ```
 
@@ -42,6 +42,10 @@ uv run --project . uvicorn guardian.api:app --port 8000 --reload
 | `POST /replay` | hold vs cash_exit vs guardian; add `"agent": {"provider": "gemini"}` to let the LLM propose at each trigger |
 | `POST /analyze` | One decision on one date; `"inject": {"NVDA": -0.12}` is the what-if shock; `"agent"` adds the LLM plan |
 | `POST /attribution` | Market vs stock-specific split for a date |
+| `POST /news` | Google-Search-grounded news with source links (Gemini, live only) |
+| `POST /ask` | Short spoken answer to a user question about the portfolio (same contract as the frontend's `/api/ask`) |
+
+Full contract and response shapes for the frontend: [API.md](API.md).
 
 All bodies accept `holdings` (`{"NVDA": 0.3, "BTC-USD": 0.1, ...}`), `candidates`, `mode` (`automatic` / `ask_first` / `paused`). A key can also be sent per request in the `X-LLM-Key` header; it is used for that call only. `"live": true` lets Gemini use Google Search for news; replays never search.
 

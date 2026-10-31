@@ -1,0 +1,374 @@
+{
+ "snapshot": {
+  "date": "2026-10-30",
+  "limits": {
+   "daily_var_limit": 0.02,
+   "rotation_loss": 0.05,
+   "emergency_loss": 0.08000000000000002,
+   "target_annual_vol": 0.15
+  },
+  "trigger": {
+   "kind": "rotation",
+   "reasons": [
+    "Loss vs baseline 6.8% \u2265 5%",
+    "Drawdown from peak 13.4% \u2265 5%",
+    "Portfolio day return -3.8% \u2264 -2%",
+    "AMD -10.9% today, costing the portfolio 1.6%",
+    "Risk budget: 99% one-day VaR 3.3% > your 2% daily limit"
+   ],
+   "values": {
+    "baseline_loss": 0.06807609311744722,
+    "hwm_drawdown": 0.1336920873576628,
+    "portfolio_day_return": -0.03782332545545819,
+    "spike_ratio": NaN,
+    "short_annual_vol": 0.3912513802826702,
+    "daily_var_99": 0.03291740332054547
+   },
+   "budget_breach": true
+  },
+  "shock": {
+   "label": "broad-tech",
+   "suggested_path": "HEDGE",
+   "qqq": -0.03473877553075133,
+   "spy": -0.01772904090171079,
+   "smh": -0.06975625165649701,
+   "holdings_down": 7,
+   "portfolio_corr_qqq": 0.9102779521042255,
+   "main_loss_driver": "AMD",
+   "driver_corr_smh_minus_qqq": 0.07374252120199676
+  },
+  "attribution": {
+   "portfolio_return": -0.03782332545545831,
+   "benchmark": "SPY",
+   "benchmark_return": -0.01772904090171079,
+   "portfolio_beta": 1.987974438260661,
+   "market_part": -0.03524488012747879,
+   "stock_specific_part": -0.0025784453279795185,
+   "market_share": 0.9318292271520134,
+   "main_driver": "market",
+   "unusual_moves": [
+    "AMD"
+   ],
+   "holdings": [
+    {
+     "ticker": "AMD",
+     "weight": 0.14285714285714285,
+     "beta": 3.075140758707815,
+     "return": -0.10878852614026058,
+     "market_part": -0.05451929628964881,
+     "stock_specific": -0.05426922985061177,
+     "contribution": -0.015541218020037224,
+     "z_score": -3.324957436996712,
+     "unusual": true
+    },
+    {
+     "ticker": "AVGO",
+     "weight": 0.14285714285714285,
+     "beta": 2.1466461344873924,
+     "return": -0.05484061863111411,
+     "market_part": -0.03805797711982634,
+     "stock_specific": -0.01678264151128777,
+     "contribution": -0.007834374090159158,
+     "z_score": -2.24187306168054,
+     "unusual": false
+    },
+    {
+     "ticker": "NVDA",
+     "weight": 0.14285714285714285,
+     "beta": 2.1456384772263326,
+     "return": -0.04221662509528712,
+     "market_part": -0.03804011232303011,
+     "stock_specific": -0.004176512772257009,
+     "contribution": -0.006030946442183873,
+     "z_score": -1.943538971884688,
+     "unusual": false
+    },
+    {
+     "ticker": "MSFT",
+     "weight": 0.14285714285714285,
+     "beta": 1.3407953580960272,
+     "return": -0.015524279014033637,
+     "market_part": -0.023771015744508434,
+     "stock_specific": 0.008246736730474796,
+     "contribution": -0.002217754144861948,
+     "z_score": -1.257653248864178,
+     "unusual": false
+    },
+    {
+     "ticker": "META",
+     "weight": 0.14285714285714285,
+     "beta": 1.9127618644476114,
+     "return": -0.015259765898342215,
+     "market_part": -0.0339114333300243,
+     "stock_specific": 0.018651667431682083,
+     "contribution": -0.0021799665569060306,
+     "z_score": -0.5960381690059333,
+     "unusual": false
+    },
+    {
+     "ticker": "AMZN",
+     "weight": 0.14285714285714285,
+     "beta": 1.804011547402785,
+     "return": -0.014110452755867309,
+     "market_part": -0.03198339451106255,
+     "stock_specific": 0.017872941755195243,
+     "contribution": -0.002015778965123901,
+     "z_score": -0.6981459957234039,
+     "unusual": false
+    },
+    {
+     "ticker": "GOOGL",
+     "weight": 0.14285714285714285,
+     "beta": 1.4908269274566652,
+     "return": -0.014023010653303247,
+     "market_part": -0.026430931574251044,
+     "stock_specific": 0.012407920920947797,
+     "contribution": -0.002003287236186178,
+     "z_score": -0.475073962917266,
+     "unusual": false
+    }
+   ]
+  },
+  "portfolio": {
+   "weights": {
+    "NVDA": 0.14285714285714285,
+    "AMD": 0.14285714285714285,
+    "AVGO": 0.14285714285714285,
+    "MSFT": 0.14285714285714285,
+    "GOOGL": 0.14285714285714285,
+    "AMZN": 0.14285714285714285,
+    "META": 0.14285714285714285
+   },
+   "asset_class": {
+    "NVDA": "equity",
+    "AMD": "equity",
+    "AVGO": "equity",
+    "MSFT": "equity",
+    "GOOGL": "equity",
+    "AMZN": "equity",
+    "META": "equity"
+   },
+   "sector": {
+    "NVDA": "semis",
+    "AMD": "semis",
+    "AVGO": "semis",
+    "MSFT": "software",
+    "GOOGL": "comm",
+    "AMZN": "discretionary",
+    "META": "comm"
+   },
+   "annual_vol": 0.2246550206161008,
+   "daily_var_99": 0.03291740332054547,
+   "last_5d_return": {
+    "NVDA": -0.029958319696068325,
+    "AMD": -0.023200895420113277,
+    "AVGO": 0.0136781708426581,
+    "MSFT": -0.004957077220043016,
+    "GOOGL": -0.12607350237180526,
+    "AMZN": -0.030846749582598032,
+    "META": -0.042995868620262834
+   }
+  },
+  "candidates": [
+   "USMV",
+   "SPLV",
+   "XLP",
+   "XLV",
+   "XLU",
+   "PG",
+   "KO"
+  ],
+  "engine_plan": {
+   "actions": [
+    {
+     "type": "TRIM",
+     "ticker": "AMD",
+     "weight": 0.1
+    },
+    {
+     "type": "TRIM",
+     "ticker": "AVGO",
+     "weight": 0.1
+    },
+    {
+     "type": "TRIM",
+     "ticker": "META",
+     "weight": 0.05
+    },
+    {
+     "type": "ADD",
+     "ticker": "XLP",
+     "weight": 0.05
+    },
+    {
+     "type": "ADD",
+     "ticker": "PG",
+     "weight": 0.15
+    },
+    {
+     "type": "ADD",
+     "ticker": "KO",
+     "weight": 0.05
+    }
+   ],
+   "passed": true,
+   "rejections": [],
+   "values": {
+    "vol_before": 0.2246550206161008,
+    "vol_after": 0.13543841601384587,
+    "vol_reduction": 0.39712713456207016,
+    "cvar_before": 0.03685130347769723,
+    "cvar_after": 0.022265805780382595,
+    "cost_nav": 0.0005,
+    "turnover": 0.25,
+    "daily_var_before": 0.03291740332054547,
+    "daily_var_after": 0.01984500926263327,
+    "stress_equities_down_20": 0.19999999999999998,
+    "stress_tech_down_30_defensive_down_15": 0.2625,
+    "daily_var_limit": 0.02,
+    "budget_met": 1.0
+   }
+  },
+  "injected_shock": {},
+  "caps": {
+   "stock": 0.2,
+   "etf": 0.4,
+   "crypto_per_coin": 0.1,
+   "sector": 0.4
+  }
+ },
+ "plans": [
+  {
+   "source": "engine",
+   "passed": true,
+   "rejections": [],
+   "values": {
+    "vol_before": 0.2246550206161008,
+    "vol_after": 0.13543841601384587,
+    "vol_reduction": 0.39712713456207016,
+    "cvar_before": 0.03685130347769723,
+    "cvar_after": 0.022265805780382595,
+    "cost_nav": 0.0005,
+    "turnover": 0.25,
+    "daily_var_before": 0.03291740332054547,
+    "daily_var_after": 0.01984500926263327,
+    "stress_equities_down_20": 0.19999999999999998,
+    "stress_tech_down_30_defensive_down_15": 0.2625,
+    "daily_var_limit": 0.02,
+    "budget_met": 1.0
+   },
+   "actions": [
+    {
+     "type": "TRIM",
+     "ticker": "AMD",
+     "weight": 0.1
+    },
+    {
+     "type": "TRIM",
+     "ticker": "AVGO",
+     "weight": 0.1
+    },
+    {
+     "type": "TRIM",
+     "ticker": "META",
+     "weight": 0.05
+    },
+    {
+     "type": "ADD",
+     "ticker": "XLP",
+     "weight": 0.05
+    },
+    {
+     "type": "ADD",
+     "ticker": "PG",
+     "weight": 0.15
+    },
+    {
+     "type": "ADD",
+     "ticker": "KO",
+     "weight": 0.05
+    }
+   ]
+  },
+  {
+   "source": "agent",
+   "passed": true,
+   "rejections": [],
+   "values": {
+    "vol_before": 0.2246550206161008,
+    "vol_after": 0.13543841601384593,
+    "vol_reduction": 0.39712713456206994,
+    "cvar_before": 0.03685130347769723,
+    "cvar_after": 0.022265805780382605,
+    "cost_nav": 0.0005,
+    "turnover": 0.25,
+    "daily_var_before": 0.03291740332054547,
+    "daily_var_after": 0.019845009262633276,
+    "stress_equities_down_20": 0.2,
+    "stress_tech_down_30_defensive_down_15": 0.26250000000000007,
+    "daily_var_limit": 0.02,
+    "budget_met": 1.0
+   },
+   "actions": [
+    {
+     "type": "TRIM",
+     "ticker": "AMD",
+     "weight": 0.1
+    },
+    {
+     "type": "TRIM",
+     "ticker": "AVGO",
+     "weight": 0.1
+    },
+    {
+     "type": "TRIM",
+     "ticker": "META",
+     "weight": 0.05
+    },
+    {
+     "type": "ADD",
+     "ticker": "XLP",
+     "weight": 0.05
+    },
+    {
+     "type": "ADD",
+     "ticker": "PG",
+     "weight": 0.15
+    },
+    {
+     "type": "ADD",
+     "ticker": "KO",
+     "weight": 0.05
+    }
+   ]
+  }
+ ],
+ "chosen": "engine",
+ "approval": "ask",
+ "approval_reasons": [
+  "ADD PG 15% of the portfolio is above the 10% auto limit"
+ ],
+ "agent": {
+  "provider": "gemini",
+  "model": "gemini-4-argon",
+  "error": null,
+  "checks_run": 1,
+  "tool_calls": [
+   "get_risk_snapshot",
+   "check_plan"
+  ],
+  "sources": [],
+  "decision": "ROTATE",
+  "explanation": "A broad tech sell-off drove the portfolio down 3.8% today, pushing our drawdown from peak to 13.4% and our 99% one-day VaR to 3.3% (above your 2.0% limit). AMD was the main individual detractor, falling 10.9% and costing the portfolio 1.6%. To bring risk back inside your limits, we are rotating 25% of the portfolio out of high-beta tech\u2014trimming AMD by 10%, AVGO by 10%, and META by 5%\u2014and adding defensive consumer staples: 15% in PG, 5% in XLP, and 5% in KO. This reduces annualized volatility from 22.5% to 13.5% (below the 15.0% target) and lowers 99% one-day VaR from 3.3% to 1.98%, safely below your 2.0% daily limit.",
+  "key_factors": [
+   "Drawdown from peak reached 13.4% and loss vs baseline reached 6.8%, exceeding the 5.0% rotation trigger.",
+   "Portfolio 99% one-day VaR hit 3.3%, breaching the 2.0% daily limit.",
+   "Broad tech sell-off (QQQ -3.5%, SMH -7.0%) and AMD (-10.9%, costing 1.6%) drove today's -3.8% portfolio return.",
+   "Rotating 25% from AMD, AVGO, and META into PG, XLP, and KO cuts annual volatility from 22.5% to 13.5% and daily VaR to 1.98%."
+  ],
+  "news_considered": []
+ },
+ "agent_agrees_with_engine": true,
+ "simulated": true,
+ "cached": false
+}
