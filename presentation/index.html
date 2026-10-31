@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance Fairies · Live</title>
+<link rel="icon" href="media/logo-mark.svg">
+<style>
+@font-face{font-family:'Geist';src:url(media/fonts/geist-latin-wght-normal.woff2) format('woff2');font-weight:100 900;font-display:block}
+:root{
+  --ink:#0e213e;--ground:#ecf4f8;--surface:#fcfeff;--line:#dae3e9;--line-2:#c6d2dc;
+  --text:#152030;--text-2:#4b5b6f;--limit:#bd1478;--limit-ink:#f978b6;
+  --up:#057558;--down:#c1351e;--down-ink:#ff8d74;--warn:#d48300;--on-ink:#eef2f8;
+  --ease:cubic-bezier(0.16,1,0.3,1);--fast:160ms;--state:260ms;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0a1322;font-family:'Geist',Inter,Helvetica,Arial,sans-serif;color:var(--text);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+body.idle{cursor:none}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center;overflow:hidden}
+
+/* slides */
+.slide{position:absolute;inset:0;background:var(--ground);opacity:0;visibility:hidden;transition:opacity var(--state) var(--ease),visibility 0s linear var(--state)}
+.slide.active{opacity:1;visibility:visible;transition:opacity var(--state) var(--ease)}
+.slide .notes{display:none}
+.slide [data-b]{opacity:0;transform:translateY(14px);transition:opacity var(--state) var(--ease),transform var(--state) var(--ease)}
+svg [data-b]{transform-box:fill-box}
+.slide [data-b].on{opacity:1;transform:none;transition-delay:var(--d,0ms)}
+.slide .draw[data-b]{opacity:1;transform:none;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1400ms var(--ease)}
+.slide .draw[data-b].on{stroke-dashoffset:0}
+.slide [data-hide].gone{opacity:0;transform:none;transition-delay:0ms}
+.instant,.instant *{transition:none !important}
+
+/* shared type */
+.eyebrow{position:absolute;left:120px;top:72px;font-size:30px;font-weight:650;letter-spacing:4px;color:var(--limit);text-transform:uppercase}
+.headline{position:absolute;left:120px;top:110px;margin:0;font-size:88px;font-weight:750;letter-spacing:-0.02em;line-height:1.05}
+.small{position:absolute;right:56px;bottom:30px;font-size:22px;color:#7d8a9b}
+.ex-wrap{position:absolute;inset:0}
+.slide .ex-wrap[data-b]{transform:none}
+
+/* hook */
+.hook{background:var(--ink);color:var(--on-ink)}
+.hook .lines{position:absolute;left:150px;top:0;bottom:60px;width:1620px;display:flex;flex-direction:column;justify-content:center;gap:40px}
+.hook .l{font-size:92px;font-weight:720;letter-spacing:-0.025em;line-height:1.06;text-wrap:balance}
+.hook .down{color:var(--down-ink)}
+.hook .rule{color:var(--limit-ink)}
+.hook .small{left:150px;right:auto;color:rgba(238,242,248,.55)}
+
+
+/* title hook */
+.title .brand-row{position:absolute;left:120px;top:96px;display:flex;align-items:center;gap:20px;font-size:40px;font-weight:720;letter-spacing:-0.02em}
+.title .q{position:absolute;left:120px;top:230px;width:1640px;margin:0;font-size:132px;font-weight:770;letter-spacing:-0.035em;line-height:1;text-wrap:balance}
+.title .demo-badge{position:absolute;left:120px;top:560px;display:inline-flex;align-items:center;gap:16px;font-size:40px;font-weight:650;color:var(--up);background:#dff1ea;border-radius:999px;padding:16px 32px}
+.title .demo-badge .dot{width:18px;height:18px;border-radius:50%;background:var(--up);animation:pulse 2s var(--ease) infinite}
+.title .title-line{position:absolute;inset:0;pointer-events:none}
+.title .facts{position:absolute;left:120px;top:810px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:34px}
+.title .facts .lab{color:var(--text-2);font-weight:600;margin-right:6px}
+.title .fact{background:var(--surface);border-radius:14px;padding:14px 24px;font-weight:600;box-shadow:0 1px 2px rgba(14,33,62,.06),0 18px 40px -22px rgba(14,33,62,.35)}
+.title .fact.rule b{color:var(--limit)}
+.slide:not(.active) *{animation-play-state:paused}
+
+/* live slides */
+.live-head{position:absolute;left:40px;right:40px;top:26px;height:64px;display:flex;align-items:center;gap:16px}
+.live-dot{display:inline-flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--up)}
+.live-dot::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--up);box-shadow:0 0 0 0 rgba(5,117,88,.5);animation:pulse 2s var(--ease) infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(5,117,88,.45)}70%{box-shadow:0 0 0 12px rgba(5,117,88,0)}100%{box-shadow:0 0 0 0 rgba(5,117,88,0)}}
+.page-name{font-size:34px;font-weight:720;letter-spacing:-0.01em}
+.chip{font-size:20px;font-weight:550;border:1.5px solid var(--line-2);border-radius:999px;padding:6px 16px;color:var(--text-2);background:var(--surface);white-space:nowrap}
+.open-live{margin-left:auto;display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:12px;padding:12px 22px;font-size:21px;font-weight:600;text-decoration:none;transition:transform var(--fast) var(--ease),background var(--fast) var(--ease)}
+.open-live:hover{background:#1a3460}
+.open-live:active{transform:scale(.97)}
+.open-live:focus-visible{outline:3px solid var(--limit);outline-offset:3px}
+.key{font-size:18px;color:var(--text-2);white-space:nowrap}
+.key b{display:inline-block;min-width:30px;text-align:center;border:1.5px solid var(--line-2);border-bottom-width:3px;border-radius:7px;padding:2px 8px;margin-right:6px;font-weight:650;color:var(--text);background:var(--surface)}
+.shot{position:absolute;border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:0 1px 0 var(--line),0 30px 70px -30px rgba(14,33,62,.38)}
+.shot img,.shot video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.shot.phone{border-radius:28px}
+.shot video{z-index:5;background:var(--surface);opacity:0;transition:opacity var(--state) var(--ease)}
+.shot video.show{opacity:1}
+.ring{position:absolute;border:4px solid var(--ink);border-radius:18px;box-shadow:0 0 0 5px rgba(252,254,255,.75)}
+.ring.dot{border-radius:50%}
+.tag{position:absolute;background:var(--ink);color:#fff;font-size:22px;font-weight:620;padding:8px 14px;border-radius:10px;white-space:nowrap}
+
+/* gemini card */
+.gcard{position:absolute;left:120px;top:250px;width:1200px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:40px 50px 38px;box-shadow:0 1px 0 var(--line),0 30px 70px -30px rgba(14,33,62,.3)}
+.grow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.model{background:var(--ink);color:#fff;border-radius:999px;padding:8px 20px;font-size:22px;font-weight:650}
+.decision{font-size:22px;font-weight:700;letter-spacing:.08em;color:var(--limit)}
+.approve{margin-left:auto;background:#fcefd6;color:#7d4b00;border:1.5px solid #f0d199;border-radius:999px;padding:7px 18px;font-size:22px;font-weight:650}
+.gcard blockquote{margin:28px 0 26px;font-size:33px;line-height:1.38;font-weight:460;color:var(--text)}
+.gcard blockquote .cut{color:#8593a4}
+.plan{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:600;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.plan .arrow{color:var(--text-2)}
+.plan .add{color:var(--up)}
+.meta{display:flex;align-items:center;gap:12px;margin-top:20px;font-size:21px}
+.meta .lab{color:var(--text-2);font-weight:600;min-width:70px}
+.meta .chip{font-size:19px}
+.meta code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;background:#eef3f7;border:1px solid var(--line);border-radius:8px;padding:5px 10px;color:var(--text)}
+.bubble{position:absolute;right:120px;top:140px;background:var(--ink);color:#fff;font-size:30px;font-weight:620;padding:18px 26px;border-radius:22px 22px 6px 22px}
+
+/* proof */
+.chart{position:absolute;left:50px;top:240px;width:1250px}
+.stats{position:absolute;left:1330px;top:270px;width:550px;display:grid;grid-template-columns:1fr 175px 175px;row-gap:14px;align-items:baseline}
+.stats .h{font-size:22px;font-weight:700;padding-bottom:6px;border-bottom:1.5px solid var(--line-2)}
+.stats .h.hold{color:var(--ink);text-align:right}
+.stats .h.g{color:var(--limit);text-align:right}
+.stats .lab{font-size:22px;color:var(--text-2)}
+.stats .v{font-size:44px;font-weight:740;text-align:right;letter-spacing:-0.02em}
+.stats .sep{grid-column:1/-1;height:20px}
+.stats .sub{grid-column:1/-1;font-size:22px;font-weight:700;color:var(--text);padding-bottom:6px;border-bottom:1.5px solid var(--line-2)}
+.neg{color:var(--down)}.pos{color:var(--up)}
+
+/* close */
+.close-svg{position:absolute;inset:0}
+.close-copy{position:absolute;left:0;right:0;top:560px;text-align:center}
+.close-copy .brand{font-size:104px;font-weight:760;letter-spacing:-0.03em;margin:0}
+.close-copy .tl{display:flex;justify-content:center;gap:34px;margin-top:26px;font-size:46px;font-weight:600;color:var(--text)}
+.close-copy .next{display:inline-flex;align-items:center;gap:14px;margin-top:56px;font-size:30px;color:var(--text-2)}
+.close-copy .next .chip{font-size:20px;color:var(--limit);border-color:var(--limit);font-weight:650;letter-spacing:.06em}
+.close .small{left:0;right:0;text-align:center;bottom:44px;font-size:24px;color:var(--text-2)}
+
+/* appendix */
+.appx img{position:absolute;inset:40px;width:calc(100% - 80px);height:calc(100% - 80px);object-fit:contain}
+.appx .cap{position:absolute;left:40px;bottom:16px;font-size:20px;color:var(--text-2)}
+.divider .headline{top:420px}
+.divider .sub{position:absolute;left:120px;top:540px;font-size:36px;color:var(--text-2)}
+
+/* overlays (screen space, not scaled) */
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:46vh;overflow:auto;background:rgba(11,22,40,.95);color:var(--on-ink);font-size:17px;line-height:1.5;padding:16px 26px 20px;z-index:20;transform:translateY(100%);transition:transform var(--state) var(--ease)}
+#notes.show{transform:none}
+#notes .nh{display:flex;gap:16px;align-items:baseline;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#9fb0c6;margin-bottom:8px}
+#notes .nh strong{color:#fff;font-size:16px;letter-spacing:0;text-transform:none}
+#notes p{margin:6px 0}
+#notes .say{font-size:19px}
+#notes .say .press{display:inline-block;color:var(--limit-ink);font-weight:700;margin-right:4px}
+#notes .do{color:#cfe8dd}
+#notes .do b,#notes .fb b{color:#fff}
+#notes .fb{color:#f3d9a8}
+#notes .src{color:#8ea0b6;font-size:14px}
+#timer{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:21;background:rgba(11,22,40,.88);color:#fff;font-size:17px;font-weight:600;padding:6px 12px;border-radius:9px;display:none}
+#timer.show{display:block}
+#timer .tg{color:#9fb0c6;font-weight:500}
+#timer.late{background:#7d4b00}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;z-index:30;background:rgba(11,22,40,.94);color:#fff;font-size:16px;padding:10px 18px;border-radius:10px;transition:opacity var(--state) var(--ease),transform var(--state) var(--ease);pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#cue{position:fixed;inset:0;z-index:25;background:var(--ground);overflow:auto;padding:28px 32px 40px;display:none}
+#cue.show{display:block}
+#cue h2{margin:0 0 4px;font-size:26px}
+#cue .hint{color:var(--text-2);font-size:15px;margin-bottom:20px}
+#cue .grid{display:grid;grid-template-columns:repeat(auto-fill,384px);gap:22px 20px}
+#cue .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform var(--fast) var(--ease),box-shadow var(--fast) var(--ease)}
+#cue .card:hover{transform:translateY(-2px);box-shadow:0 12px 30px -16px rgba(14,33,62,.4)}
+#cue .card.cur{outline:3px solid var(--limit)}
+#cue .tb{position:relative;width:384px;height:216px;overflow:hidden;border-bottom:1px solid var(--line)}
+#cue .tb>.slide{transform:scale(.2);transform-origin:0 0;width:1920px;height:1080px;inset:auto;left:0;top:0}
+#cue .ci{padding:10px 14px 14px;font-size:14px;line-height:1.45}
+#cue .ci .t{display:flex;justify-content:space-between;font-weight:700;font-size:15px}
+#cue .ci .tm{color:var(--limit);font-variant-numeric:tabular-nums}
+#cue .ci .a{color:var(--text-2);margin-top:4px}
+
+/* presenter window */
+body.presenter{background:#0a1322;color:var(--on-ink)}
+body.presenter #stage{left:20px;top:70px;transform:scale(var(--s,1));transform-origin:0 0}
+body.presenter #notes{transform:none;left:auto;top:70px;right:0;bottom:0;max-height:none;width:38vw;background:transparent;font-size:20px}
+body.presenter #notes .say{font-size:23px}
+#pbar{display:none}
+body.presenter #pbar{display:flex;position:fixed;left:20px;right:20px;top:14px;height:44px;align-items:center;gap:20px;font-size:20px}
+#pbar .clock{font-size:30px;font-weight:700}
+#pbar .nx{margin-left:auto;color:#9fb0c6}
+
+@media (prefers-reduced-motion: reduce){
+  .slide [data-b],.slide [data-b].on{transform:none !important}
+  *,*::before{transition-duration:1ms !important;transition-delay:0ms !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 · HOOK -->
+<section class="slide title" data-title="Hook" data-time="0:00–0:10" data-end="10" data-cue="Ask the question. → shows the crash facts. Then → to the app.">
+  <div class="brand-row" data-b="0"><svg viewBox="0 0 32 32" width="64" height="64" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0e213e"/><circle cx="16" cy="16" r="9" fill="none" stroke="#eef2f8" stroke-width="2"/><line x1="4" x2="28" y1="16" y2="16" stroke="#f07fb8" stroke-width="2.5" stroke-linecap="round"/></svg><span>Finance Fairies</span></div>
+  <h1 class="q" data-b="0" style="--d:150ms">What if your portfolio could protect itself?</h1>
+  <div class="demo-badge" data-b="0" style="--d:450ms"><span class="dot"></span>We have a real app demo working.</div>
+  <svg class="title-line" viewBox="0 0 1920 1080" aria-hidden="true"><line class="draw" data-b="0" style="--d:300ms" pathLength="1" x1="0" y1="760" x2="1920" y2="760" stroke="#bd1478" stroke-width="6" stroke-linecap="round"/></svg>
+  <div class="facts">
+    <span class="lab" data-b="1">Yesterday</span>
+    <span class="fact" data-b="1" style="--d:80ms">AMD <b class="neg">−10.9%</b></span>
+    <span class="fact" data-b="1" style="--d:160ms">AI-heavy portfolio <b class="neg">−3.8%</b> in one day</span>
+    <span class="fact rule" data-b="1" style="--d:240ms">Its limit <b>2%</b></span>
+  </div>
+  <div class="small" style="left:120px;right:auto">30 Oct 2026 · seven AI stocks · engine on real prices · Simulated</div>
+  <aside class="notes">
+    <p class="say">“What if your portfolio could protect itself? We built it, and the app is running live.”</p>
+    <p class="say"><span class="press">→</span> “Yesterday, chip stocks crashed. AMD fell 10.9 percent. An AI-heavy portfolio lost 3.8 percent in one day. Its owner’s limit was 2 percent.”</p>
+    <p class="do"><b>Do:</b> keep this about 10 seconds, then → to the live Guardrails slide.</p>
+    <p class="src">Source: 30 Oct 2026 live run, seven-stock engine book ($10,000), gemini-agent-decision-2026-10-30-live-news.json. Simulated.</p>
+  </aside>
+</section>
+
+<!-- 2 · GUARDRAILS (live) -->
+<section class="slide" data-title="Meet Alex’s fairy" data-time="0:10–0:50" data-end="50" data-live="http://localhost:5173/#guardrails" data-cue="Live: Guardrails. Point at the two rules. Optional: mic, “Don’t let me lose more than 3% in a day”.">
+  <header class="live-head">
+    <span class="live-dot">LIVE</span><span class="page-name">Guardrails</span><span class="chip">Demo data</span>
+    <a class="open-live" href="http://localhost:5173/#guardrails" target="_blank" rel="noopener">Open live app ↗</a>
+  </header>
+  <div class="shot" style="left:40px;top:120px;width:1400px;height:875px"><img src="media/ui/09-guardrails.png" alt="Guardrails page on desktop: two rules, daily loss limit 2% and maximum drop 10%"></div>
+  <div class="shot phone" data-b="0" style="--d:200ms;left:1476px;top:120px;width:404px;height:875px"><img src="media/ui/m-09-guardrails.png" alt="Guardrails page on phone"></div>
+  <aside class="notes">
+    <p class="say">“You own dozens of investments. You don’t know what to sell, what to hold, or what happens next.”</p>
+    <p class="say">“Meet Finance Fairies. Alex doesn’t manage a hundred positions one by one. Alex writes two rules for the whole portfolio, in plain English: never fall more than 10 percent from the peak, never lose more than 2 percent in a day. That’s it. Alex sets the boundaries; the fairy handles the complexity.”</p>
+    <p class="do"><b>Do:</b> press <b>L</b> (or click Open live app) → Guardrails. Point at the two rules. Optional: hold the mic and say “Don’t let me lose more than 3% in a day”. If you change it, the limit line in the next demo moves too; set it back to 2% or skip.</p>
+    <p class="fb"><b>Fallback:</b> no recording for this page. Stay on this slide; the screenshot is real.</p>
+  </aside>
+</section>
+
+<!-- 3 · SELL-OFF (live) -->
+<section class="slide" data-title="The crash, live" data-time="0:50–1:40" data-end="100" data-live="http://localhost:5173/#overview" data-video="media/video/desktop-selloff.mp4" data-cue="Live: Overview → Simulate a sell-off. Point at diamond, Agent activity, Room to your limits. V = recording.">
+  <header class="live-head">
+    <span class="live-dot">LIVE</span><span class="page-name">Overview</span><span class="chip">Demo data</span><span class="chip">Simulated</span>
+    <a class="open-live" href="http://localhost:5173/#overview" target="_blank" rel="noopener">Open live app ↗</a>
+    <span class="key"><b>V</b>recording</span>
+  </header>
+  <div class="shot main" style="left:216px;top:118px;width:1488px;height:930px">
+    <img src="media/ui/01-overview.png" alt="Overview page before the sell-off">
+    <img src="media/ui/19-overview-selloff-agent-acted.png" alt="Overview after the sell-off: agent action diamond on the chart and a new Agent activity entry" data-b="1">
+    <div class="ring dot" data-b="1" style="--d:250ms;left:524px;top:296px;width:64px;height:64px"></div>
+    <div class="tag" data-b="1" style="--d:250ms;left:470px;top:236px">Agent acted</div>
+    <div class="ring" data-b="1" style="--d:400ms;left:396px;top:790px;width:548px;height:76px"></div>
+    <div class="tag" data-b="1" style="--d:400ms;left:962px;top:807px">With its reason</div>
+    <div class="ring" data-b="1" style="--d:550ms;left:1052px;top:112px;width:412px;height:150px"></div>
+  </div>
+  <aside class="notes">
+    <p class="say">“Picture an ordinary morning in the app. Chips and crypto fall together. Watch the magenta line: that’s Alex’s daily limit. The hatched band is where the fairy starts acting.”</p>
+    <p class="say">“It doesn’t send a notification and wait. It acts, inside Alex’s rules: it trims the riskiest holdings and moves money into calmer assets, instead of selling everything to cash. And every action comes with its reason.”</p>
+    <p class="do"><b>Do:</b> <b>L</b> → Overview → click <b>Simulate a sell-off</b>. Point at the magenta diamond on the chart, the new Agent activity entry, and “Room to your limits”. The entry text varies run to run; read what is there. Back here, <span class="press">→</span> shows the real end frame with markers.</p>
+    <p class="fb"><b>Fallback:</b> press <b>V</b> to play desktop-selloff.mp4 in place (V again hides it). This screen is demo data; don’t quote its dollar figures next to engine numbers.</p>
+  </aside>
+</section>
+
+<!-- 4 · v01 -->
+<section class="slide" data-title="Rules become lines" data-time="1:40–1:50" data-end="110" data-cue="→ brings in the worst-likely-day gauge.">
+  <div class="ex-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%"><defs><style>text{font-family:'Geist',Inter,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums;}</style><marker id="v01-arr-d48300" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#d48300" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v01-arr-057558" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#057558" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v01-arr-c1351e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c1351e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v01-arr-7d8a9b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#7d8a9b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v01-arr-c7d3dc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c7d3dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v01-arr-bd1478" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#bd1478" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v01-arr-0e213e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#0e213e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><filter id="v01-shadow" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0e213e" flood-opacity="0.08"/></filter><pattern id="v01-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" stroke="#bd1478" stroke-width="3" opacity="0.22"/></pattern></defs><rect id="v01-bg" width="1920" height="1080" fill="#ecf4f8"/><g id="v01-title" data-b="0" style="--d:0ms"><text x="120.0" y="100.0" font-size="30" font-weight="650" fill="#bd1478" text-anchor="start" letter-spacing="4">HOW IT WORKS</text><text x="120.0" y="200.0" font-size="88" font-weight="750" fill="#152030" text-anchor="start" >Your rules become lines</text></g><g id="v01-ward-band" data-b="0" style="--d:480ms"><rect x="330" y="645.0" width="420" height="315.0" fill="url(#v01-hatch)"/></g><g id="v01-ruler" data-b="0" style="--d:80ms"><line x1="330.0" y1="330.0" x2="330.0" y2="970.0" stroke="#c7d3dc" stroke-width="5" stroke-linecap="round"/><text x="300.0" y="346.0" font-size="44" font-weight="650" fill="#7d8a9b" text-anchor="end" >0%</text></g><g id="v01-line-1" data-b="0" style="--d:160ms"><line x1="314.0" y1="582.0" x2="750.0" y2="582.0" stroke="#057558" stroke-width="8" stroke-linecap="round"/><text x="300.0" y="600.0" font-size="52" font-weight="750" fill="#057558" text-anchor="end" >−4%</text><text x="780.0" y="599.0" font-size="48" font-weight="700" fill="#057558" text-anchor="start" >Add back</text></g><g id="v01-line-2" data-b="0" style="--d:240ms"><line x1="314.0" y1="645.0" x2="750.0" y2="645.0" stroke="#d48300" stroke-width="8" stroke-linecap="round"/><text x="300.0" y="663.0" font-size="52" font-weight="750" fill="#d48300" text-anchor="end" >−5%</text><text x="780.0" y="662.0" font-size="48" font-weight="700" fill="#d48300" text-anchor="start" >Rotate</text></g><g id="v01-line-3" data-b="0" style="--d:320ms"><line x1="314.0" y1="834.0" x2="750.0" y2="834.0" stroke="#c1351e" stroke-width="8" stroke-linecap="round"/><text x="300.0" y="852.0" font-size="52" font-weight="750" fill="#c1351e" text-anchor="end" >−8%</text><text x="780.0" y="851.0" font-size="48" font-weight="700" fill="#c1351e" text-anchor="start" >Emergency</text></g><g id="v01-line-4" data-b="0" style="--d:400ms"><line x1="314.0" y1="960.0" x2="750.0" y2="960.0" stroke="#bd1478" stroke-width="8" stroke-linecap="round" stroke-dasharray="20 14"/><text x="300.0" y="978.0" font-size="52" font-weight="750" fill="#bd1478" text-anchor="end" >−10%</text><text x="780.0" y="977.0" font-size="48" font-weight="700" fill="#bd1478" text-anchor="start" >Your limit</text></g><g id="v01-gauge" data-b="1" style="--d:0ms"><text x="1480.0" y="360.0" font-size="48" font-weight="700" fill="#152030" text-anchor="middle" >Worst likely day</text><path d="M1230.0 790.0 A250 250 0 0 1 1480.0 540.0" fill="none" stroke="#e3f3ee" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/><path d="M1480.0 540.0 A250 250 0 0 1 1730.0 790.0" fill="none" stroke="#fbebe7" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/><path d="M1230.0 790.0 A250 250 0 0 1 1480.0 540.0" fill="none" stroke="#057558" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="M1480.0 540.0 A250 250 0 0 1 1730.0 790.0" fill="none" stroke="#c1351e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g><g id="v01-limit-tick" data-b="1" style="--d:120ms"><line x1="1480.0" y1="488.0" x2="1480.0" y2="592.0" stroke="#bd1478" stroke-width="9" stroke-linecap="round"/><text x="1504.0" y="518.0" font-size="40" font-weight="700" fill="#bd1478" text-anchor="start" >your 2%</text></g><g id="v01-needle-before" data-b="1" style="--d:220ms"><line x1="1480.0" y1="790.0" x2="1645.5" y2="686.8" stroke="#c1351e" stroke-width="10" stroke-linecap="round"/><circle cx="1480" cy="790" r="18" fill="#0e213e"/></g><g id="v01-needle-after" data-b="1" style="--d:700ms"><line x1="1480.0" y1="790.0" x2="1476.9" y2="595.0" stroke="#057558" stroke-width="10" stroke-linecap="round"/><circle cx="1480" cy="790" r="18" fill="#0e213e"/></g><g id="v01-readout" data-b="1" style="--d:700ms"><text x="1430.0" y="940.0" font-size="96" font-weight="750" fill="#c1351e" text-anchor="end" >3.3%</text><text x="1480.0" y="930.0" font-size="64" font-weight="400" fill="#7d8a9b" text-anchor="middle" >→</text><text x="1530.0" y="940.0" font-size="96" font-weight="750" fill="#057558" text-anchor="start" >1.98%</text></g><g id="v01-small-print" data-b="0" style="--d:0ms"><text x="1860.0" y="1036.0" font-size="26" font-weight="500" fill="#7d8a9b" text-anchor="end" >Simulated · Not investment advice</text></g></svg></div>
+  <aside class="notes">
+    <p class="say">“Two rules become a ladder of lines <span class="press">→</span> and a daily risk budget: the worst likely day, measured before it happens.”</p>
+    <p class="src">3.3% → 1.98%: one-day 99% VaR on 30 Oct 2026, engine book. Simulated.</p>
+  </aside>
+</section>
+
+<!-- 5 · v03 -->
+<section class="slide" data-title="Market or your stocks?" data-time="1:50–1:57" data-end="117" data-cue="One line, move on.">
+  <div class="ex-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%"><defs><style>text{font-family:'Geist',Inter,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums;}</style><marker id="v03-arr-d48300" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#d48300" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v03-arr-057558" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#057558" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v03-arr-c1351e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c1351e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v03-arr-7d8a9b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#7d8a9b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v03-arr-c7d3dc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c7d3dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v03-arr-bd1478" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#bd1478" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v03-arr-0e213e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#0e213e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><filter id="v03-shadow" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0e213e" flood-opacity="0.08"/></filter><pattern id="v03-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" stroke="#bd1478" stroke-width="3" opacity="0.22"/></pattern></defs><rect id="v03-bg" width="1920" height="1080" fill="#ecf4f8"/><g id="v03-title" data-b="0" style="--d:0ms"><text x="120.0" y="100.0" font-size="30" font-weight="650" fill="#bd1478" text-anchor="start" letter-spacing="4">HOW IT WORKS</text><text x="120.0" y="200.0" font-size="88" font-weight="750" fill="#152030" text-anchor="start" >The market, or your stocks?</text></g><g id="v03-bar-market" data-b="0" style="--d:150ms"><rect x="120.0" y="400.0" width="1209.3" height="170.0" rx="24" fill="#0e213e" stroke="#0e213e" stroke-width="0" /><text x="168.0" y="508.0" font-size="64" font-weight="750" fill="#ffffff" text-anchor="start" >Market</text></g><g id="v03-bar-own" data-b="0" style="--d:260ms"><rect x="1339.3" y="400.0" width="460.7" height="170.0" rx="24" fill="#d48300" stroke="#d48300" stroke-width="0" /><text x="1760.0" y="508.0" font-size="64" font-weight="750" fill="#ffffff" text-anchor="end" >Own</text></g><g id="v03-share" data-b="0" style="--d:420ms"><text x="120.0" y="820.0" font-size="200" font-weight="800" fill="#0e213e" text-anchor="start" >72%</text><text x="570.0" y="800.0" font-size="64" font-weight="650" fill="#4b5a6e" text-anchor="start" >from the market</text></g><g id="v03-example" data-b="0" style="--d:540ms"><text x="120.0" y="360.0" font-size="40" font-weight="600" fill="#7d8a9b" text-anchor="start" >NVIDIA −12% what-if</text></g><g id="v03-small-print" data-b="0" style="--d:0ms"><text x="1860.0" y="1036.0" font-size="26" font-weight="500" fill="#7d8a9b" text-anchor="end" >Simulated · Not investment advice</text></g></svg></div>
+  <aside class="notes">
+    <p class="say">“When something moves, it asks why: the whole market, or your own stocks?”</p>
+    <p class="src">72% from the market: NVIDIA −12% what-if, 30 Oct 2026.</p>
+  </aside>
+</section>
+
+<!-- 6 · v06 -->
+<section class="slide" data-title="Five percent at a time" data-time="1:57–2:12" data-end="132" data-cue="→ shows the after row and the numbers.">
+  <div class="ex-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%"><defs><style>text{font-family:'Geist',Inter,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums;}</style><marker id="v06-arr-d48300" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#d48300" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v06-arr-057558" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#057558" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v06-arr-c1351e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c1351e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v06-arr-7d8a9b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#7d8a9b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v06-arr-c7d3dc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c7d3dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v06-arr-bd1478" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#bd1478" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v06-arr-0e213e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#0e213e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><filter id="v06-shadow" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0e213e" flood-opacity="0.08"/></filter><pattern id="v06-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" stroke="#bd1478" stroke-width="3" opacity="0.22"/></pattern></defs><rect id="v06-bg" width="1920" height="1080" fill="#ecf4f8"/><g id="v06-title" data-b="0" style="--d:0ms"><text x="120.0" y="100.0" font-size="30" font-weight="650" fill="#bd1478" text-anchor="start" letter-spacing="4">HOW IT WORKS</text><text x="120.0" y="200.0" font-size="88" font-weight="750" fill="#152030" text-anchor="start" >Five percent at a time</text></g><g id="v06-before" data-b="0" style="--d:100ms"><text x="120.0" y="336.0" font-size="44" font-weight="700" fill="#4b5a6e" text-anchor="start" >Before</text><g id="v06-before-NVDA" data-b="0" style="--d:160ms"><rect x="120.0" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="236.0" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >NVDA</text></g><g id="v06-before-AMD" data-b="0" style="--d:210ms"><rect x="360.1" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="476.1" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >AMD</text></g><g id="v06-before-AVGO" data-b="0" style="--d:260ms"><rect x="600.1" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="716.2" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >AVGO</text></g><g id="v06-before-MSFT" data-b="0" style="--d:310ms"><rect x="840.2" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="956.3" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >MSFT</text></g><g id="v06-before-GOOGL" data-b="0" style="--d:360ms"><rect x="1080.3" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="1196.3" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >GOOGL</text></g><g id="v06-before-AMZN" data-b="0" style="--d:410ms"><rect x="1320.4" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="1436.4" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >AMZN</text></g><g id="v06-before-META" data-b="0" style="--d:460ms"><rect x="1560.4" y="360.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="1676.5" y="440.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >META</text></g></g><g id="v06-after" data-b="1" style="--d:0ms"><text x="120.0" y="576.0" font-size="44" font-weight="700" fill="#4b5a6e" text-anchor="start" >After</text><g id="v06-after-NVDA" data-b="1" style="--d:0ms"><rect x="120.0" y="600.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="236.0" y="680.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >NVDA</text></g><g id="v06-after-AMD" data-b="1" style="--d:60ms"><rect x="360.1" y="600.0" width="64.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /></g><g id="v06-after-AVGO" data-b="1" style="--d:120ms"><rect x="432.1" y="600.0" width="64.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /></g><g id="v06-after-MSFT" data-b="1" style="--d:180ms"><rect x="504.2" y="600.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="620.3" y="680.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >MSFT</text></g><g id="v06-after-GOOGL" data-b="1" style="--d:240ms"><rect x="744.3" y="600.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="860.3" y="680.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >GOOGL</text></g><g id="v06-after-AMZN" data-b="1" style="--d:300ms"><rect x="984.4" y="600.0" width="232.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="1100.4" y="680.0" font-size="40" font-weight="700" fill="#152030" text-anchor="middle" >AMZN</text></g><g id="v06-after-META" data-b="1" style="--d:360ms"><rect x="1224.4" y="600.0" width="148.1" height="130.0" rx="16" fill="#e4e9f1" stroke="#c7d3dc" stroke-width="2.5" /><text x="1298.5" y="680.0" font-size="30" font-weight="700" fill="#152030" text-anchor="middle" >META</text></g><g id="v06-after-PG" data-b="1" style="--d:420ms"><rect x="1380.5" y="600.0" width="244.0" height="130.0" rx="16" fill="#e3f3ee" stroke="#057558" stroke-width="2.5" /><text x="1502.5" y="680.0" font-size="40" font-weight="700" fill="#057558" text-anchor="middle" >PG</text></g><g id="v06-after-KO" data-b="1" style="--d:480ms"><rect x="1632.5" y="600.0" width="76.0" height="130.0" rx="16" fill="#e3f3ee" stroke="#057558" stroke-width="2.5" /></g><g id="v06-after-XLP" data-b="1" style="--d:540ms"><rect x="1716.5" y="600.0" width="76.0" height="130.0" rx="16" fill="#e3f3ee" stroke="#057558" stroke-width="2.5" /></g></g><g id="v06-readout-1" data-b="1" style="--d:650ms"><text x="120.0" y="870.0" font-size="44" font-weight="650" fill="#4b5a6e" text-anchor="start" >Volatility</text><text x="120.0" y="990.0" font-size="104" font-weight="800" fill="#c1351e" text-anchor="start" >22.5%</text><text x="470.0" y="975.0" font-size="72" font-weight="400" fill="#7d8a9b" text-anchor="start" >→</text><text x="560.0" y="990.0" font-size="104" font-weight="800" fill="#057558" text-anchor="start" >13.5%</text></g><g id="v06-readout-2" data-b="1" style="--d:800ms"><text x="1000.0" y="870.0" font-size="44" font-weight="650" fill="#4b5a6e" text-anchor="start" >Worst day</text><text x="1000.0" y="990.0" font-size="104" font-weight="800" fill="#c1351e" text-anchor="start" >3.3%</text><text x="1350.0" y="975.0" font-size="72" font-weight="400" fill="#7d8a9b" text-anchor="start" >→</text><text x="1440.0" y="990.0" font-size="104" font-weight="800" fill="#057558" text-anchor="start" >1.98%</text></g><g id="v06-small-print" data-b="0" style="--d:0ms"><text x="1860.0" y="1036.0" font-size="26" font-weight="500" fill="#7d8a9b" text-anchor="end" >30 Oct 2026 · Simulated · Not investment advice</text></g></svg></div>
+  <aside class="notes">
+    <p class="say">“Then it rotates, five percent at a time, from the riskiest holdings into calm ones that pass every screen.” <span class="press">→</span> “On the thirtieth of October: volatility from 22.5 to 13.5 percent, worst likely day from 3.3 to 1.98, back under the two percent limit.”</p>
+    <p class="src">Plan: trim AMD 10%, AVGO 10%, META 5%; add PG 15%, KO 5%, XLP 5%. Simulated.</p>
+  </aside>
+</section>
+
+<!-- 7 · v07 + v08 -->
+<section class="slide" data-title="Gemini proposes; maths decides" data-time="2:12–2:32" data-end="152" data-cue="→ switches to One gate, eight checks.">
+  <div class="ex-wrap" data-b="0" data-hide="1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%"><defs><style>text{font-family:'Geist',Inter,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums;}</style><marker id="v07-arr-d48300" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#d48300" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v07-arr-057558" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#057558" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v07-arr-c1351e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c1351e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v07-arr-7d8a9b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#7d8a9b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v07-arr-c7d3dc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c7d3dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v07-arr-bd1478" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#bd1478" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v07-arr-0e213e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#0e213e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><filter id="v07-shadow" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0e213e" flood-opacity="0.08"/></filter><pattern id="v07-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" stroke="#bd1478" stroke-width="3" opacity="0.22"/></pattern></defs><rect id="v07-bg" width="1920" height="1080" fill="#ecf4f8"/><g id="v07-title" data-b="0" style="--d:0ms"><text x="120.0" y="100.0" font-size="30" font-weight="650" fill="#bd1478" text-anchor="start" letter-spacing="4">HOW IT WORKS</text><text x="120.0" y="200.0" font-size="88" font-weight="750" fill="#152030" text-anchor="start" >Gemini proposes. It can&#x27;t trade.</text></g><g id="v07-gemini" data-b="0" style="--d:120ms"><rect x="700.0" y="300.0" width="528.6" height="117.6" rx="58.800000000000004" fill="#0e213e" stroke="#0e213e" stroke-width="2.5" filter="url(#v07-shadow)" /><text x="964.3" y="379.0" font-size="56" font-weight="650" fill="#ffffff" text-anchor="middle" >Gemini 4 Argon</text></g><g id="v07-tool-1" data-b="0" style="--d:260ms"><rect x="120.0" y="560.0" width="305.4" height="96.6" rx="48.300000000000004" fill="#fcfeff" stroke="#0e213e" stroke-width="2.5" filter="url(#v07-shadow)" /><text x="272.7" y="624.9" font-size="46" font-weight="650" fill="#0e213e" text-anchor="middle" >Read risk</text></g><line x1="435.4" y1="608.0" x2="483.4" y2="608.0" stroke="#c7d3dc" stroke-width="6" stroke-linecap="round" marker-end="url(#v07-arr-c7d3dc)"/><g id="v07-tool-2" data-b="0" style="--d:360ms"><rect x="495.4" y="560.0" width="485.8" height="96.6" rx="48.300000000000004" fill="#fcfeff" stroke="#0e213e" stroke-width="2.5" filter="url(#v07-shadow)" /><text x="738.3" y="624.9" font-size="46" font-weight="650" fill="#0e213e" text-anchor="middle" >Find calm assets</text></g><line x1="991.2" y1="608.0" x2="1039.2" y2="608.0" stroke="#c7d3dc" stroke-width="6" stroke-linecap="round" marker-end="url(#v07-arr-c7d3dc)"/><g id="v07-tool-3" data-b="0" style="--d:460ms"><rect x="1051.2" y="560.0" width="331.2" height="96.6" rx="48.300000000000004" fill="#fcfeff" stroke="#057558" stroke-width="2.5" filter="url(#v07-shadow)" /><text x="1216.8" y="624.9" font-size="46" font-weight="650" fill="#057558" text-anchor="middle" >Check plan</text></g><line x1="1392.4" y1="608.0" x2="1440.4" y2="608.0" stroke="#c7d3dc" stroke-width="6" stroke-linecap="round" marker-end="url(#v07-arr-c7d3dc)"/><g id="v07-tool-4" data-b="0" style="--d:560ms"><rect x="1452.4" y="560.0" width="228.2" height="96.6" rx="48.300000000000004" fill="#fcfeff" stroke="#bd1478" stroke-width="2.5" filter="url(#v07-shadow)" /><text x="1566.5" y="624.9" font-size="46" font-weight="650" fill="#bd1478" text-anchor="middle" >Submit</text></g><path d="M960 417.6 L960 470 L272.72 470 L272.72 548" fill="none" stroke="#c7d3dc" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#v07-arr-c7d3dc)"/><g id="v07-revise" data-b="0" style="--d:700ms"><path d="M1216.8000000000002 662 C1216.8000000000002 770 738.32 770 738.32 676" fill="none" stroke="#d48300" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="16 12" marker-end="url(#v07-arr-d48300)"/><text x="977.6" y="830.0" font-size="46" font-weight="750" fill="#d48300" text-anchor="middle" >Fails? Revise.</text></g><g id="v07-news" data-b="0" style="--d:820ms"><rect x="120.0" y="900.0" width="489.6" height="84.0" rx="42.0" fill="#fcfeff" stroke="#dae3e9" stroke-width="2.5" /><text x="364.8" y="956.4" font-size="40" font-weight="650" fill="#4b5a6e" text-anchor="middle" >News: Google Search</text></g><g id="v07-no-trade" data-b="0" style="--d:900ms"><rect x="1280.0" y="900.0" width="444.8" height="84.0" rx="42.0" fill="#fbebe7" stroke="#fbebe7" stroke-width="2.5" /><text x="1502.4" y="956.4" font-size="40" font-weight="650" fill="#c1351e" text-anchor="middle" >No trading access</text></g><g id="v07-small-print" data-b="0" style="--d:0ms"><text x="1860.0" y="1036.0" font-size="26" font-weight="500" fill="#7d8a9b" text-anchor="end" >Gemini 4 Argon · Interactions API · Simulated</text></g></svg></div>
+  <div class="ex-wrap" data-b="1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%"><defs><style>text{font-family:'Geist',Inter,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums;}</style><marker id="v08-arr-d48300" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#d48300" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v08-arr-057558" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#057558" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v08-arr-c1351e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c1351e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v08-arr-7d8a9b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#7d8a9b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v08-arr-c7d3dc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#c7d3dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v08-arr-bd1478" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#bd1478" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="v08-arr-0e213e" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1.5 1.5 L8.5 5 L1.5 8.5" fill="none" stroke="#0e213e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><filter id="v08-shadow" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0e213e" flood-opacity="0.08"/></filter><pattern id="v08-hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" stroke="#bd1478" stroke-width="3" opacity="0.22"/></pattern></defs><rect id="v08-bg" width="1920" height="1080" fill="#ecf4f8"/><g id="v08-title" data-b="1" style="--d:0ms"><text x="120.0" y="100.0" font-size="30" font-weight="650" fill="#bd1478" text-anchor="start" letter-spacing="4">HOW IT WORKS</text><text x="120.0" y="200.0" font-size="88" font-weight="750" fill="#152030" text-anchor="start" >One gate. Eight checks.</text></g><g id="v08-plan-1" data-b="1" style="--d:100ms"><rect x="120.0" y="400.0" width="372.5" height="100.8" rx="50.400000000000006" fill="#fcfeff" stroke="#0e213e" stroke-width="2.5" filter="url(#v08-shadow)" /><text x="306.2" y="467.7" font-size="48" font-weight="650" fill="#0e213e" text-anchor="middle" >Engine plan</text></g><path d="M502.48 450.4 L620 450.4 L620 640 L660 640" fill="none" stroke="#0e213e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#v08-arr-0e213e)"/><g id="v08-plan-2" data-b="1" style="--d:180ms"><rect x="120.0" y="660.0" width="372.5" height="100.8" rx="50.400000000000006" fill="#fcfeff" stroke="#bd1478" stroke-width="2.5" filter="url(#v08-shadow)" /><text x="306.2" y="727.7" font-size="48" font-weight="650" fill="#bd1478" text-anchor="middle" >Gemini plan</text></g><path d="M502.48 710.4 L620 710.4 L620 640 L660 640" fill="none" stroke="#bd1478" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#v08-arr-bd1478)"/><g id="v08-gate" data-b="1" style="--d:260ms"><rect x="670.0" y="300.0" width="820.0" height="700.0" rx="40" fill="#fcfeff" stroke="#057558" stroke-width="4" filter="url(#v08-shadow)" /></g><g id="v08-check-1" data-b="1" style="--d:340ms"><circle cx="730" cy="366" r="24" fill="#057558"/><path d="M719.2 366 L727.6 375.12 L742.0 357.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="380.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Less volatility</text></g><g id="v08-check-2" data-b="1" style="--d:410ms"><circle cx="730" cy="444" r="24" fill="#057558"/><path d="M719.2 444 L727.6 453.12 L742.0 435.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="458.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Smaller tail loss</text></g><g id="v08-check-3" data-b="1" style="--d:480ms"><circle cx="730" cy="522" r="24" fill="#057558"/><path d="M719.2 522 L727.6 531.12 L742.0 513.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="536.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Survives a −20% crash</text></g><g id="v08-check-4" data-b="1" style="--d:550ms"><circle cx="730" cy="600" r="24" fill="#057558"/><path d="M719.2 600 L727.6 609.12 L742.0 591.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="614.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Survives tech −30%</text></g><g id="v08-check-5" data-b="1" style="--d:620ms"><circle cx="730" cy="678" r="24" fill="#057558"/><path d="M719.2 678 L727.6 687.12 L742.0 669.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="692.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Within caps</text></g><g id="v08-check-6" data-b="1" style="--d:690ms"><circle cx="730" cy="756" r="24" fill="#057558"/><path d="M719.2 756 L727.6 765.12 L742.0 747.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="770.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Small turnover</text></g><g id="v08-check-7" data-b="1" style="--d:760ms"><circle cx="730" cy="834" r="24" fill="#057558"/><path d="M719.2 834 L727.6 843.12 L742.0 825.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="848.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Low cost</text></g><g id="v08-check-8" data-b="1" style="--d:830ms"><circle cx="730" cy="912" r="24" fill="#057558"/><path d="M719.2 912 L727.6 921.12 L742.0 903.6" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="776.0" y="926.0" font-size="42" font-weight="650" fill="#152030" text-anchor="start" >Lower worst day</text></g><path d="M1494 640 L1560 640" fill="none" stroke="#057558" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#v08-arr-057558)"/><g id="v08-winner" data-b="1" style="--d:1000ms"><rect x="1570.0" y="500.0" width="270.0" height="280.0" rx="36" fill="#e3f3ee" stroke="#057558" stroke-width="3" /><text x="1705.0" y="625.0" font-size="60" font-weight="800" fill="#057558" text-anchor="middle" >Safer</text><text x="1705.0" y="690.0" font-size="40" font-weight="650" fill="#057558" text-anchor="middle" >plan wins</text></g><g id="v08-small-print" data-b="1" style="--d:0ms"><text x="1860.0" y="1036.0" font-size="26" font-weight="500" fill="#7d8a9b" text-anchor="end" >Simulated · Not investment advice</text></g></svg></div>
+  <aside class="notes">
+    <p class="say">“Gemini 4 Argon is the agent. It reads the engine’s numbers through tools, can check the news, and proposes a plan. But it cannot trade.”</p>
+    <p class="say"><span class="press">→</span> “Its plan has to pass the same eight checks as the engine’s own plan: less volatility, a smaller tail loss, two crash tests, caps, turnover, cost, a lower worst day. The safer plan that passes wins. Gemini proposes; the maths decides.”</p>
+    <p class="src">Tools: get_risk_snapshot, screen_candidates, check_plan, submit_plan. It must pass check_plan before it can submit.</p>
+  </aside>
+</section>
+
+<!-- 8 · WHAT-IF (live) -->
+<section class="slide" data-title="What-if, live" data-time="2:32–2:50" data-end="170" data-live="http://localhost:5173/#whatif" data-video="media/video/desktop-whatif.mp4" data-cue="Live: What-if → NVIDIA falls 12% → See what Guardian would do. V = recording.">
+  <header class="live-head">
+    <span class="live-dot">LIVE</span><span class="page-name">What-if</span><span class="chip">Engine · real prices</span><span class="chip">Simulated</span>
+    <a class="open-live" href="http://localhost:5173/#whatif" target="_blank" rel="noopener">Open live app ↗</a>
+    <span class="key"><b>V</b>recording</span>
+  </header>
+  <div class="shot main" style="left:216px;top:118px;width:1488px;height:930px">
+    <img src="media/ui/13-whatif.png" alt="What-if page with presets">
+    <img src="media/ui/15-whatif-result.png" alt="What-if result: 72% from the market, volatility 23.2% to 13.0%, needs your approval" data-b="1">
+    <div class="ring" data-b="1" style="--d:250ms;left:886px;top:402px;width:560px;height:60px"></div>
+    <div class="tag" data-b="1" style="--d:250ms;left:620px;top:410px">72% market</div>
+    <div class="ring" data-b="1" style="--d:400ms;left:900px;top:640px;width:330px;height:64px"></div>
+    <div class="tag" data-b="1" style="--d:400ms;left:610px;top:650px">23.2% → 13.0%</div>
+    <div class="ring" data-b="1" style="--d:550ms;left:886px;top:760px;width:410px;height:66px"></div>
+    <div class="tag" data-b="1" style="--d:550ms;left:620px;top:772px">Asks Alex first</div>
+  </div>
+  <aside class="notes">
+    <p class="say">“Here’s a time machine: replace a day’s moves and watch what it would do.”</p>
+    <p class="say"><span class="press">→</span> “72 percent of this drop is the market. The plan cuts volatility from 23 to 13 percent, and because one trade is above ten percent of the portfolio, it asks Alex first.”</p>
+    <p class="do"><b>Do:</b> <b>L</b> → What-if → preset <b>NVIDIA falls 12%</b> → <b>See what Guardian would do</b>. If the result takes more than ~5 s, come back and press <b>V</b>.</p>
+    <p class="fb"><b>Fallback:</b> <b>V</b> plays desktop-whatif.mp4; <span class="press">→</span> shows the real result frame with markers.</p>
+    <p class="src">23.2% → 13.0% volatility, worst likely day 3.4% → 1.9%, cost 0.06%. “ADD PG 15% of the portfolio is above the 10% auto limit.” Engine on real prices, $10,000 book.</p>
+  </aside>
+</section>
+
+<!-- 9 · GEMINI CARD -->
+<section class="slide" data-title="A real day, a real answer" data-time="2:50–3:20" data-end="200" data-cue="→ brings in the voice panel: “Why did you sell AMD?”">
+    <h1 class="headline">A real day. A real answer.</h1>
+  <div class="gcard" data-b="0" style="--d:120ms">
+    <div class="grow"><span class="model">Gemini 4 Argon</span><span class="decision">ROTATE 25%</span><span class="approve">Needs your approval</span></div>
+    <blockquote>“A broad tech and semiconductor selloff drove the portfolio down 3.8% today<span class="cut"> [...] </span>AMD was the main loss driver, falling 10.9% on sector contagion<span class="cut"> [...] </span>This lowers annual volatility from 22.5% to 13.5% and reduces one-day VaR from 3.3% to 1.98%, below your 2.0% daily limit.”</blockquote>
+    <div class="plan"><span>Trim AMD 10% · AVGO 10% · META 5%</span><span class="arrow">→</span><span class="add">Add PG 15% · KO 5% · XLP 5%</span></div>
+    <div class="meta"><span class="lab">News</span><span class="chip">morningstar.com</span><span class="chip">investing.com</span><span class="chip">marketbeat.com</span></div>
+    <div class="meta"><span class="lab">Trail</span><code>get_risk_snapshot</code><code>check_plan × 2</code></div>
+  </div>
+  <div class="bubble" data-b="1">“Why did you sell AMD?”</div>
+  <div class="shot phone" data-b="1" style="--d:120ms;left:1420px;top:240px;width:370px;height:801px"><img src="media/ui/m-04-voice-panel.png" alt="Ask your fairy voice panel on phone"></div>
+  <div class="small" style="left:120px;right:auto">Engine on real prices · 7 AI stocks · $10,000 book · Simulated</div>
+  <aside class="notes">
+    <p class="say">“On the real thirtieth of October, Gemini read the sell-off, found the news behind it, checked its own plan twice, and asked for approval.”</p>
+    <p class="say"><span class="press">→</span> “And Alex can simply ask why. Autonomy without transparency is dangerous; every action here is traceable.”</p>
+    <p class="do"><b>Note:</b> the card is rebuilt from the real JSON (the app’s explanation card isn’t captured yet). Say “Gemini’s own words”, not “this screen”. The quote is verbatim, shortened with [...].</p>
+    <p class="src">gemini-agent-decision-2026-10-30-live-news.json: tool_calls get_risk_snapshot, check_plan, check_plan; approval “ADD PG 15% of the portfolio is above the 10% auto limit”.</p>
+  </aside>
+</section>
+
+<!-- 10 · PROOF -->
+<section class="slide" data-title="Proof" data-time="3:20–3:45" data-end="225" data-cue="→ buy and hold draws, → Guardian draws, → 14-month numbers.">
+    <h1 class="headline">Same stocks. Same days.</h1>
+  <div class="chart"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%" font-family="Geist, Inter, Helvetica, Arial, sans-serif">
+
+<line x1="110" x2="1340" y1="820.0" y2="820.0" stroke="#dae3e9" stroke-width="1.5"/>
+<text x="96" y="827.0" font-size="20" fill="#152030" text-anchor="end" opacity="0.7">$8,453</text>
+<line x1="110" x2="1340" y1="637.5" y2="637.5" stroke="#dae3e9" stroke-width="1.5"/>
+<text x="96" y="644.5" font-size="20" fill="#152030" text-anchor="end" opacity="0.7">$9,059</text>
+<line x1="110" x2="1340" y1="455.0" y2="455.0" stroke="#dae3e9" stroke-width="1.5"/>
+<text x="96" y="462.0" font-size="20" fill="#152030" text-anchor="end" opacity="0.7">$9,666</text>
+<line x1="110" x2="1340" y1="272.5" y2="272.5" stroke="#dae3e9" stroke-width="1.5"/>
+<text x="96" y="279.5" font-size="20" fill="#152030" text-anchor="end" opacity="0.7">$10,273</text>
+<line x1="110" x2="1340" y1="90.0" y2="90.0" stroke="#dae3e9" stroke-width="1.5"/>
+<text x="96" y="97.0" font-size="20" fill="#152030" text-anchor="end" opacity="0.7">$10,880</text>
+<text x="110.0" y="870" font-size="20" fill="#152030" text-anchor="middle" opacity="0.7">2025-01-02</text>
+<text x="725.0" y="870" font-size="20" fill="#152030" text-anchor="middle" opacity="0.7">2025-02-07</text>
+<text x="1340.0" y="870" font-size="20" fill="#152030" text-anchor="middle" opacity="0.7">2025-03-14</text>
+<line x1="110" x2="1340" y1="655.4" y2="655.4" stroke="#bd1478" stroke-width="3" stroke-dasharray="12 9"/>
+<polyline data-b="2" class="draw" pathLength="1" style="--d:0ms" points="110.0,354.7 135.6,295.7 161.2,238.2 186.9,277.5 212.5,285.2 238.1,323.3 263.8,337.2 289.4,346.5 315.0,282.3 340.6,280.0 366.2,247.2 391.9,226.3 417.5,200.3 443.1,190.9 468.8,181.0 494.4,238.0 520.0,224.6 545.6,226.3 571.2,208.6 596.9,214.3 622.5,218.6 648.1,200.4 673.8,223.9 699.4,220.7 725.0,241.5 750.6,212.6 776.2,181.2 801.9,176.9 827.5,154.2 853.1,184.2 878.8,181.8 904.4,164.6 930.0,170.6 955.6,190.4 981.2,225.3 1006.9,239.9 1032.5,228.8 1058.1,287.8 1083.8,249.9 1109.4,280.3 1135.0,312.2 1160.6,278.5 1186.2,327.9 1211.9,301.3 1237.5,338.8 1263.1,356.9 1288.8,366.1 1314.4,386.5 1340.0,349.9" fill="none" stroke="#bd1478" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline data-b="1" class="draw" pathLength="1" style="--d:0ms" points="110.0,354.7 135.6,295.7 161.2,217.1 186.9,296.6 212.5,321.4 238.1,376.9 263.8,389.4 289.4,415.5 315.0,330.1 340.6,358.4 366.2,297.0 391.9,263.0 417.5,204.9 443.1,198.4 468.8,196.1 494.4,396.8 520.0,320.7 545.6,333.0 571.2,320.3 596.9,319.8 622.5,348.1 648.1,287.5 673.8,321.5 699.4,303.8 725.0,358.9 750.6,303.2 776.2,305.8 801.9,316.1 827.5,291.6 853.1,282.7 878.8,305.8 904.4,304.9 930.0,320.7 955.6,404.9 981.2,471.2 1006.9,529.7 1032.5,482.8 1058.1,603.1 1083.8,561.3 1109.4,662.9 1135.0,652.0 1160.6,598.8 1186.2,693.4 1211.9,657.6 1237.5,768.1 1263.1,746.0 1288.8,678.0 1314.4,738.3 1340.0,664.8" fill="none" stroke="#0e213e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline data-b="3" style="--d:0ms" points="110.0,354.7 135.6,295.7 161.2,248.7 186.9,248.7 212.5,248.6 238.1,248.6 263.8,248.6 289.4,248.5 315.0,248.6 340.6,248.6 366.2,248.7 391.9,248.7 417.5,248.8 443.1,248.8 468.8,248.8 494.4,248.6 520.0,248.6 545.6,248.6 571.2,248.6 596.9,248.6 622.5,248.6 648.1,248.7 673.8,248.6 699.4,248.7 725.0,248.6 750.6,248.7 776.2,248.7 801.9,248.6 827.5,248.7 853.1,248.7 878.8,248.7 904.4,248.7 930.0,248.6 955.6,248.6 981.2,248.5 1006.9,248.4 1032.5,248.5 1058.1,248.4 1083.8,248.4 1109.4,248.3 1135.0,248.3 1160.6,248.4 1186.2,248.3 1211.9,248.3 1237.5,248.2 1263.1,248.2 1288.8,248.3 1314.4,248.2 1340.0,248.3" fill="none" stroke="#057558" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4 8"/>
+<text x="1356" y="255.3" font-size="22" font-weight="600" fill="#057558" data-b="3" style="--d:0ms">Sell everything +3.5%</text>
+<text x="1356" y="356.9" font-size="22" font-weight="600" fill="#bd1478" data-b="2" style="--d:1300ms">Guardian +0.2%</text>
+<text x="1356" y="662.4" font-size="22" font-weight="600" fill="#bd1478">Your floor -10%</text>
+<text x="1356" y="692.4" font-size="22" font-weight="600" fill="#0e213e" data-b="1" style="--d:1300ms">Buy and hold -10.3%</text>
+<g data-b="2" style="--d:29ms"><rect x="126.6" y="286.7" width="18" height="18" transform="rotate(45 135.6 295.7)" fill="#bd1478"/></g>
+<g data-b="2" style="--d:233ms"><rect x="306.0" y="273.3" width="18" height="18" transform="rotate(45 315.0 282.3)" fill="#bd1478"/></g>
+<g data-b="2" style="--d:642ms"><rect x="664.8" y="214.9" width="18" height="18" transform="rotate(45 673.8 223.9)" fill="#bd1478"/></g>
+<g data-b="2" style="--d:904ms"><rect x="895.4" y="155.6" width="18" height="18" transform="rotate(45 904.4 164.6)" fill="#bd1478"/></g>
+<g data-b="2" style="--d:1225ms"><rect x="1177.2" y="318.9" width="18" height="18" transform="rotate(45 1186.2 327.9)" fill="#bd1478"/></g>
+</svg></div>
+  <div class="stats">
+    <span></span><span class="h hold" data-b="1">Buy and hold</span><span class="h g" data-b="2">Guardian</span>
+    <span class="lab">Return</span><span class="v neg" data-b="1" style="--d:1300ms">−10.3%</span><span class="v" data-b="2" style="--d:1300ms">+0.2%</span>
+    <span class="lab">Worst day</span><span class="v neg" data-b="1" style="--d:1400ms">−6.3%</span><span class="v" data-b="2" style="--d:1400ms">−1.9%</span>
+    <span class="lab">Days below −2%</span><span class="v neg" data-b="1" style="--d:1500ms">10</span><span class="v pos" data-b="2" style="--d:1500ms">0</span>
+    <span class="sep"></span>
+    <span class="sub" data-b="3">14 months · stocks + crypto</span>
+    <span class="lab" data-b="3">Return</span><span class="v pos" data-b="3" style="--d:100ms">+36.2%</span><span class="v pos" data-b="3" style="--d:100ms">+16.6%</span>
+    <span class="lab" data-b="3">Max drawdown</span><span class="v neg" data-b="3" style="--d:200ms">23.1%</span><span class="v" data-b="3" style="--d:200ms">10.5%</span>
+  </div>
+  <div class="small">Seven AI stocks · $10,000 · limits 10% / 2% · real prices, simulated fills</div>
+  <aside class="notes">
+    <p class="say">“Early 2025, same seven stocks.” <span class="press">→</span> “Doing nothing lost 10.3 percent and had ten days worse than minus two.” <span class="press">→</span> “Guardian stayed inside both limits: worst day minus 1.9 percent, zero days over the limit.”</p>
+    <p class="say"><span class="press">→</span> “It won’t beat a bull market: over fourteen months with crypto it made 16.6 percent against 36.2 for holding, but with less than half the drawdown. It’s not selling predictions. It’s selling the limits you chose.”</p>
+    <p class="src">replay-2025q1-summary.csv; replay-stocks-crypto-summary.csv (2 Sep 2025 – 30 Oct 2026, NVDA AMD MSFT GOOGL BTC ETH). The dotted green line is “sell everything on first alarm”, +3.5%, out of the market from 3 Jan.</p>
+  </aside>
+</section>
+
+<!-- 11 · CLOSE -->
+<section class="slide close" data-title="Close" data-time="3:45–4:00" data-end="240" data-cue="Say the three lines. Optional → for “Next: hedge”.">
+  <svg class="close-svg" viewBox="0 0 1920 1080" aria-hidden="true">
+    <line class="draw" data-b="0" style="--d:150ms" pathLength="1" x1="0" y1="330" x2="1920" y2="330" stroke="#bd1478" stroke-width="10" stroke-linecap="round"/>
+    <circle class="draw" data-b="0" style="--d:0ms" pathLength="1" cx="960" cy="330" r="118" fill="none" stroke="#0e213e" stroke-width="14"/>
+  </svg>
+  <div class="close-copy">
+    <h1 class="brand" data-b="0" style="--d:500ms">Finance Fairies</h1>
+    <div class="tl"><span data-b="0" style="--d:800ms">You set the rules.</span><span data-b="0" style="--d:1000ms">Gemini does the thinking.</span><span data-b="0" style="--d:1200ms">The maths keeps it honest.</span></div>
+    <div class="next" data-b="1"><span class="chip">NEXT</span>A small, approved hedge for market-wide crashes.</div>
+  </div>
+  <div class="small" data-b="0" style="--d:1400ms">Built with Gemini 4 Argon · Simulated · Not investment advice</div>
+  <aside class="notes">
+    <p class="say">“Finance Fairies. You set the rules. Gemini does the thinking. The maths keeps it honest.”</p>
+    <p class="say">Optional <span class="press">→</span> “Next: a small, approved hedge for market-wide crashes.” (Designed, not built.)</p>
+    <p class="do"><b>Stop here.</b> → continues into the appendix for questions.</p>
+  </aside>
+</section>
+
+<!-- APPENDIX -->
+<section class="slide divider" data-title="Appendix" data-time="Q&amp;A" data-cue="For judges’ questions only.">
+  <div class="eyebrow" style="top:380px">For questions</div>
+  <h1 class="headline">Appendix</h1>
+  <div class="sub">How it works, in full. Press <b>C</b> to jump.</div>
+  <aside class="notes"><p class="say">Not presented. Use for questions.</p></aside>
+</section>
+<section class="slide appx" data-title="12-step flow" data-time="Q&amp;A" data-live="media/appendix/v00-overview-vertical.png" data-cue="Whole product flow, top to bottom. L opens full size.">
+  <img src="media/appendix/v00-overview-vertical.png" alt="The 12-step product flow"><div class="cap">The whole flow · L opens full size</div>
+  <aside class="notes"><p class="say">The whole loop, from your two rules to the explanation. Press L for full size.</p></aside>
+</section>
+<section class="slide appx" data-title="Four alarms" data-time="Q&amp;A" data-cue="What triggers a check.">
+  <img src="media/appendix/v02-four-alarms.png" alt="Four alarms">
+  <aside class="notes"><p class="say">The four alarms that start a check.</p></aside>
+</section>
+<section class="slide appx" data-title="Shock type" data-time="Q&amp;A" data-cue="Broad market vs own stocks fork.">
+  <img src="media/appendix/v04-shock-type.png" alt="Shock type">
+  <aside class="notes"><p class="say">How it classifies the shock before choosing a path. 30 Oct was “broad tech”.</p></aside>
+</section>
+<section class="slide appx" data-title="Calm, not cash" data-time="Q&amp;A" data-cue="Why it rotates instead of selling to cash.">
+  <img src="media/appendix/v05-calm-not-cash.png" alt="Calm, not cash">
+  <aside class="notes"><p class="say">Why it rotates into calm assets instead of selling everything to cash.</p></aside>
+</section>
+<section class="slide appx" data-title="You stay in control" data-time="Q&amp;A" data-cue="Automatic · Ask first · Paused.">
+  <img src="media/appendix/v09-you-stay-in-control.png" alt="You stay in control">
+  <aside class="notes"><p class="say">Three agent modes: Automatic, Ask first, Paused. If Gemini advises holding while the engine wants to trade, the decision goes to the user.</p></aside>
+</section>
+<section class="slide appx" data-title="Next: hedge" data-time="Q&amp;A" data-cue="Designed, not built.">
+  <img src="media/appendix/v10-hedge-next.png" alt="Next: hedge a market crash, designed not built">
+  <aside class="notes"><p class="say">HEDGE is designed, not built. Not part of any result shown.</p></aside>
+</section>
+<section class="slide appx" data-title="Stocks + crypto, 14 months" data-time="Q&amp;A" data-cue="+36.2% hold vs +16.6% Guardian; drawdown 23.1% vs 10.5%.">
+  <img src="media/appendix/replay-stocks-crypto-2025-2026.png" alt="Stocks and crypto replay, Sept 2025 to Oct 2026">
+  <div class="cap">2 Sep 2025 – 30 Oct 2026 · NVDA AMD MSFT GOOGL BTC ETH · real prices, simulated fills</div>
+  <aside class="notes"><p class="say">Buy and hold +36.2%, Guardian +16.6%. Max drawdown 23.1% vs 10.5%. Days worse than −2%: 36 vs 3. It gives up upside to keep the limits.</p></aside>
+</section>
+<section class="slide appx" data-title="12-step flow, detailed" data-time="Q&amp;A" data-live="media/appendix/00-master-flow-vertical.png" data-cue="Formulas and thresholds. L opens full size.">
+  <img src="media/appendix/00-master-flow-vertical.png" alt="The 12-step flow with formulas and thresholds"><div class="cap">Detailed flow with thresholds · L opens full size</div>
+  <aside class="notes"><p class="say">Same flow with formulas and the real 30 Oct values. Press L for full size.</p></aside>
+</section>
+
+</div>
+
+<div id="pbar"><span class="clock">0:00</span><span class="pos-t"></span><span class="nx"></span></div>
+<div id="notes" aria-live="polite"></div>
+<div id="timer"></div>
+<div id="toast" role="status"></div>
+<div id="cue"><h2>Cue card</h2><div class="hint">Click a slide to jump · C or Esc to close · N notes · T timer · V recording · L live app · P presenter window · F full screen</div><div class="grid"></div></div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('#stage > .slide')];
+  const stage = document.getElementById('stage');
+  const notesEl = document.getElementById('notes');
+  const timerEl = document.getElementById('timer');
+  const toastEl = document.getElementById('toast');
+  const cueEl = document.getElementById('cue');
+  const isPresenter = location.hash === '#presenter';
+  const maxStep = slides.map(s => Math.max(0, ...[...s.querySelectorAll('[data-b]')].map(e => +e.dataset.b)));
+  let cur = 0, step = 0, t0 = null, presenterWin = null;
+
+  if (isPresenter) document.body.classList.add('presenter');
+
+  function fit() {
+    const w = isPresenter ? innerWidth * 0.6 - 30 : innerWidth;
+    const h = isPresenter ? innerHeight - 90 : innerHeight;
+    stage.style.setProperty('--s', Math.min(w / 1920, h / 1080));
+  }
+  addEventListener('resize', fit); fit();
+
+  const fmt = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+
+  function applyBuilds(s, k) {
+    s.querySelectorAll('[data-b]').forEach(e => e.classList.toggle('on', +e.dataset.b <= k));
+    s.querySelectorAll('[data-hide]').forEach(e => e.classList.toggle('gone', k >= +e.dataset.hide));
+  }
+
+  function stopVideo(s) {
+    const v = s.querySelector('.shot.main video');
+    if (v) { v.pause(); v.classList.remove('show'); }
+  }
+
+  function go(i, k, fromEnd) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    const changed = i !== cur;
+    const s = slides[i];
+    if (changed) {
+      stopVideo(slides[cur]);
+      slides[cur].classList.remove('active');
+      cur = i;
+      // reset the incoming slide, then build it: from the start going forward, fully built going back
+      s.classList.add('instant');
+      applyBuilds(s, -1);
+      void s.offsetWidth;
+      if (fromEnd) { applyBuilds(s, k); requestAnimationFrame(() => s.classList.remove('instant')); }
+      else { s.classList.remove('instant'); void s.offsetWidth; }
+      s.classList.add('active');
+    }
+    step = k;
+    applyBuilds(s, step);
+    if (!isPresenter) document.body.style.background = '#ecf4f8';
+    renderNotes(); renderTimer(); sync();
+    if (!isPresenter) history.replaceState(null, '', `#s${cur + 1}`);
+  }
+
+  function next() {
+    if (!isPresenter && t0 === null) t0 = performance.now();
+    if (step < maxStep[cur]) go(cur, step + 1);
+    else if (cur < slides.length - 1) go(cur + 1, 0);
+  }
+  function prev() {
+    if (step > 0) go(cur, step - 1);
+    else if (cur > 0) go(cur - 1, maxStep[cur - 1], true);
+  }
+
+  function renderNotes() {
+    const s = slides[cur];
+    const n = s.querySelector('.notes');
+    const nx = slides[cur + 1];
+    notesEl.innerHTML = `<div class="nh"><strong>${cur + 1}/${slides.length} · ${s.dataset.title}</strong><span>${s.dataset.time || ''}</span><span>build ${step}/${maxStep[cur]}</span><span>next: ${nx ? nx.dataset.title : '—'}</span></div>${n ? n.innerHTML : ''}`;
+    const pb = document.querySelector('#pbar .nx');
+    if (pb) pb.textContent = `Next: ${nx ? nx.dataset.title : '—'}`;
+    const pt = document.querySelector('#pbar .pos-t');
+    if (pt) pt.textContent = `${cur + 1}/${slides.length} · ${s.dataset.time || ''}`;
+  }
+
+  function elapsed() { return t0 === null ? 0 : (performance.now() - t0) / 1000; }
+  function renderTimer(e = elapsed()) {
+    const end = +slides[cur].dataset.end || 0;
+    const late = end && e > end + 5;
+    timerEl.innerHTML = `${fmt(e)} <span class="tg">/ ${end ? 'slide ends ' + fmt(end) : 'Q&A'}</span>`;
+    timerEl.classList.toggle('late', !!late);
+    const c = document.querySelector('#pbar .clock');
+    if (c) { c.textContent = fmt(e); c.style.color = late ? '#ffb347' : ''; }
+  }
+  setInterval(() => renderTimer(isPresenter ? presenterElapsed : elapsed()), 500);
+
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  }
+
+  function toggleVideo() {
+    const s = slides[cur];
+    const src = s.dataset.video;
+    if (!src) { toast(s.dataset.live ? 'No recording for this screen. The screenshot is the fallback.' : 'No recording on this slide.'); return; }
+    const box = s.querySelector('.shot.main');
+    let v = box.querySelector('video');
+    if (!v) {
+      v = document.createElement('video');
+      v.src = src; v.muted = true; v.playsInline = true; v.preload = 'auto';
+      box.appendChild(v);
+    }
+    if (v.classList.contains('show')) { v.pause(); v.classList.remove('show'); }
+    else { v.currentTime = 0; v.classList.add('show'); v.play().catch(() => toast('Video could not play.')); }
+  }
+
+  function openLive() {
+    const url = slides[cur].dataset.live;
+    if (url) window.open(url, '_blank', 'noopener'); else toast('No live link on this slide.');
+  }
+
+  function fullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
+  }
+
+  // cue card: a scaled clone of every slide in its final state
+  let cueBuilt = false;
+  function buildCue() {
+    const grid = cueEl.querySelector('.grid');
+    slides.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const tb = document.createElement('div'); tb.className = 'tb';
+      const c = s.cloneNode(true);
+      c.classList.add('active', 'instant');
+      c.querySelectorAll('[data-b]').forEach(e => e.classList.add('on'));
+      c.querySelectorAll('[data-hide]').forEach(e => e.classList.add('gone'));
+      c.querySelectorAll('video, .notes').forEach(e => e.remove());
+      c.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+      tb.appendChild(c);
+      const ci = document.createElement('div'); ci.className = 'ci';
+      ci.innerHTML = `<div class="t"><span>${i + 1} · ${s.dataset.title}</span><span class="tm">${s.dataset.time || ''}</span></div><div class="a">${s.dataset.cue || ''}</div>`;
+      card.append(tb, ci);
+      card.addEventListener('click', () => { toggleCue(false); go(i, 0); });
+      grid.appendChild(card);
+    });
+    cueBuilt = true;
+  }
+  function toggleCue(force) {
+    if (!cueBuilt) buildCue();
+    const show = force ?? !cueEl.classList.contains('show');
+    cueEl.classList.toggle('show', show);
+    cueEl.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('cur', i === cur));
+  }
+
+  // presenter window: same file at #presenter, synced with postMessage (works from file://)
+  let presenterElapsed = 0;
+  function sync() {
+    if (isPresenter) return;
+    if (presenterWin && !presenterWin.closed) presenterWin.postMessage({ ff: 'state', cur, step, e: elapsed() }, '*');
+  }
+  setInterval(sync, 1000);
+  function openPresenter() {
+    presenterWin = window.open(location.href.split('#')[0] + '#presenter', 'ff-presenter', 'width=1400,height=820');
+    setTimeout(sync, 600);
+  }
+  addEventListener('message', ev => {
+    const d = ev.data || {};
+    if (d.ff === 'state' && isPresenter) { presenterElapsed = d.e; if (d.cur !== cur || d.step !== step) go(d.cur, d.step, d.cur < cur || (d.cur === cur && d.step < step)); }
+    if (d.ff === 'key' && !isPresenter) handle(d.key);
+  });
+
+  function handle(key) {
+    switch (key) {
+      case 'ArrowRight': case ' ': case 'PageDown': case 'Enter': next(); break;
+      case 'ArrowLeft': case 'PageUp': case 'Backspace': prev(); break;
+      case 'Home': go(0, 0); break;
+      case 'End': go(10, maxStep[10], true); break;
+      case 'n': case 'N': notesEl.classList.toggle('show'); break;
+      case 't': case 'T': timerEl.classList.toggle('show'); break;
+      case 'r': case 'R': t0 = null; renderTimer(); toast('Timer reset. It starts on the next →.'); break;
+      case 'f': case 'F': fullscreen(); break;
+      case 'v': case 'V': toggleVideo(); break;
+      case 'l': case 'L': openLive(); break;
+      case 'c': case 'C': toggleCue(); break;
+      case 'p': case 'P': openPresenter(); break;
+      case 'Escape': toggleCue(false); notesEl.classList.remove('show'); break;
+      default: return false;
+    }
+    return true;
+  }
+
+  addEventListener('keydown', ev => {
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (isPresenter && window.opener) {
+      // the presenter window drives the audience window, which echoes its state back
+      if (['ArrowRight',' ','PageDown','Enter','ArrowLeft','PageUp','Backspace','Home','End','v','V','l','L','r','R'].includes(ev.key)) {
+        ev.preventDefault();
+        if (ev.key === 'l' || ev.key === 'L') { openLive(); return; }
+        window.opener.postMessage({ ff: 'key', key: ev.key }, '*');
+        return;
+      }
+    }
+    if (handle(ev.key)) ev.preventDefault();
+  });
+
+  let idle;
+  addEventListener('mousemove', () => { document.body.classList.remove('idle'); clearTimeout(idle); idle = setTimeout(() => document.body.classList.add('idle'), 2000); });
+
+  const start = /^#s(\d+)$/.exec(location.hash);
+  slides[0].classList.add('active');
+  if (isPresenter) notesEl.classList.add('show');
+  go(start ? +start[1] - 1 : 0, 0);
+})();
+</script>
+</body>
+</html>
