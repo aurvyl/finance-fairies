@@ -111,7 +111,7 @@ export function useListen(onFinal: (text: string) => void) {
     const r = new Ctor()
     r.lang = navigator.language || 'en-US'
     r.interimResults = true
-    r.continuous = false
+    r.continuous = true
     r.onresult = (e) => {
       let live = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
