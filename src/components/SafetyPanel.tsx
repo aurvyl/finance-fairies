@@ -60,7 +60,7 @@ function LaneBar({ l, actAt }: { l: Lane; actAt: number }) {
           <span>{l.used <= 0.005 ? 'No loss yet' : `${pct(Math.min(at, 1), 0, false)} of limit used`}</span>
         </div>
         <div className="lane-mark trim" style={{ left: `${actAt * 100}%` }}>
-          <strong>Fairy starts selling</strong>
+          <strong>Fairy steps in at {pct(actAt, 0, false)} of limit</strong>
           <span>{l.roomToTrim > 0 ? `${compactMoney(l.roomToTrim)} away` : 'Passed'}</span>
         </div>
         <div className="lane-mark sell">
