@@ -160,6 +160,15 @@ export class Simulation {
     this.emit()
   }
 
+  /** Put back rules saved in this browser, without logging them as changes. */
+  restore(g: Partial<Pick<Guardrails, 'dailyLoss' | 'maxDrawdown'>>, a?: Autonomy) {
+    this.guardrails = { ...this.guardrails, ...g }
+    if (a) this.autonomy = a
+    this.dailyLevel = this.levelFor(this.dailyUsed()) - 1
+    this.ddLevel = this.levelFor(this.ddUsed()) - 1
+    this.emit()
+  }
+
   setAutonomy(a: Autonomy) {
     if (a === this.autonomy) return
     const label = { auto: 'act automatically', ask: 'ask before acting', paused: 'stay paused' }[a]

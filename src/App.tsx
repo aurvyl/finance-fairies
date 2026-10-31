@@ -12,6 +12,7 @@ import { PortfolioChart, type Period } from './components/PortfolioChart'
 import { ReplayView } from './components/ReplayView'
 import { Decisions, SafetyPanel } from './components/SafetyPanel'
 import { RollingNumber, useSettled } from './components/RollingNumber'
+import { Onboarding } from './components/Onboarding'
 import { ScenarioStory } from './components/ScenarioStory'
 import { SettingsView } from './components/SettingsView'
 import { VoicePanel } from './components/VoicePanel'
@@ -21,6 +22,7 @@ import { useGlide } from './motion'
 import { compactMoney, money, pct } from './engine/format'
 import { sim } from './engine/sim'
 import type { Snapshot } from './engine/types'
+import { useOnboarded } from './onboarding'
 import { UIContext, useSim, viewFromHash, type UI, type View } from './store'
 
 const NAV: { id: View; label: string; icon: typeof LayoutDashboard; title?: string; group?: 'engine' | 'end' }[] = [
@@ -170,6 +172,7 @@ export default function App() {
   const [preview, setPreview] = useState<UI['preview']>({})
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [seed, setSeed] = useState<{ q: string; n: number } | null>(null)
+  const onboarded = useOnboarded()
 
   const setView = (v: View) => {
     turnPage(() => {
@@ -191,8 +194,9 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!onboarded) return
     document.title = view === 'overview' ? 'Finance Fairies' : `${NAV.find((n) => n.id === view)!.label} · Finance Fairies`
-  }, [view])
+  }, [view, onboarded])
 
   useEffect(() => {
     sim.start()
@@ -227,6 +231,8 @@ export default function App() {
   const time = new Date(s.now).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   const title = NAV.find((n) => n.id === view)!.title ?? NAV.find((n) => n.id === view)!.label
   const demo = DEMO_VIEWS.includes(view)
+
+  if (!onboarded) return <Onboarding onDone={() => setView('overview')} />
 
   return (
     <UIContext.Provider value={ui}>

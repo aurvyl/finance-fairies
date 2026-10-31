@@ -5,6 +5,7 @@ import { getSettings, setLlmKey, setSettings, useHasLlmKey, useSettings } from '
 import type { Provider } from '../api/types'
 import { checkEngine, useConnection } from '../api/useEngine'
 import { canListen, canSpeak } from '../voice'
+import { HelpSection } from './HelpSection'
 
 export function SettingsView() {
   const settings = useSettings()
@@ -147,6 +148,8 @@ export function SettingsView() {
           {!canSpeak && ' This browser can’t read answers aloud.'}
         </p>
       </section>
+
+      <HelpSection />
     </div>
   )
 }
