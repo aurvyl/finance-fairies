@@ -11,6 +11,7 @@ import { PortfolioChart, type Period } from './components/PortfolioChart'
 import { ReplayView } from './components/ReplayView'
 import { Decisions, SafetyPanel } from './components/SafetyPanel'
 import { RollingNumber, useSettled } from './components/RollingNumber'
+import { ScenarioStory } from './components/ScenarioStory'
 import { SettingsView } from './components/SettingsView'
 import { VoicePanel } from './components/VoicePanel'
 import { WhatIfView } from './components/WhatIfView'
@@ -229,7 +230,7 @@ export default function App() {
             </div>
             <div className="top-actions">
               {demo && (
-              <button className="btn ghost" onClick={() => sim.triggerShock()} disabled={s.shock > 0} title="Demo: start a sharp sell-off to watch the agent respond">
+              <button className="btn ghost" onClick={() => sim.triggerShock()} disabled={s.shock > 0} title="Demo: play a fictional news-driven sell-off and watch your fairy respond">
                 <TrendingDown size={16} aria-hidden />
                 {s.shock > 0 ? 'Sell-off in progress' : 'Simulate a sell-off'}
               </button>
@@ -244,6 +245,11 @@ export default function App() {
 
           {view === 'overview' && (
             <div className="grid overview">
+              {s.scenario && (
+                <div className="span-all">
+                  <ScenarioStory s={s} />
+                </div>
+              )}
               <div className="span-all">
                 <SafetyPanel s={s} />
               </div>

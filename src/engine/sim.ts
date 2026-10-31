@@ -1,6 +1,7 @@
 import { buildPortfolio, gauss, rng, SECTORS } from './data'
 import { compactMoney, money, pct } from './format'
-import type { ActivityItem, Autonomy, Guardrails, Holding, Point, Sector, SectorMove, Snapshot, Trade } from './types'
+import { DEFAULT_SCENARIO, hitFor, listOf, SCENARIOS, type Beat, type Scenario } from './scenarios'
+import type { ActivityItem, Autonomy, Guardrails, Holding, Point, ScenarioState, Sector, SectorMove, Snapshot, Trade } from './types'
 
 /**
  * A self-contained market + agent simulation. Everything here is synthetic demo data:
@@ -47,6 +48,9 @@ export class Simulation {
   private windowPrices = new Map<string, number>()
   private windowStart = 0
   private sectorDrift: Partial<Record<Sector, number>> = {}
+  private symbolDrift: Record<string, number> = {}
+  private marketDrift = 0
+  private scenario: ScenarioState | null = null
   private timer: number | undefined
   private snap!: Snapshot
 
@@ -91,24 +95,42 @@ export class Simulation {
     this.timer = undefined
   }
 
-  /** Demo control: a sharp, semis-and-crypto-led sell-off over the next ~20 sim minutes. */
-  triggerShock() {
-    this.shock = 14
-    this.sectorDrift = { Semiconductors: -0.0012, Crypto: -0.0018, Technology: -0.0004 }
+  /**
+   * Demo control: play a fictional, story-driven sell-off (see scenarios.ts). Each beat of the
+   * story changes which sectors and symbols are falling, so the panic visibly spreads.
+   */
+  triggerShock(id = DEFAULT_SCENARIO) {
+    const sc = SCENARIOS[id] ?? SCENARIOS[DEFAULT_SCENARIO]
+    this.shock = sc.ticks
+    this.scenario = { id: sc.id, startedAt: this.now, beat: -1, done: false, startPrices: Object.fromEntries(this.holdings.map((h) => [h.symbol, h.price])) }
+    this.playBeat(sc, 0)
+    const exposed = this.holdings.filter((h) => hitFor(sc, h, sc.beats.length)).reduce((a, h) => a + h.qty * h.price, 0) / this.value()
     this.push({
       id: nid(),
       kind: 'market',
       t: this.now,
-      title: 'Sell-off starting in chips and crypto',
-      summary: 'Semiconductors and crypto are falling fast. I’m watching your daily limit closely.',
+      title: `Simulated scenario: ${sc.headline}`,
+      summary: `${sc.dek} I’m watching your limits closely.`,
       why: [
-        'Semiconductor names in your book are falling about three times faster than the broad market.',
-        'Crypto is moving with them, which removes the diversification you usually get from it.',
-        `Together those two groups are ${pct(this.shareOf(['Semiconductors', 'Crypto']), 0, false)} of the portfolio.`,
+        ...sc.beats.slice(0, 1).map((b) => b.text),
+        `If it spreads the way panics usually do, ${listOf(sc.hits.slice(1).map((g) => g.noun))} are next. Together with ${sc.hits[0].noun} that’s ${pct(exposed, 0, false)} of your money.`,
+        sc.disclaimer,
       ],
       value: this.value(),
     })
     this.emit()
+  }
+
+  /** Hide the story card. Prices keep doing whatever they were doing. */
+  clearScenario() {
+    this.scenario = null
+    this.emit()
+  }
+
+  /** The story behind the sell-off, if there is one, with how far it has got. */
+  activeScenario(): { sc: Scenario; state: ScenarioState } | null {
+    const st = this.scenario
+    return st ? { sc: SCENARIOS[st.id], state: st } : null
   }
 
   setGuardrails(next: Partial<Guardrails>) {
@@ -244,17 +266,13 @@ export class Simulation {
       activity: this.activity,
       marketOpen: this.now < this.dayStart + 390 * MIN,
       shock: this.shock,
+      scenario: this.scenario,
     }
     for (const l of this.listeners) l()
   }
 
   private push(item: ActivityItem) {
     this.activity = [item, ...this.activity].slice(0, 80)
-  }
-
-  private shareOf(sectors: Sector[]) {
-    const v = this.value()
-    return this.holdings.filter((h) => sectors.includes(h.sector)).reduce((a, h) => a + h.qty * h.price, 0) / v
   }
 
   private levelFor(used: number) {
@@ -271,19 +289,22 @@ export class Simulation {
     }
     this.now += SIM_MIN_PER_TICK * MIN
     const sq = Math.sqrt(DT)
-    const shockDrift = this.shock > 0 ? -0.0005 : 0
     if (this.shock > 0) {
       this.shock--
-      if (this.shock === 0) this.sectorDrift = { Semiconductors: 0.0006, Crypto: 0.0008 }
+      this.advanceScenario()
     }
-    const mkt = this.baseDrift + shockDrift + 0.15 * sq * gauss(this.r)
+    const mkt = this.baseDrift + this.marketDrift + 0.15 * sq * gauss(this.r)
     const sectorF: Partial<Record<Sector, number>> = {}
     for (const s of SECTORS) sectorF[s] = (this.sectorDrift[s] ?? 0) + 0.1 * sq * gauss(this.r)
     for (const h of this.holdings) {
       if (h.assetClass === 'Cash') {
         h.price *= 1 + 0.045 * DT
       } else {
-        const ret = h.beta * mkt + (sectorF[h.sector] ?? 0) * (h.sector === 'Global equity' ? 0.3 : 1) + h.vol * sq * gauss(this.r) * 0.6
+        const ret =
+          h.beta * mkt +
+          (sectorF[h.sector] ?? 0) * (h.sector === 'Global equity' ? 0.3 : 1) +
+          (this.symbolDrift[h.symbol] ?? 0) +
+          h.vol * sq * gauss(this.r) * 0.6
         h.price = Math.max(h.price * (1 + ret), 0.0001)
       }
       h.path = [...h.path, h.price]
@@ -306,6 +327,7 @@ export class Simulation {
     this.now = this.dayStart
     this.open = close
     this.dailyLevel = -1
+    this.scenario = null
     for (const h of this.holdings) {
       h.open = h.price
       h.path = [h.price]
@@ -321,6 +343,42 @@ export class Simulation {
       why: [`Yesterday closed at ${money(close)}.`],
       value: close,
     })
+  }
+
+  private advanceScenario() {
+    const st = this.scenario
+    if (!st || st.done) return
+    const sc = SCENARIOS[st.id]
+    const elapsed = sc.ticks - this.shock
+    let next = st.beat
+    while (next + 1 < sc.beats.length && sc.beats[next + 1].at <= elapsed) next++
+    if (next > st.beat) this.playBeat(sc, next)
+    if (this.shock === 0) {
+      this.sectorDrift = { ...sc.after.sectors }
+      this.symbolDrift = { ...(sc.after.symbols ?? {}) }
+      this.marketDrift = 0
+      this.scenario = { ...st, beat: this.scenario!.beat, done: true }
+    }
+  }
+
+  private playBeat(sc: Scenario, i: number) {
+    const b: Beat = sc.beats[i]
+    this.sectorDrift = { ...b.sectors }
+    this.symbolDrift = { ...(b.symbols ?? {}) }
+    this.marketDrift = b.market
+    for (const [sym, jump] of Object.entries(b.gaps ?? {})) {
+      const h = this.holdings.find((x) => x.symbol === sym)
+      if (h) h.price *= 1 + jump
+    }
+    this.scenario = { ...this.scenario!, beat: i }
+  }
+
+  /** The story behind the current fall, as sentences for the explainer. */
+  private storyWhy(down: boolean): string[] {
+    const a = this.activeScenario()
+    if (!a) return []
+    const text = a.state.done && !down ? a.sc.after.text : a.sc.beats[a.state.beat].text
+    return [`Behind it (simulated scenario): ${text}`]
   }
 
   private markWindow() {
@@ -352,6 +410,7 @@ export class Simulation {
         down
           ? 'High-beta holdings fell more than the market, as they usually do on risk-off days.'
           : 'High-beta holdings led the rebound.',
+        ...this.storyWhy(down),
       ],
       value: this.value(),
     })
@@ -406,10 +465,12 @@ export class Simulation {
     const sold = sells.reduce((a, t) => a + t.amount, 0)
     const names = sells.slice(0, 3).map((t) => t.symbol)
     const verb = ['Trimmed', 'Cut', 'Moved most risk out of'][level]
+    const story = this.storyFor(sells.map((t) => t.symbol), sold)
     const why = [
       `You’ve used ${pct(used, 0, false)} of your ${pct(limit, rule === 'daily' ? 1 : 0, false)} ${ruleName}. I act at ${pct(LEVELS[level], 0, false)}.`,
-      `${moves.map((m) => `${m.sector} (${pct(m.pct)})`).join(' and ')} caused most of the fall.`,
-      `I sold ${compactMoney(sold)} across ${sells.length} positions that add the most risk per dollar, and parked it in 0–3 month Treasuries.`,
+      story?.cause ?? `${moves.map((m) => `${m.sector} (${pct(m.pct)})`).join(' and ')} caused most of the fall.`,
+      story?.sold ??
+        `I sold ${compactMoney(sold)} across ${sells.length} positions that add the most risk per dollar, and parked it in 0–3 month Treasuries.`,
       `Portfolio beta drops from ${betaBefore.toFixed(2)} to ${betaAfter.toFixed(2)}: another 1% market fall would now cost about ${pct(betaAfter / 100, 2, false)} instead of ${pct(betaBefore / 100, 2, false)}.`,
     ]
     if (level === 2) why.push('You’re at the limit, so I’ll hold off adding risk until tomorrow’s open unless you tell me otherwise.')
@@ -420,7 +481,7 @@ export class Simulation {
       t: this.now,
       rule,
       title: `${this.autonomy === 'ask' ? 'Proposed: ' : ''}${verb} ${names.join(', ')}${sells.length > 3 ? ` +${sells.length - 3}` : ''}`,
-      summary: `${ruleName[0].toUpperCase() + ruleName.slice(1)} at ${pct(used, 0, false)} of limit. ${this.autonomy === 'ask' ? 'Waiting for your OK.' : `Moved ${compactMoney(sold)} to Treasuries.`}`,
+      summary: `${story ? `${story.short}: ` : ''}${ruleName} at ${pct(used, 0, false)} of limit. ${this.autonomy === 'ask' ? 'Waiting for your OK.' : `Moved ${compactMoney(sold)} to Treasuries.`}`.replace(/^./, (c) => c.toUpperCase()),
       why,
       trades,
       usedBefore: used,
@@ -434,6 +495,29 @@ export class Simulation {
     this.push(item)
   }
 
+  private exposedNow(h: Holding) {
+    const a = this.activeScenario()
+    return !!a && !a.state.done && !!hitFor(a.sc, h, a.state.beat)
+  }
+
+  /** Tie a decision to the story: which part of it caused the fall, and which sales answer it. */
+  private storyFor(sold: string[], amount: number) {
+    const a = this.activeScenario()
+    if (!a) return null
+    const { sc, state } = a
+    const groups = sc.hits.filter((g) => g.from <= state.beat)
+    const inStory = sold.filter((sym) => {
+      const h = this.holdings.find((x) => x.symbol === sym)
+      return h && hitFor(sc, h, state.beat)
+    })
+    const list = listOf(groups.map((g) => g.noun))
+    return {
+      short: `The ${sc.short}`,
+      cause: `This is the ${sc.short} (a simulated scenario). So far it has hit ${list}.`,
+      sold: `I sold ${compactMoney(amount)} across ${sold.length} positions, ${inStory.length} of them from the groups it hit (${inStory.slice(0, 4).join(', ') || 'none'}), because they add the most risk while the panic spreads. The money went into short-dated Treasuries, where other investors are running too.`,
+    }
+  }
+
   private beta(list = this.holdings) {
     const v = this.value(list)
     return list.reduce((a, h) => a + (h.qty * h.price * h.beta) / v, 0)
@@ -443,7 +527,8 @@ export class Simulation {
   private planTrades(share: number): Trade[] {
     const risky = this.holdings
       .filter((h) => h.assetClass !== 'Cash' && h.assetClass !== 'Bond')
-      .map((h) => ({ h, risk: h.qty * h.price * Math.abs(h.beta) * (0.5 + h.vol) }))
+      // during a story-driven sell-off, holdings the story has reached count as riskier, so they go first
+      .map((h) => ({ h, risk: h.qty * h.price * Math.abs(h.beta) * (0.5 + h.vol) * (this.exposedNow(h) ? 1.4 : 1) }))
       .sort((a, b) => b.risk - a.risk)
       .slice(0, 8)
     const trades: Trade[] = risky.map(({ h }) => ({ side: 'Sell', symbol: h.symbol, amount: h.qty * h.price * share }))
