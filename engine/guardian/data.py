@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import yfinance as yf
 
-from .config import ALL_TICKERS
+from .config import ALL_TICKERS, BENCHMARK
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
@@ -46,9 +46,14 @@ def fetch_prices(
         "close": raw["Close"][tickers],
         "volume": raw["Volume"][tickers],
     }
+    # Crypto trades every day; keep exchange sessions only so every asset shares one calendar.
+    # A weekend crypto move then shows up in Monday's return.
+    sessions = frames["close"][BENCHMARK].dropna().index if BENCHMARK in tickers else frames["close"].index
     for k, df in frames.items():
-        df = df.sort_index()
+        df = df.loc[sessions].sort_index()
         df.index = pd.to_datetime(df.index).tz_localize(None)
+        if k != "volume":
+            df = df.ffill(limit=3)
         frames[k] = df
         df.to_parquet(paths[k])
     return frames

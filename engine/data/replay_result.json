@@ -250,7 +250,7 @@
             "turnover": 0.35000000000000003,
             "daily_var_before": 0.033035083882949526,
             "daily_var_after": 0.019306897337056535,
-            "stress_equities_down_20": 0.20000000000000007,
+            "stress_equities_down_20": 0.20000000000000004,
             "stress_tech_down_30_defensive_down_15": 0.24750000000000003,
             "daily_var_limit": 0.02,
             "budget_met": 1.0
@@ -295,6 +295,7 @@
         }
       ],
       "chosen": "engine",
+      "agent": null,
       "attribution": {
         "portfolio_return": 0.019594952567445385,
         "benchmark": "SPY",
@@ -445,7 +446,7 @@
             "turnover": 0.1,
             "daily_var_before": 0.020784220890291152,
             "daily_var_after": 0.017943976620744102,
-            "stress_equities_down_20": 0.2001428126223099,
+            "stress_equities_down_20": 0.20014281262230985,
             "stress_tech_down_30_defensive_down_15": 0.23258307018026927,
             "daily_var_limit": 0.02,
             "budget_met": 1.0
@@ -470,6 +471,7 @@
         }
       ],
       "chosen": "engine",
+      "agent": null,
       "attribution": {
         "portfolio_return": 0.02128439232340706,
         "benchmark": "SPY",
@@ -669,6 +671,7 @@
         }
       ],
       "chosen": "engine",
+      "agent": null,
       "attribution": {
         "portfolio_return": -0.007419873932153542,
         "benchmark": "SPY",
@@ -882,6 +885,7 @@
         }
       ],
       "chosen": "engine",
+      "agent": null,
       "attribution": {
         "portfolio_return": -0.01601409327909972,
         "benchmark": "SPY",
@@ -1082,7 +1086,7 @@
             "turnover": 0.049999999999999996,
             "daily_var_before": 0.01590473626203095,
             "daily_var_after": 0.0156811390784414,
-            "stress_equities_down_20": 0.20031111843421534,
+            "stress_equities_down_20": 0.2003111184342153,
             "stress_tech_down_30_defensive_down_15": 0.18880017768917035,
             "daily_var_limit": 0.02,
             "budget_met": 1.0
@@ -1102,6 +1106,7 @@
         }
       ],
       "chosen": null,
+      "agent": null,
       "attribution": {
         "portfolio_return": -0.003054579632642693,
         "benchmark": "SPY",
@@ -1314,6 +1319,7 @@
         }
       ],
       "chosen": null,
+      "agent": null,
       "attribution": {
         "portfolio_return": -0.006811974491129939,
         "benchmark": "SPY",
@@ -1506,7 +1512,7 @@
             "turnover": 0.049999999999999996,
             "daily_var_before": 0.016355188685098814,
             "daily_var_after": 0.016054573919835242,
-            "stress_equities_down_20": 0.20030944222270244,
+            "stress_equities_down_20": 0.20030944222270242,
             "stress_tech_down_30_defensive_down_15": 0.18899212486120492,
             "daily_var_limit": 0.02,
             "budget_met": 1.0
@@ -1526,6 +1532,7 @@
         }
       ],
       "chosen": null,
+      "agent": null,
       "attribution": {
         "portfolio_return": 0.012312728892059985,
         "benchmark": "SPY",
