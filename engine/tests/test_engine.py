@@ -111,6 +111,34 @@ def test_budget_trigger_and_budget_plan():
     assert plan.check.values["daily_var_after"] < plan.check.values["daily_var_before"]
 
 
+def test_attribution_splits_market_and_stock_specific():
+    from guardian.attribution import attribute_day
+
+    win = synthetic_window(crash_last_day=True)
+    w = pd.Series({t: 1 / 7 for t in Policy().holdings})
+    res = attribute_day(win.returns, w)
+    assert res["portfolio_return"] == pytest.approx(float((win.returns.iloc[-1][w.index] * w).sum()))
+    assert res["market_part"] + res["stock_specific_part"] == pytest.approx(res["portfolio_return"])
+    assert set(res["unusual_moves"]) >= {"NVDA", "AMD", "AVGO"}  # -17% days are far outside normal
+
+
+def test_approval_route():
+    from dataclasses import replace
+
+    from guardian.rotation import Plan, approval_route
+
+    p = Policy()
+    w0 = pd.Series({"NVDA": 0.5, "KO": 0.5})
+    small = Plan("engine", w0, w0, [{"type": "TRIM", "ticker": "NVDA", "weight": 0.05}, {"type": "ADD", "ticker": "KO", "weight": 0.05}])
+    big = Plan("engine", w0, w0, [{"type": "TRIM", "ticker": "NVDA", "weight": 0.20}, {"type": "ADD", "ticker": "KO", "weight": 0.20}])
+    odd = Plan("agent", w0, w0, [{"type": "ADD", "ticker": "TSLA", "weight": 0.05}])
+    assert approval_route(small, p)[0] == "auto"
+    assert approval_route(big, p)[0] == "ask"
+    assert approval_route(odd, p)[0] == "ask"
+    assert approval_route(small, replace(p, agent_mode="ask_first"))[0] == "ask"
+    assert approval_route(small, replace(p, agent_mode="paused"))[0] == "blocked"
+
+
 def test_check_rejects_concentration_breach():
     policy = Policy()
     win = synthetic_window()
