@@ -106,7 +106,42 @@ export function SafetyPanel({ s }: { s: Snapshot }) {
           <LaneBar key={l.key} l={l} actAt={a} />
         ))}
       </div>
+      <SpeedRow s={s} />
     </section>
+  )
+}
+
+/** The engine's rate-of-fall checks (engine/guardian/triggers.py), shown on the live book. */
+function speedChecks(s: Snapshot) {
+  const day = s.value / s.open - 1
+  const worst = s.holdings.filter((h) => h.open > 0 && h.assetClass !== 'Cash').reduce<{ sym: string; r: number }>(
+    (w, h) => (h.price / h.open - 1 < w.r ? { sym: h.symbol, r: h.price / h.open - 1 } : w),
+    { sym: '', r: 0 },
+  )
+  const closes = [...s.daily.map((p) => p.v), s.value]
+  const rets = closes.slice(1).map((v, i) => v / closes[i] - 1)
+  const sd = (xs: number[]) => {
+    const m = xs.reduce((a, x) => a + x, 0) / xs.length
+    return Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / Math.max(1, xs.length - 1))
+  }
+  const ratio = rets.length >= 20 ? sd(rets.slice(-5)) / Math.max(1e-9, sd(rets.slice(-60))) : NaN
+  return [
+    { key: 'day', name: 'Today', now: pct(day), line: `limit ${pct(-s.guardrails.dailyLoss, 1)}`, hit: day <= -s.guardrails.dailyLoss },
+    { key: 'stock', name: worst.sym ? `Worst holding (${worst.sym})` : 'Worst holding', now: pct(worst.r), line: 'flag at −7%', hit: worst.r <= -0.07 },
+    { key: 'vol', name: 'Swings vs normal', now: Number.isFinite(ratio) ? `${ratio.toFixed(1)}×` : '—', line: 'flag at 1.8×', hit: ratio >= 1.8 },
+  ]
+}
+
+function SpeedRow({ s }: { s: Snapshot }) {
+  return (
+    <div className="speed" aria-label="How fast it is falling">
+      <span className="speed-head">How fast it’s falling</span>
+      {speedChecks(s).map((c) => (
+        <span key={c.key} className={`speed-chip ${c.hit ? 'hit' : ''}`}>
+          <span className="muted">{c.name}</span> <strong className="num">{c.now}</strong> <span className="muted">· {c.line}</span>
+        </span>
+      ))}
+    </div>
   )
 }
 

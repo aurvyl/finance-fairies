@@ -3560,3 +3560,9 @@ input[type='range']::-moz-range-thumb {
 .used-bar.after .used-track div {
   background: var(--safe);
 }
+
+.speed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 14px; font-size: 13px; }
+.speed-head { font-weight: 600; }
+.speed-chip { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line, rgba(127,127,127,.25)); }
+.speed-chip.hit { border-color: var(--warn, #d97706); }
+.speed-chip.hit strong { color: var(--warn, #d97706); }
