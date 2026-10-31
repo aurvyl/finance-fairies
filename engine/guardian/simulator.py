@@ -98,7 +98,7 @@ def replay(
     close, open_, volume = frames["close"], frames["open"], frames["volume"]
     all_returns = close.pct_change()
     days = close.loc[start:end].index
-    w_start = pd.Series({t: 1 / len(policy.holdings) for t in policy.holdings})
+    w_start = pd.Series(policy.initial_weights())
 
     books: dict[str, Book] = {}
     for name in ("hold", "cash_exit", "guardian"):
@@ -167,8 +167,9 @@ def replay(
             shock = classify_shock(r_hist, w_prev)
             steps = policy.max_steps_budget if trig.budget_breach else policy.max_steps
             plans: list[Plan] = [engine_plan(w_now, window, policy, steps)]
+            ctx: dict = {}
             if agent is not None:
-                ctx = {"date": str(day.date()), "trigger": trig, "shock": shock, "weights": w_now, "window": window, "policy": policy, "engine_plan": plans[0]}
+                ctx = {"date": str(day.date()), "trigger": trig, "shock": shock, "weights": w_now, "window": window, "policy": policy, "engine_plan": plans[0], "max_steps": steps}
                 proposal = agent(ctx)
                 if proposal:
                     universe = list(dict.fromkeys(list(w_now.index) + policy.candidates))
@@ -191,6 +192,7 @@ def replay(
                     for p in plans
                 ],
                 "chosen": best.source if best else None,
+                "agent": ctx.get("agent_note") if agent is not None else None,
                 "attribution": attribute_day(r_hist, w_prev),
                 "approval": route,
                 "approval_reasons": route_reasons,
