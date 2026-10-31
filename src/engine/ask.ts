@@ -61,7 +61,16 @@ export function localAnswer(q: string, s: Snapshot): Answer {
     if (!a) return { source: 'agent', text: 'I haven’t needed to trade yet. Both limits have plenty of room.' }
     return { source: 'agent', focus: a.id, text: `${a.title}. ${a.why.join(' ')}` }
   }
-  if (/\b(what happened|why .*(down|up|fall|fell|drop|move|moving|red|green)|market)\b/i.test(text)) {
+  if (/\b(what happened|why .*(down|up|fall|fell|drop|move|moving|red|green|crash)|market|crash|news)\b/i.test(text)) {
+    const story = sim.activeScenario()
+    if (story) {
+      const { sc, state } = story
+      const beat = state.done ? sc.after : sc.beats[state.beat]
+      return {
+        source: 'agent',
+        text: `In this simulated scenario, ${sc.headline.replace(/^./, (c) => c.toLowerCase())}. ${beat.text} You’re ${pct(change)} today.`,
+      }
+    }
     const moves = sim.sectorMoves('open')
     const worst = moves.slice(0, 2)
     const best = moves[moves.length - 1]
@@ -106,6 +115,22 @@ export function contextFor(s: Snapshot) {
     sectorsToday: moves.map((m) => ({ sector: m.sector, movePct: +(m.pct * 100).toFixed(2), contributionPct: +(m.contribution * 100).toFixed(3) })),
     recentActivity: s.activity.slice(0, 8).map((a) => ({ kind: a.kind, title: a.title, summary: a.summary, why: a.why })),
     positions: s.holdings.length,
+    ...scenarioContext(),
+  }
+}
+
+/** The fictional story behind a demo sell-off, so a model can explain the cause and say it is made up. */
+function scenarioContext() {
+  const a = sim.activeScenario()
+  if (!a) return {}
+  const { sc, state } = a
+  return {
+    simulatedScenario: {
+      fictional: true,
+      headline: sc.headline,
+      storySoFar: sc.beats.slice(0, state.beat + 1).map((b) => `${b.title}: ${b.text}`).concat(state.done ? [`${sc.after.title}: ${sc.after.text}`] : []),
+      hit: sc.hits.filter((g) => g.from <= state.beat).map((g) => `${g.label}: ${g.why}`),
+    },
   }
 }
 

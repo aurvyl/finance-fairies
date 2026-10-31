@@ -90,4 +90,17 @@ export interface Snapshot {
   activity: ActivityItem[]
   marketOpen: boolean
   shock: number
+  /** the fictional story behind the current sell-off, if one was started today */
+  scenario: ScenarioState | null
+}
+
+export interface ScenarioState {
+  id: string
+  startedAt: number
+  /** index of the latest beat that has started */
+  beat: number
+  /** true once the shock has played out */
+  done: boolean
+  /** prices when the story began, to show how far each group fell */
+  startPrices: Record<string, number>
 }

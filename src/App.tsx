@@ -11,6 +11,7 @@ import { PortfolioChart, type Period } from './components/PortfolioChart'
 import { ReplayView } from './components/ReplayView'
 import { Decisions, SafetyPanel } from './components/SafetyPanel'
 import { RollingNumber, useSettled } from './components/RollingNumber'
+import { ScenarioStory } from './components/ScenarioStory'
 import { SettingsView } from './components/SettingsView'
 import { VoicePanel } from './components/VoicePanel'
 import { WhatIfView } from './components/WhatIfView'
@@ -229,9 +230,9 @@ export default function App() {
             </div>
             <div className="top-actions">
               {demo && (
-              <button className="btn ghost" onClick={() => sim.triggerShock()} disabled={s.shock > 0} title="Demo: start a sharp sell-off to watch the agent respond">
+              <button className="btn ghost" onClick={() => sim.triggerShock()} disabled={s.shock > 0} title="Demo: play a simulated, news-driven market crash and watch your fairy respond">
                 <TrendingDown size={16} aria-hidden />
-                {s.shock > 0 ? 'Sell-off in progress' : 'Simulate a sell-off'}
+                {s.shock > 0 ? 'Crash in progress' : 'Simulate a crash'}
               </button>
               )}
               <TopSettings onOpen={() => setView('settings')} />
@@ -254,6 +255,7 @@ export default function App() {
                   <Legend period={period} />
                 </section>
                 <Decisions s={s} />
+                {s.scenario && <ScenarioStory s={s} />}
               </div>
               <div className="col">
                 <Activity s={s} limit={3} />

@@ -1,11 +1,13 @@
-import { Activity as Swings, ArrowDown, CalendarDays, Check, Hand, OctagonAlert, Pause, ShieldCheck, TrendingDown, X } from 'lucide-react'
+import { Activity as Swings, ArrowDown, CalendarDays, Check, Hand, OctagonAlert, Pause, ShieldCheck, TrendingDown, X, ChevronDown, Newspaper } from 'lucide-react'
 import { compactMoney, pct } from '../engine/format'
 import { sim } from '../engine/sim'
 import type { ActivityItem, Snapshot } from '../engine/types'
 import { useUI } from '../store'
 import { decisionOf, riskChange, soldAmount, type Decision } from './decision'
 import { FairyMark } from './FairyAvatar'
+import { SCENARIOS } from '../engine/scenarios'
 import './visuals.css'
+import './story.css'
 
 interface Lane {
   key: 'daily' | 'peak'
@@ -332,7 +334,10 @@ const holdNote = (a: ActivityItem) => (a.summary.startsWith('You paused') ? 'You
 
 /** The agent's recent decisions as pictures: what it did, and how much market risk it took off. */
 export function Decisions({ s }: { s: Snapshot }) {
-  const items = s.activity.filter((a) => a.kind === 'action').slice(0, 3)
+  const actions = s.activity.filter((a) => a.kind === 'action')
+  // during a crash, show only what the fairy did about it, so older decisions don't muddle the story
+  const since = s.scenario ? actions.filter((a) => a.t >= s.scenario!.startedAt) : []
+  const items = (since.length ? since : actions).slice(0, 3)
   return (
     <section className="panel decisions" aria-labelledby="dec-h">
       <header className="panel-head">
@@ -346,7 +351,7 @@ export function Decisions({ s }: { s: Snapshot }) {
             </span>
             <div className="decision-body">
               <h3>No trades needed yet</h3>
-              <p className="muted">Your fairy is watching. Press “Simulate a sell-off” to see it act.</p>
+              <p className="muted">Your fairy is watching. Press “Simulate a crash” to see it act.</p>
             </div>
           </li>
         </ul>
@@ -356,6 +361,19 @@ export function Decisions({ s }: { s: Snapshot }) {
             <DecisionCard key={a.id} a={a} />
           ))}
         </ol>
+      )}
+      {s.scenario && (
+        <button
+          className="story-link"
+          onClick={() => document.getElementById('story')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        >
+          <Newspaper size={15} aria-hidden />
+          <span>
+            <span className="story-link-label">Why it’s falling</span>
+            {SCENARIOS[s.scenario.id].headline}
+          </span>
+          <ChevronDown size={16} aria-hidden />
+        </button>
       )}
     </section>
   )

@@ -1,0 +1,296 @@
+/* The story behind a simulated sell-off. Own file so it never collides with other visual passes. */
+
+.panel.story {
+  display: grid;
+  gap: 6px;
+  container-type: inline-size;
+  scroll-margin-top: 16px;
+}
+
+/* the link from "What your fairy decided" down to the story */
+.story-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.story-link:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.story-link > span {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+}
+.story-link-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.story-link svg {
+  flex: none;
+  color: var(--text-2);
+}
+.story-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.story-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.story-kicker .demo-tag {
+  margin-left: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.story-head .icon-btn {
+  width: 30px;
+  height: 30px;
+}
+.story h2 {
+  font-size: clamp(19px, 1.2vw + 12px, 24px);
+  font-weight: 680;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  text-wrap: balance;
+  max-width: 34ch;
+  margin-top: 6px;
+}
+.story-dek {
+  color: var(--text-2);
+  font-size: 14.5px;
+  max-width: 70ch;
+  text-wrap: pretty;
+}
+.story-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 20px 40px;
+  margin-top: 14px;
+}
+.story-sub {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-2);
+  margin-bottom: 12px;
+}
+
+/* ---- how it spread ---- */
+.story-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.story-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.4em 1fr;
+  column-gap: 14px;
+  padding: 0 0 14px 22px;
+}
+.story-steps li::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--line);
+}
+.story-steps li:last-child::before {
+  display: none;
+}
+.step-dot {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--line-2);
+}
+.step-past .step-dot {
+  background: var(--text-3);
+  box-shadow: none;
+}
+.step-past::before {
+  background: var(--text-3);
+}
+.step-now .step-dot {
+  background: var(--ink);
+  box-shadow: 0 0 0 4px oklch(0.25 0.06 258 / 0.14);
+  animation: story-pulse 1.8s var(--ease) infinite;
+}
+.story-steps time {
+  grid-row: span 2;
+  font-size: 12.5px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  padding-top: 1px;
+}
+.story-steps strong {
+  font-size: 14px;
+  font-weight: 640;
+}
+.story-steps p {
+  font-size: 13.5px;
+  color: var(--text-2);
+  margin-top: 2px;
+  text-wrap: pretty;
+}
+.step-next strong {
+  color: var(--text-3);
+  font-weight: 560;
+}
+.step-past p {
+  display: none;
+}
+.step-past:hover p {
+  display: block;
+}
+@keyframes story-pulse {
+  50% {
+    box-shadow: 0 0 0 7px oklch(0.25 0.06 258 / 0.06);
+  }
+}
+
+/* ---- what it hit ---- */
+.hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.hit {
+  display: grid;
+  gap: 6px;
+  cursor: help;
+  animation: story-in var(--mid) var(--ease) both;
+}
+.hit-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.hit-head strong {
+  font-weight: 640;
+}
+.hit-dir {
+  display: grid;
+  place-items: center;
+}
+.hit-dir.down {
+  color: var(--down);
+}
+.hit-dir.up {
+  color: var(--safe-hi);
+}
+.hit-word {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.hit-track {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--sunk);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.hit-track span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--down);
+  opacity: 0.75;
+  transition: width var(--mid) var(--ease);
+}
+.hit.haven .hit-track span {
+  background: var(--safe);
+  opacity: 1;
+}
+.hit p {
+  font-size: 13px;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+@keyframes story-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* ---- what the fairy did ---- */
+.story-fairy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: var(--brand-soft);
+  font-size: 14px;
+}
+.story-fairy p {
+  flex: 1;
+  text-wrap: pretty;
+}
+.story-fairy-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+}
+.story-fairy .btn {
+  flex: none;
+}
+
+@container (max-width: 680px) {
+  .story-body {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .story-fairy {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-now .step-dot,
+  .hit {
+    animation: none;
+  }
+  .hit-track span {
+    transition: none;
+  }
+}
