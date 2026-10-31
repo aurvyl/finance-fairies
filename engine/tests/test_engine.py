@@ -69,6 +69,23 @@ def test_engine_plan_reduces_volatility_and_passes_checks():
     assert plan.check.values["turnover"] <= 0.20 + 1e-9
 
 
+def test_classify_shock_broad_vs_none():
+    from guardian.triggers import classify_shock
+
+    win = synthetic_window(crash_last_day=False)
+    r = win.returns.copy()
+    r["QQQ"] = r[["NVDA", "AMD", "AVGO", "MSFT", "GOOGL", "AMZN", "META"]].mean(axis=1)
+    r["SMH"] = r[["NVDA", "AMD", "AVGO"]].mean(axis=1)
+    w = pd.Series({t: 1 / 7 for t in Policy().holdings})
+    calm = classify_shock(r, w)
+    assert calm["label"] == "none"
+    r.iloc[-1] = -0.01
+    r.loc[r.index[-1], ["NVDA", "AMD", "AVGO", "MSFT", "GOOGL", "AMZN", "META"]] = -0.04
+    r.loc[r.index[-1], ["QQQ", "SMH"]] = -0.04
+    r.loc[r.index[-1], "SPY"] = -0.02
+    assert classify_shock(r, w)["label"] == "broad-tech"
+
+
 def test_check_rejects_concentration_breach():
     policy = Policy()
     win = synthetic_window()
