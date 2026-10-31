@@ -90,5 +90,32 @@ class Policy:
     rerisk_loss: float = 0.12
     rerisk_spike_ratio: float = 1.2
 
+    # Daily risk budget (ex-ante): 99% one-day parametric VaR must stay under this limit.
+    daily_var_limit: float | None = None
+    var_z: float = 2.326  # one-sided 99%
+    max_steps_budget: int = 10  # a budget rotation may move up to 50% in one go
+
     holdings: list[str] = field(default_factory=lambda: list(HOLDINGS))
     candidates: list[str] = field(default_factory=lambda: list(CANDIDATES))
+
+
+def policy_from_limits(max_drawdown: float = 0.10, max_daily_loss: float = 0.02, baseline: float = 10_000.0, **overrides) -> Policy:
+    """Turn the user's plain-language limits into engine thresholds.
+
+    max_drawdown 10%  -> rotate once half the budget is used (-5%), emergency de-risk at 80% of it (-8%),
+                         leaving a buffer because overnight gaps can jump past any line.
+    max_daily_loss 2% -> 99% one-day VaR budget of 2% (act before a bad day) and a 2% shock trigger
+                         (react after one).
+    Limits are targets, not guarantees.
+    """
+    params = dict(
+        baseline=baseline,
+        rotation_loss=0.5 * max_drawdown,
+        hwm_drawdown=0.5 * max_drawdown,
+        emergency_loss=0.8 * max_drawdown,
+        shock_portfolio_return=-max_daily_loss,
+        daily_var_limit=max_daily_loss,
+        rerisk_loss=0.8 * 0.5 * max_drawdown,  # recover comfortably inside the rotation line first
+    )
+    params.update(overrides)
+    return Policy(**params)
