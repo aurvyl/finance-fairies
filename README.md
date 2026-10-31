@@ -1,3 +1,5 @@
+<p align="center"><img src="public/logo.png" alt="Finance Fairies logo" width="220" /></p>
+
 # Finance Fairies: Portfolio Guardian
 
 An agentic portfolio guardian. You set two rules for the whole portfolio in plain language, "never fall more than 10% from where I started" and "never lose more than 2% in a day", and the agent keeps the portfolio inside them. When risk builds up it **rotates** money from the riskiest holdings into calmer assets instead of selling everything to cash, then explains, by text or voice, why the market moved and what it did.
