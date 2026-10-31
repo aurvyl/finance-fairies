@@ -77,7 +77,7 @@ uvicorn quant_backend.api:app --reload --port 8000
 
 An agentic portfolio manager. You set rules for the **whole portfolio** in plain language ("don't let me lose more than 2% in a day", "don't let it fall more than 10% from its peak"), and the agent keeps hundreds of stocks, crypto assets and funds inside them automatically, then explains, by text or voice, why the market moved and why it acted.
 
-The web interface (`src/`, `server/` at the repo root) runs on a built-in market and agent simulation (synthetic demo data). It does not call the Python engine yet.
+The web interface (`src/`, `server/` at the repo root) has two halves. **Overview, Holdings, Activity and Guardrails** run on a built-in market and agent simulation (synthetic demo data), so the app works with nothing else running. **Replay and What-if** call the Guardian engine (`engine/`) over HTTP; without it, Replay shows a saved engine run and What-if explains how to connect.
 
 ![Overview](docs/overview.png)
 
@@ -91,6 +91,13 @@ npm run dev        # http://localhost:5173
 ```
 
 Press **Simulate a sell-off** to watch the agent respond, then open **Talk to your fairy**.
+
+#### Connect the Guardian engine
+```bash
+cd engine && uv run --project . uvicorn guardian.api:app --port 8000
+```
+
+The interface looks for the engine at `http://localhost:8000`. Change it in **Settings**, or at build time with `VITE_ENGINE_URL=https://… npm run build`. Settings also turns on the engine's AI agent and picks its model provider; a provider key typed there is kept in memory for that tab only and sent as `X-LLM-Key`. The data layer lives in `src/api/` (`client.ts` for the calls, `types.ts` for the response shapes, `useEngine.ts` for connection state and request hooks).
 
 #### Optional: Claude explanations
 Open questions ("why is my portfolio down?") are answered by a built-in explainer that quotes the live numbers. To have Claude (Opus) answer them instead, start the dev server with an API key:
@@ -106,6 +113,9 @@ The key stays on the server (`server/agentApi.ts`); the browser only sends the q
 - **Automatic actions with reasons.** Each trade appears in Agent activity with the numbers behind it, an inline "Why", a "Listen" button that reads it aloud, and "Ask about this".
 - **Three agent modes.** Automatic, Ask first (propose trades and wait for approval), and Paused.
 - **Voice.** Hold the mic button (or hold Space) to talk; answers are spoken with the current word highlighted. Uses the browser's Web Speech API; works best in Chrome, Edge and Safari. Firefox falls back to typing with spoken answers.
+- **Replay.** Runs your two rules over a past period on the engine and compares Guardian with buy and hold and selling everything: worst fall, days over the daily limit, return, trades and costs, with every limit check and its plans in a feed.
+- **What-if.** Replace a day's moves (for example NVIDIA −12%) and see the trigger, the plans the engine checked, which passed, and whether it would trade on its own or ask you first.
+- **Engine lines on Guardrails.** When connected, Guardrails lists the exact thresholds the engine derives from your rules.
 - **Responsive.** Desktop rail becomes a bottom tab bar on phones.
 
 ### Code map

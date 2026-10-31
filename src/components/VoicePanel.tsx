@@ -1,5 +1,6 @@
 import { Keyboard, Mic, Send, Square, Volume2, X } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { setSettings, useSettings } from '../api/settings'
 import { ask } from '../engine/ask'
 import { sim } from '../engine/sim'
 import { useUI } from '../store'
@@ -29,7 +30,9 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
   const [turns, setTurns] = useState<Turn[]>([])
   const [text, setText] = useState('')
   const [thinking, setThinking] = useState(false)
-  const [voiceOn, setVoiceOn] = useState(canSpeak)
+  const settings = useSettings()
+  const voiceOn = canSpeak && settings.readAloud
+  const setVoiceOn = (on: boolean) => setSettings({ readAloud: on })
   const [typing, setTyping] = useState(!canListen)
   const speaking = useSpeaking()
   const list = useRef<HTMLOListElement>(null)
