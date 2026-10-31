@@ -95,6 +95,10 @@ class Policy:
     var_z: float = 2.326  # one-sided 99%
     max_steps_budget: int = 10  # a budget rotation may move up to 50% in one go
 
+    # Approval routing: what may run without a human click
+    agent_mode: str = "automatic"  # "automatic" | "ask_first" | "paused"
+    auto_max_trade_weight: float = 0.10  # any single leg above 10% of NAV asks first
+
     holdings: list[str] = field(default_factory=lambda: list(HOLDINGS))
     candidates: list[str] = field(default_factory=lambda: list(CANDIDATES))
 

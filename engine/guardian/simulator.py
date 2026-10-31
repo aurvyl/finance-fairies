@@ -16,7 +16,8 @@ import pandas as pd
 
 from . import metrics as m
 from .config import Policy
-from .rotation import MarketWindow, Plan, actions_between, check_plan, engine_plan, pick_best
+from .attribution import attribute_day
+from .rotation import MarketWindow, Plan, actions_between, approval_route, check_plan, engine_plan, pick_best
 from .triggers import classify_shock, evaluate, recovery_ok
 
 # An agent planner receives the decision context and may return target weights.
@@ -177,6 +178,7 @@ def replay(
                     agent_plan.check = check_plan(w0, w1, window, policy, steps)
                     plans.append(agent_plan)
             best = pick_best(plans)
+            route, route_reasons = approval_route(best, policy) if best else ("none", [])
             log({
                 "date": str(day.date()),
                 "strategy": "guardian",
@@ -189,8 +191,13 @@ def replay(
                     for p in plans
                 ],
                 "chosen": best.source if best else None,
+                "attribution": attribute_day(r_hist, w_prev),
+                "approval": route,
+                "approval_reasons": route_reasons,
+                # The replay assumes the user approves "ask" plans; a paused agent trades nothing.
+                "approval_assumed_in_replay": route == "ask",
             })
-            if best is not None:
+            if best is not None and route != "blocked":
                 pending["guardian"] = best.weights_after[best.weights_after > 1e-9]
                 last_trade_i = i
                 rotated = True
