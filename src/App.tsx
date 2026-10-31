@@ -247,12 +247,12 @@ export default function App() {
           {view === 'overview' && (
             <div className="grid overview">
               <div className="col">
+                <Activity s={s} limit={3} />
                 <section className="panel hero" aria-label="Portfolio value">
                   <Headline s={s} period={period} setPeriod={setPeriod} />
                   <PortfolioChart s={s} period={period} />
                   <Legend period={period} />
                 </section>
-                <Activity s={s} limit={6} />
               </div>
               <div className="col">
                 <Guardrails s={s} />
