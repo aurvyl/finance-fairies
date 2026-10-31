@@ -2,80 +2,13 @@
 
 # Finance Fairies: Portfolio Guardian
 
+![Finance Fairies overview: limits drawn on the portfolio chart, agent actions with reasons](docs/overview.png)
+
 An agentic portfolio guardian. You set two rules for the whole portfolio in plain language, "never fall more than 10% from where I started" and "never lose more than 2% in a day", and the agent keeps the portfolio inside them. When risk builds up it **rotates** money from the riskiest holdings into calmer assets instead of selling everything to cash, then explains, by text or voice, why the market moved and what it did.
 
 Built at *Halloween at Imperial: Gemini Edition* (Track 1, Frontier Agents with Gemini). All trading is simulated on a paper portfolio.
 
-![Overview](docs/overview.png)
-
-## How it decides
-
-**The LLM proposes, the code disposes.**
-
-1. Every daily close, the **engine** (Python, deterministic) measures risk: drawdown against your limits, a 99% one-day VaR budget, shock days, volatility spikes, and a CAPM split of the day's move into market and stock-specific parts.
-2. When a line is crossed, the engine builds its own rotation plan, and the **Gemini agent** (Gemini 4 Argon) reads the same numbers through tools, proposes a plan, and must pass `check_plan` before it can submit. With live news on, Gemini also reads a Google-Search-grounded brief and cites its sources.
-3. The engine re-checks every plan (volatility, CVaR, stress tests, position and sector caps, turnover, cost, VaR) and keeps the best one that passes.
-4. **Approval routing**: small, pre-approved trades run automatically; large legs, new assets, hedges, or a plan the agent disagrees with wait for your click. Paused mode trades nothing.
-5. Orders fill at the next open with slippage and costs.
-
-Other providers (OpenAI, Anthropic, OpenRouter) can be selected in Settings; Gemini is the default.
-
-## Repository layout
-
-| Path | What it is |
-|---|---|
-| [`engine/`](engine/README.md) | **Backend.** Risk engine, replay simulator, Gemini agent and FastAPI (`engine/API.md` is the frontend contract) |
-| `src/`, `server/` | **Web interface** (Vite + React + TypeScript) |
-| `design/`, `DESIGN.md`, `PRODUCT.md` | Design system, product brief, clickable build |
-| `engine.py`, `api.py`, `models.py`, `test_*.py` (root) | First quant prototype and hedging tests, kept for reference: [docs/quant-prototype.md](docs/quant-prototype.md) |
-
-## Quickstart
-
-Backend (Python 3.12, [uv](https://docs.astral.sh/uv/)):
-
-```bash
-cd engine
-uv sync
-bash scripts/set_gemini_key.sh          # stores GEMINI_API_KEY in engine/.env.local (git-ignored) and checks it
-uv run --project . pytest -q            # 18 tests
-uv run --project . uvicorn guardian.api:app --port 8000
-```
-
-Web interface (Node 20+):
-
-```bash
-npm install
-npm run dev                              # http://localhost:5173, looks for the engine at http://localhost:8000
-```
-
-Without the engine the interface still runs on its built-in simulation.
-
-## Results on real data (replay, simulated fills)
-
-Limits 10% maximum drawdown and 2% daily loss, seven equal-weight AI and tech stocks, 2 January to 14 March 2025 (includes the DeepSeek sell-off):
-
-| Strategy | Return | Max drawdown | Days worse than -2% |
-|---|---|---|---|
-| Buy and hold | -10.3% | 18.1% | 10 |
-| Sell everything on first alarm | +3.5% | 0.0% | 0 (out of the market from 3 January) |
-| **Guardian** | **+0.2%** | **7.2%** | **0** |
-
-Guardian stayed invested and inside both limits; its worst day was -1.88%. On a mixed stock and crypto book (September 2025 to October 2026) it returned +16.6% against +36.2% for buy and hold, with a 10.5% instead of 23.1% maximum drawdown: it gives up upside to keep the limits. Thresholds are heuristics from our research, not calibrated by backtest, and limits are targets rather than guarantees (overnight gaps can jump past any line).
-
-## Status (31 October 2026, 14:20)
-
-| Area | State |
-|---|---|
-| Risk engine, replay, user limits, VaR budget, shock classification, CAPM attribution, approval routing | Done, 18 tests |
-| Gemini agent (Gemini 4 Argon, tool loop with `check_plan` verification) | Done, verified against the live API |
-| Live news brief (Google Search grounding, cited sources), `/ask` voice answers | Done in the engine |
-| Multi-provider settings (Gemini default; OpenAI, Anthropic, OpenRouter) | Done in the engine |
-| Crypto and multi-asset portfolios | Done |
-| Web interface: Overview, Guardrails, Activity, voice, Replay, What-if, Settings | Done on the interface branch |
-| Interface showing the agent's explanation, sources and verification trail; `/ask` on Gemini | In progress ([handoff](docs/handoff-frontend.md)) |
-| News section in the app, voice upgrades | Next |
-| HEDGE path with inverse ETFs (PSQ, SH), human approval | Designed, not built |
-| Broker connection, intraday data | Out of scope for the hackathon |
+**Pitch:** open [`presentation.html`](presentation.html) in a browser (arrow keys to move, **N** for speaker notes, **F** for full screen). The demo script that goes with it is in [docs/demo-script.md](docs/demo-script.md).
 
 ## Web interface
 
@@ -109,6 +42,76 @@ Open questions ("why is my portfolio down?") are answered by a built-in explaine
 - `src/engine/ask.ts` question answering and rule parsing
 - `src/voice.ts` speech recognition and synthesis
 - `src/components/` chart, guardrails, activity feed, holdings, replay, what-if, settings, voice panel
+
+## Quickstart
+
+Backend (Python 3.12, [uv](https://docs.astral.sh/uv/)):
+
+```bash
+cd engine
+uv sync
+bash scripts/set_gemini_key.sh          # stores GEMINI_API_KEY in engine/.env.local (git-ignored) and checks it
+uv run --project . pytest -q            # 18 tests
+uv run --project . uvicorn guardian.api:app --port 8000
+```
+
+Web interface (Node 20+):
+
+```bash
+npm install
+npm run dev                              # http://localhost:5173, looks for the engine at http://localhost:8000
+```
+
+Without the engine the interface still runs on its built-in simulation.
+
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| [`engine/`](engine/README.md) | **Backend.** Risk engine, replay simulator, Gemini agent and FastAPI (`engine/API.md` is the frontend contract) |
+| `src/`, `server/` | **Web interface** (Vite + React + TypeScript) |
+| `design/`, `DESIGN.md`, `PRODUCT.md` | Design system, product brief, clickable build |
+| `presentation.html`, `docs/demo-script.md` | Pitch deck (single HTML file) and demo script |
+| `engine.py`, `api.py`, `models.py`, `test_*.py` (root) | First quant prototype and hedging tests, kept for reference: [docs/quant-prototype.md](docs/quant-prototype.md) |
+
+## How it decides
+
+**The LLM proposes, the code disposes.**
+
+1. Every daily close, the **engine** (Python, deterministic) measures risk: drawdown against your limits, a 99% one-day VaR budget, shock days, volatility spikes, and a CAPM split of the day's move into market and stock-specific parts.
+2. When a line is crossed, the engine builds its own rotation plan, and the **Gemini agent** (Gemini 4 Argon) reads the same numbers through tools, proposes a plan, and must pass `check_plan` before it can submit. With live news on, Gemini also reads a Google-Search-grounded brief and cites its sources.
+3. The engine re-checks every plan (volatility, CVaR, stress tests, position and sector caps, turnover, cost, VaR) and keeps the best one that passes.
+4. **Approval routing**: small, pre-approved trades run automatically; large legs, new assets, hedges, or a plan the agent disagrees with wait for your click. Paused mode trades nothing.
+5. Orders fill at the next open with slippage and costs.
+
+Other providers (OpenAI, Anthropic, OpenRouter) can be selected in Settings; Gemini is the default.
+
+## Results on real data (replay, simulated fills)
+
+Limits 10% maximum drawdown and 2% daily loss, seven equal-weight AI and tech stocks, 2 January to 14 March 2025 (includes the DeepSeek sell-off):
+
+| Strategy | Return | Max drawdown | Days worse than -2% |
+|---|---|---|---|
+| Buy and hold | -10.3% | 18.1% | 10 |
+| Sell everything on first alarm | +3.5% | 0.0% | 0 (out of the market from 3 January) |
+| **Guardian** | **+0.2%** | **7.2%** | **0** |
+
+Guardian stayed invested and inside both limits; its worst day was -1.88%. On a mixed stock and crypto book (September 2025 to October 2026) it returned +16.6% against +36.2% for buy and hold, with a 10.5% instead of 23.1% maximum drawdown: it gives up upside to keep the limits. Thresholds are heuristics from our research, not calibrated by backtest, and limits are targets rather than guarantees (overnight gaps can jump past any line).
+
+## Status (31 October 2026, 14:20)
+
+| Area | State |
+|---|---|
+| Risk engine, replay, user limits, VaR budget, shock classification, CAPM attribution, approval routing | Done, 18 tests |
+| Gemini agent (Gemini 4 Argon, tool loop with `check_plan` verification) | Done, verified against the live API |
+| Live news brief (Google Search grounding, cited sources), `/ask` voice answers | Done in the engine |
+| Multi-provider settings (Gemini default; OpenAI, Anthropic, OpenRouter) | Done in the engine |
+| Crypto and multi-asset portfolios | Done |
+| Web interface: Overview, Guardrails, Activity, voice, Replay, What-if, Settings | Done on the interface branch |
+| Interface showing the agent's explanation, sources and verification trail; `/ask` on Gemini | In progress ([handoff](docs/handoff-frontend.md)) |
+| News section in the app, voice upgrades | Next |
+| HEDGE path with inverse ETFs (PSQ, SH), human approval | Designed, not built |
+| Broker connection, intraday data | Out of scope for the hackathon |
 
 ## Team
 
