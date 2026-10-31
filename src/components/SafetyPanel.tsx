@@ -184,7 +184,7 @@ export function SafetyPanel({ s }: { s: Snapshot }) {
               <tr key={l.key}>
                 <th scope="row">{l.name}</th>
                 <td>
-                  {l.used <= 0.005 ? 'No loss yet' : `${pct(Math.min(l.used, 1), 0, false)} of your ${pct(l.limit, l.key === 'daily' ? 1 : 0, false)} limit used`}
+                  {l.used <= 0.005 ? 'No loss yet' : `Down ${pct(l.used * l.limit, 1, false)} (limit ${pct(l.limit, l.key === 'daily' ? 1 : 0, false)})`}
                 </td>
                 <td>
                   {l.roomToTrim > 0
