@@ -1,8 +1,9 @@
-import { Activity as ActivityIcon, FlaskConical, History, LayoutDashboard, Mic, Settings, ShieldCheck, Table2, TrendingDown } from 'lucide-react'
+import { Activity as ActivityIcon, FlaskConical, History, LayoutDashboard, Settings, ShieldCheck, Table2, TrendingDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useConnection } from './api/useEngine'
 import { Activity } from './components/Activity'
 import { Allocation } from './components/Allocation'
+import { FairyAvatar, FairyMark } from './components/FairyAvatar'
 import { EngineThresholds } from './components/EngineThresholds'
 import { Guardrails } from './components/Guardrails'
 import { Holdings } from './components/Holdings'
@@ -16,17 +17,6 @@ import { compactMoney, money, pct } from './engine/format'
 import { sim } from './engine/sim'
 import type { Snapshot } from './engine/types'
 import { UIContext, useSim, viewFromHash, type UI, type View } from './store'
-
-function Mark() {
-  // a load line: the circle-and-bar mark painted on a hull to show how low it may safely sit
-  return (
-    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden className="mark">
-      <circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
-      <line x1="2" x2="30" y1="16" y2="16" stroke="var(--limit-on-ink)" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M10 9.5c2-3 4-4 6-4s4 1 6 4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".7" />
-    </svg>
-  )
-}
 
 const NAV: { id: View; label: string; icon: typeof LayoutDashboard; title?: string; group?: 'engine' | 'end' }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -68,7 +58,7 @@ function Rail({ s, view, setView }: { s: Snapshot; view: View; setView: (v: View
   return (
     <nav className="rail" aria-label="Main">
       <div className="brand">
-        <Mark />
+        <FairyMark size={34} />
         <span>Finance Fairies</span>
       </div>
       <ul className="nav">
@@ -238,7 +228,7 @@ export default function App() {
               )}
               <TopSettings onOpen={() => setView('settings')} />
               <button className={`btn talk-btn ${voiceOpen ? 'on' : ''}`} onClick={() => setVoiceOpen((o) => !o)} aria-expanded={voiceOpen}>
-                <Mic size={16} aria-hidden />
+                <FairyAvatar size={22} state="idle" />
                 Talk to your fairy
               </button>
             </div>
