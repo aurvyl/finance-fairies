@@ -17,7 +17,7 @@ cd engine && uv sync && uv run --project . uvicorn guardian.api:app --port 8000
 
 ## Tasks, in priority order
 
-1. **Merge `origin/main` into your branch.** `README.md` will conflict: take main's version. It already contains your branch's Web interface section (rewritten around the whole project); re-add anything of yours that is missing. Root-level prototype docs moved to `docs/quant-prototype.md`.
+1. **Merge `origin/main` into your branch.** Note: at 14:20 `main` was rewritten to fix commit authorship (same files, new commit IDs), so your branch still holds the old copies of the engine commits. Plain `git fetch && git merge origin/main` works because the content is identical; do not force-push `main`, and do not `git pull --rebase` onto it. `README.md` will conflict: take main's version. It already contains your branch's Web interface section (rewritten around the whole project); re-add anything of yours that is missing. Root-level prototype docs moved to `docs/quant-prototype.md`.
 2. **Fix the agent type.** In `src/api/types.ts`, `AnalyzeOut.agent` and `ReplayEvent.agent` are typed as `string | null`, but the engine returns an object or null:
 
    ```ts

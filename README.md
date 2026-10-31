@@ -25,7 +25,7 @@ Other providers (OpenAI, Anthropic, OpenRouter) can be selected in Settings; Gem
 | [`engine/`](engine/README.md) | **Backend.** Risk engine, replay simulator, Gemini agent and FastAPI (`engine/API.md` is the frontend contract) |
 | `src/`, `server/` | **Web interface** (Vite + React + TypeScript) |
 | `design/`, `DESIGN.md`, `PRODUCT.md` | Design system, product brief, clickable build |
-| `engine.py`, `api.py`, `models.py`, `test_*.py` (root) | First quant prototype, kept for reference: [docs/quant-prototype.md](docs/quant-prototype.md) |
+| `engine.py`, `api.py`, `models.py`, `test_*.py` (root) | First quant prototype and hedging tests, kept for reference: [docs/quant-prototype.md](docs/quant-prototype.md) |
 
 ## Quickstart
 
@@ -60,6 +60,21 @@ Limits 10% maximum drawdown and 2% daily loss, seven equal-weight AI and tech st
 
 Guardian stayed invested and inside both limits; its worst day was -1.88%. On a mixed stock and crypto book (September 2025 to October 2026) it returned +16.6% against +36.2% for buy and hold, with a 10.5% instead of 23.1% maximum drawdown: it gives up upside to keep the limits. Thresholds are heuristics from our research, not calibrated by backtest, and limits are targets rather than guarantees (overnight gaps can jump past any line).
 
+## Status (31 October 2026, 14:20)
+
+| Area | State |
+|---|---|
+| Risk engine, replay, user limits, VaR budget, shock classification, CAPM attribution, approval routing | Done, 18 tests |
+| Gemini agent (Gemini 4 Argon, tool loop with `check_plan` verification) | Done, verified against the live API |
+| Live news brief (Google Search grounding, cited sources), `/ask` voice answers | Done in the engine |
+| Multi-provider settings (Gemini default; OpenAI, Anthropic, OpenRouter) | Done in the engine |
+| Crypto and multi-asset portfolios | Done |
+| Web interface: Overview, Guardrails, Activity, voice, Replay, What-if, Settings | Done on the interface branch |
+| Interface showing the agent's explanation, sources and verification trail; `/ask` on Gemini | In progress ([handoff](docs/handoff-frontend.md)) |
+| News section in the app, voice upgrades | Next |
+| HEDGE path with inverse ETFs (PSQ, SH), human approval | Designed, not built |
+| Broker connection, intraday data | Out of scope for the hackathon |
+
 ## Web interface
 
 The interface has two halves. **Overview, Holdings, Activity and Guardrails** run on a built-in market and agent simulation (synthetic demo data), so the app works with nothing else running. **Replay and What-if** call the Guardian engine over HTTP; without it, Replay shows a saved engine run and What-if explains how to connect.
@@ -92,6 +107,14 @@ Open questions ("why is my portfolio down?") are answered by a built-in explaine
 - `src/engine/ask.ts` question answering and rule parsing
 - `src/voice.ts` speech recognition and synthesis
 - `src/components/` chart, guardrails, activity feed, holdings, replay, what-if, settings, voice panel
+
+## Team
+
+| GitHub | Contributed |
+|---|---|
+| [@smgonthebeat](https://github.com/smgonthebeat) | Product framing, risk engine, Gemini agent, API, research |
+| [@VincentBucherTang](https://github.com/VincentBucherTang) | Quant prototype (attribution, anomaly and VaR ideas), hedging tests |
+| [@aurvyl](https://github.com/aurvyl) | Repository, web interface |
 
 ## Scope and limits
 
