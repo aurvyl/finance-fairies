@@ -15,7 +15,7 @@ import pandas as pd
 from . import metrics as m
 from .attribution import attribute_day
 from .config import Policy, asset_class, sector_of
-from .llm import AgentRun, Tool, run_agent
+from .llm import AgentRun, Tool, gemini_grounded, run_agent
 from .rotation import MarketWindow, Plan, actions_between, approval_route, check_plan, engine_plan, loss_ranking, screen_candidates
 from .triggers import classify_shock, evaluate
 
@@ -44,9 +44,19 @@ Rules:
   plain English, name the main driver of today's move and what the trade changes in numbers.
 {news_rule}"""
 
-NEWS_LIVE = """- Live mode: use Google Search for news from the last 48 hours on the biggest movers (earnings, guidance,
-  export rules, regulation, insider sales, political or Congress actions). News is context only: it can
-  change which holdings you trim first, never the risk checks. List the headlines you used in news_considered."""
+NEWS_LIVE = """- Live mode: the prompt includes a news brief from Google Search (earnings, guidance, export rules,
+  regulation, insider sales, political or Congress actions). News is context only: it can change which
+  holdings you trim first, never the risk checks. List the headlines you used in news_considered."""
+
+NEWS_PROMPT = """You are a markets news desk. As of {date}, find the news from the last 48 hours that explains the
+moves in these tickers: {movers}. Cover company news (earnings, guidance), sector news, regulation or export
+rules, insider selling, and political or US Congress actions where relevant. Answer in at most 6 bullet
+points, one headline each with source name and date. If you find nothing reliable for a ticker, say so."""
+
+
+def news_brief(tickers: list[str], date: str, api_key: str | None = None) -> dict:
+    """Grounded news for the given tickers (live mode only: it searches today's web)."""
+    return gemini_grounded(NEWS_PROMPT.format(date=date, movers=", ".join(tickers)), api_key=api_key)
 NEWS_REPLAY = """- Historical replay as of {date}: do not search the web and do not use knowledge of what happened after
   {date}. Leave news_considered empty."""
 
@@ -188,13 +198,21 @@ def make_tools(ctx: dict) -> tuple[list[Tool], dict]:
     return tools, {"universe": universe, "w0": w0, "state": state}
 
 
+def escalate_on_disagreement(route: str, reasons: list[str], note: dict | None, chosen: str | None) -> tuple[str, list[str]]:
+    """The agent cannot veto a passing engine plan, but if it advised HOLD, a human decides instead of auto."""
+    if route == "auto" and chosen == "engine" and note and note.get("decision") == "HOLD":
+        why = (note.get("key_factors") or [note.get("explanation") or ""])[0]
+        return "ask", reasons + [f"the AI agent recommended holding: {str(why)[:160]}"]
+    return route, reasons
+
+
 class GuardianAgent:
     """AgentPlanner for the simulator and the API. Provider is user-selectable; Gemini is the default."""
 
     def __init__(self, provider: str = "gemini", model: str | None = None, api_key: str | None = None,
-                 live: bool = False, code_execution: bool = True):
+                 live: bool = False, code_execution: bool = True, thinking_level: str | None = "low"):
         self.provider, self.model, self.api_key = provider, model, api_key
-        self.live, self.code_execution = live, code_execution
+        self.live, self.code_execution, self.thinking_level = live, code_execution, thinking_level
         self.runs: list[AgentRun] = []
 
     def analyse(self, ctx: dict) -> dict:
@@ -202,12 +220,21 @@ class GuardianAgent:
         news_rule = NEWS_LIVE if self.live else NEWS_REPLAY.format(date=ctx["date"])
         prompt = (f"Decision date {ctx['date']}. The engine flagged: {ctx['trigger'].reasons or ['no trigger']}. "
                   "Start with get_risk_snapshot, decide, verify with check_plan, then submit_plan.")
+        news = None
+        if self.live:
+            r = ctx["window"].returns.iloc[-1].reindex(ctx["weights"].index)
+            movers = list(r.abs().sort_values(ascending=False).index[:4])
+            news = news_brief(movers, ctx["date"], self.api_key if self.provider == "gemini" else None)
+            if news["text"]:
+                prompt += "\n\nNews brief (Google Search, cite these headlines only):\n" + news["text"]
         run = run_agent(self.provider, SYSTEM.format(news_rule=news_rule), prompt, tools, "submit_plan",
                         model=self.model, api_key=self.api_key, code_execution=self.code_execution,
-                        web_search=self.live and self.provider == "gemini")
+                        web_search=False, thinking_level=self.thinking_level)
         self.runs.append(run)
         note = {"provider": run.provider, "model": run.model, "error": run.error, "checks_run": aux["state"]["checks"],
-                "tool_calls": [t["tool"] for t in run.trace], "sources": run.sources[:8]}
+                "tool_calls": [t["tool"] for t in run.trace],
+                "sources": (news or {}).get("sources", [])[:8] or run.sources[:8],
+                "news_brief": (news or {}).get("text"), "news_error": (news or {}).get("error")}
         weights = None
         if run.final:
             note.update({k: run.final.get(k) for k in ("decision", "explanation", "key_factors", "news_considered")})

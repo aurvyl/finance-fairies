@@ -104,3 +104,13 @@ def test_api_endpoints():
     assert what_if["snapshot"]["injected_shock"] == {"NVDA": -0.15}
     rp = c.post("/replay", json={}).json()
     assert set(rp["nav"]) == {"hold", "cash_exit", "guardian"}
+
+
+def test_agent_hold_escalates_auto_to_ask():
+    from guardian.agent import escalate_on_disagreement
+
+    note = {"decision": "HOLD", "key_factors": ["selloff already reversing"]}
+    route, why = escalate_on_disagreement("auto", [], note, "engine")
+    assert route == "ask" and "holding" in why[0]
+    assert escalate_on_disagreement("auto", [], {"decision": "ROTATE"}, "engine")[0] == "auto"
+    assert escalate_on_disagreement("blocked", [], note, "engine")[0] == "blocked"

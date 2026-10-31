@@ -7,6 +7,7 @@ import { useConnection, useRequest } from '../api/useEngine'
 import { pct } from '../engine/format'
 import type { Snapshot } from '../engine/types'
 import { useUI } from '../store'
+import { AgentCard, useElapsed } from './AgentCard'
 import { AttributionBar, PlanDetails } from './PlanDetails'
 
 interface Shock {
@@ -14,7 +15,9 @@ interface Shock {
   move: string
 }
 
-const PRESETS: { label: string; shocks: Shock[] }[] = [
+const PRESETS: { label: string; date?: string; shocks: Shock[] }[] = [
+  { label: 'Today, as it happened', date: '2026-10-30', shocks: [] },
+  { label: 'NVIDIA falls 15% (29 Oct)', date: '2026-10-29', shocks: [{ ticker: 'NVDA', move: '-15' }] },
   { label: 'NVIDIA falls 12%', shocks: [{ ticker: 'NVDA', move: '-12' }] },
   { label: 'Chip rout', shocks: [{ ticker: 'NVDA', move: '-10' }, { ticker: 'AMD', move: '-9' }, { ticker: 'AVGO', move: '-8' }] },
   { label: 'Big tech slide', shocks: [{ ticker: 'MSFT', move: '-6' }, { ticker: 'GOOGL', move: '-7' }, { ticker: 'META', move: '-8' }, { ticker: 'AMZN', move: '-6' }] },
@@ -24,8 +27,8 @@ export function WhatIfView({ s }: { s: Snapshot }) {
   const conn = useConnection()
   const settings = useSettings()
   const ui = useUI()
-  const [date, setDate] = useState('2026-10-30')
-  const [shocks, setShocks] = useState<Shock[]>(PRESETS[0].shocks)
+  const [date, setDate] = useState('2026-10-29')
+  const [shocks, setShocks] = useState<Shock[]>(PRESETS[1].shocks)
   const [req, run] = useRequest(engine.analyze)
   const online = conn.state === 'online'
   const result = useRef<HTMLElement>(null)
@@ -38,8 +41,11 @@ export function WhatIfView({ s }: { s: Snapshot }) {
   const inject = Object.fromEntries(
     shocks.filter((x) => x.ticker.trim() && x.move.trim() && !isNaN(parseFloat(x.move))).map((x) => [x.ticker.trim().toUpperCase(), parseFloat(x.move) / 100]),
   )
-  const valid = Object.keys(inject).length > 0 && /^\d{4}-\d{2}-\d{2}$/.test(date)
-  const go = () => void run({ ...rulesFor(s), date, inject })
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(date)
+  const go = () => void run({ ...rulesFor(s), date, ...(Object.keys(inject).length ? { inject } : {}) })
+  const elapsed = useElapsed(req.status === 'loading')
+  const agentName = settings.provider === 'gemini' ? 'Gemini' : 'The agent'
+  const waiting = settings.useAgent ? `${agentName} is checking the plan… ${elapsed}s` : 'Working it out…'
 
   return (
     <div className="grid two">
@@ -51,7 +57,14 @@ export function WhatIfView({ s }: { s: Snapshot }) {
 
         <div className="chips presets" role="group" aria-label="Example shocks">
           {PRESETS.map((p) => (
-            <button key={p.label} className="chip" onClick={() => setShocks(p.shocks)}>
+            <button
+              key={p.label}
+              className="chip"
+              onClick={() => {
+                setShocks(p.shocks)
+                if (p.date) setDate(p.date)
+              }}
+            >
               {p.label}
             </button>
           ))}
@@ -95,7 +108,7 @@ export function WhatIfView({ s }: { s: Snapshot }) {
           <div className="row-actions start">
             <button className="btn solid" disabled={!valid || !online || req.status === 'loading'}>
               <FlaskConical size={15} aria-hidden />
-              {req.status === 'loading' ? (settings.useAgent ? 'Asking the agent…' : 'Working it out…') : 'See what Guardian would do'}
+              {req.status === 'loading' ? waiting : 'See what Guardian would do'}
             </button>
           </div>
           {!online && (
@@ -114,6 +127,11 @@ export function WhatIfView({ s }: { s: Snapshot }) {
           <h2 id="wi-r">Guardian’s decision</h2>
         </header>
         {req.status === 'idle' && <p className="empty">Run a scenario to see the trigger, the plans the engine checked, and whether it would ask you first.</p>}
+        {req.status === 'loading' && settings.useAgent && (
+          <p className="progress-note" role="status">
+            {waiting} The engine re-checks every plan the agent proposes; this usually takes 25 to 45 seconds{settings.liveNews ? ', about 75 with live news' : ''}.
+          </p>
+        )}
         {req.status === 'loading' && (
           <div className="skeleton block" aria-label="Loading">
             <span />
@@ -146,6 +164,8 @@ export function WhatIfView({ s }: { s: Snapshot }) {
               )}
             </p>
             {req.data.chosen && <span className={`route route-${req.data.approval}`}>{approvalLabel(req.data.approval)}</span>}
+            {req.data.cached && <span className="source-tag cached">Instant: recorded agent answer</span>}
+            {req.data.agent && <AgentCard a={req.data.agent} agrees={req.data.agent_agrees_with_engine} />}
             <dl className="plan-values wide">
               <div>
                 <dt>Volatility now</dt>
@@ -175,7 +195,6 @@ export function WhatIfView({ s }: { s: Snapshot }) {
                 </ul>
               </>
             )}
-            {req.data.agent && <p className="agent-note">{req.data.agent}</p>}
           </div>
         )}
       </section>

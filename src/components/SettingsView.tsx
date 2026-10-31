@@ -81,6 +81,12 @@ export function SettingsView() {
           Let the AI agent propose plans in replays and what-ifs
         </label>
 
+        <label className={`toggle ${settings.useAgent ? '' : 'off'}`}>
+          <input type="checkbox" checked={settings.liveNews} disabled={!settings.useAgent} onChange={(e) => setSettings({ liveNews: e.target.checked })} />
+          <span className="toggle-ui" aria-hidden />
+          Let it read today’s news in What-if (slower; never used in replays)
+        </label>
+
         <fieldset className="providers" disabled={!settings.useAgent}>
           <legend>Model provider</legend>
           {(providers ?? [{ id: 'gemini', label: 'Gemini', default_model: '', features: [], key_configured: false, recommended: true }]).map((p) => (

@@ -11,7 +11,8 @@ interface Turn {
   id: string
   q: string
   a?: string
-  source?: 'agent' | 'claude'
+  source?: 'agent' | 'claude' | 'engine'
+  model?: string
 }
 
 const SUGGESTIONS = ['Why is my portfolio down today?', 'What did you just do, and why?', 'How close am I to my limits?', 'Don’t let me lose more than 3% in a day']
@@ -47,7 +48,7 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
     setThinking(true)
     const ans = await ask(question, sim.getSnapshot())
     setThinking(false)
-    setTurns((t) => t.map((x) => (x.id === id ? { ...x, a: ans.text, source: ans.source } : x)))
+    setTurns((t) => t.map((x) => (x.id === id ? { ...x, a: ans.text, source: ans.source, model: ans.model } : x)))
     if (ans.focus) {
       ui.setExpanded(ans.focus)
       ui.setHovered(ans.focus)
@@ -157,7 +158,7 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
               <div className="a">
                 <p>{speaking.id === t.id ? <SpokenText text={t.a} charIndex={speaking.charIndex} /> : t.a}</p>
                 <div className="a-meta">
-                  <span>{t.source === 'claude' ? 'Answered by Claude from your portfolio data' : 'From your portfolio data'}</span>
+                  <span>{t.source === 'engine' ? `Answered by the Guardian agent${t.model ? ` (${t.model})` : ''} from your portfolio data` : t.source === 'claude' ? 'Answered by Claude from your portfolio data' : 'From your portfolio data'}</span>
                   {canSpeak && (
                     <button className="tool" onClick={() => (speaking.id === t.id ? stopSpeaking() : speak(t.id, t.a!))}>
                       {speaking.id === t.id ? <Square size={11} aria-hidden /> : <Volume2 size={13} aria-hidden />}

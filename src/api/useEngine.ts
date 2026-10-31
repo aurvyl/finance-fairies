@@ -13,6 +13,8 @@ const set = (c: Connection) => {
 }
 let inflight: Promise<void> | null = null
 
+export const getConnection = () => conn
+
 /** Check the engine once; callers share the result. */
 export function checkEngine() {
   inflight ??= engine

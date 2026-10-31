@@ -10,13 +10,15 @@ export interface Settings {
   useAgent: boolean
   provider: string
   readAloud: boolean
+  /** let the agent read today's news (What-if only; never used for replays) */
+  liveNews: boolean
 }
 
 const KEY = 'ff.settings.v1'
 const DEFAULT_URL = (import.meta.env.VITE_ENGINE_URL as string | undefined) ?? 'http://localhost:8000'
 
 function load(): Settings {
-  const base: Settings = { engineUrl: DEFAULT_URL, useAgent: false, provider: 'gemini', readAloud: true }
+  const base: Settings = { engineUrl: DEFAULT_URL, useAgent: false, provider: 'gemini', readAloud: true, liveNews: false }
   try {
     const raw = localStorage.getItem(KEY)
     return raw ? { ...base, ...JSON.parse(raw) } : base

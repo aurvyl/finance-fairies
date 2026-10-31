@@ -9,6 +9,7 @@ import saved from '../fixtures/replay_2025q1.json'
 import { money, pct } from '../engine/format'
 import type { Snapshot } from '../engine/types'
 import { useUI } from '../store'
+import { AgentCard, useElapsed } from './AgentCard'
 import { AttributionBar, PlanDetails } from './PlanDetails'
 import { SeriesChart, type Series } from './SeriesChart'
 
@@ -130,7 +131,7 @@ function EventRow({ e, id, open, active, onToggle, onHover }: { e: ReplayEvent; 
                   </ul>
                 </>
               )}
-              {e.agent && <p className="agent-note">{e.agent}</p>}
+              {e.agent && <AgentCard a={e.agent} />}
             </div>
           </div>
         )}
@@ -148,6 +149,9 @@ export function ReplayView({ s }: { s: Snapshot }) {
   const [open, setOpen] = useState<string | null>(null)
   const [active, setActive] = useState<string | null>(null)
   const [all, setAll] = useState(false)
+  const [withAgent, setWithAgent] = useState(false)
+  const elapsed = useElapsed(req.status === 'loading')
+  const go = () => void run({ ...rulesFor(s), start: p.start, end: p.end }, withAgent && settings.useAgent)
 
   const live = req.status === 'done' ? req.data : null
   const r = live ?? SAVED
@@ -178,7 +182,7 @@ export function ReplayView({ s }: { s: Snapshot }) {
         <header className="panel-head wrap">
           <h2 id="replay-h">Would Guardian have kept you inside your limits?</h2>
           <span className="source-tag">
-            {live ? `Engine replay${settings.useAgent ? ' with AI agent' : ''}` : 'Saved engine replay'} · {fmtDay(r.start)} to {fmtDay(r.end)} · simulated
+            {live ? `Engine replay${r.events.some((e) => e.agent) ? ' with AI agent' : ''}` : 'Saved engine replay'} · {fmtDay(r.start)} to {fmtDay(r.end)} · simulated
           </span>
         </header>
 
@@ -194,14 +198,21 @@ export function ReplayView({ s }: { s: Snapshot }) {
             </select>
             <ChevronDown size={14} aria-hidden />
           </label>
-          <button className="btn solid" disabled={!online || req.status === 'loading'} onClick={() => void run({ ...rulesFor(s), start: p.start, end: p.end })}>
+          <button className="btn solid" disabled={!online || req.status === 'loading'} onClick={go}>
             <Play size={15} aria-hidden />
-            {req.status === 'loading' ? 'Replaying…' : `Replay with your rules`}
+            {req.status === 'loading' ? `Replaying… ${elapsed}s` : `Replay with your rules`}
           </button>
           {live && (
             <button className="btn ghost" onClick={() => reset({ status: 'idle' })}>
               <RotateCcw size={15} aria-hidden /> Show saved replay
             </button>
+          )}
+          {online && settings.useAgent && (
+            <label className="toggle compact">
+              <input type="checkbox" checked={withAgent} onChange={(e) => setWithAgent(e.target.checked)} disabled={req.status === 'loading'} />
+              <span className="toggle-ui" aria-hidden />
+              Include the AI agent (about a minute per limit check, no live news)
+            </label>
           )}
           <p className="controls-note">
             {online
@@ -222,7 +233,7 @@ export function ReplayView({ s }: { s: Snapshot }) {
             <p>
               <strong>The replay didn’t run.</strong> {req.error}
             </p>
-            <button className="btn ghost sm" onClick={() => void run({ ...rulesFor(s), start: p.start, end: p.end })}>
+            <button className="btn ghost sm" onClick={go}>
               Try again
             </button>
           </div>

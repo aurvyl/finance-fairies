@@ -45,16 +45,21 @@ async function call<T>(path: string, init: RequestInit & { timeout?: number } = 
 
 const post = <T>(path: string, body: unknown, timeout?: number) => call<T>(path, { method: 'POST', body: JSON.stringify(body), timeout })
 
-function agent(): { agent?: AgentConfig } {
+/** Agent settings for a request. Live news is only ever sent for a single day, never for replays. */
+function agent(live = false): { agent?: AgentConfig } {
   const s = getSettings()
-  return s.useAgent ? { agent: { provider: s.provider } } : {}
+  if (!s.useAgent) return {}
+  return { agent: live && s.liveNews ? { provider: s.provider, live: true } : { provider: s.provider } }
 }
 
 export const engine = {
   health: () => call<Health>('/health', { timeout: 4000 }),
   providers: () => call<{ default: string; providers: Provider[] }>('/providers', { timeout: 4000 }),
   limits: (p: PortfolioIn) => post<LimitsOut>('/limits', p, 8000),
-  replay: (p: PortfolioIn & { start: string; end: string }) => post<ReplayOut>('/replay', { ...p, ...agent() }, agent().agent ? 180_000 : 60_000),
+  // the agent takes about a minute per limit check in a replay, and 25 to 75 s for one day
+  replay: (p: PortfolioIn & { start: string; end: string }, withAgent = false) =>
+    post<ReplayOut>('/replay', { ...p, ...(withAgent ? agent() : {}) }, withAgent && agent().agent ? 600_000 : 60_000),
   analyze: (p: PortfolioIn & { date: string; inject?: Record<string, number> }) =>
-    post<AnalyzeOut>('/analyze', { ...p, ...agent() }, agent().agent ? 120_000 : 30_000),
+    post<AnalyzeOut>('/analyze', { ...p, ...agent(true) }, agent().agent ? 150_000 : 30_000),
+  ask: (question: string, context: unknown) => post<{ answer: string; provider: string; model: string }>('/ask', { question, context, provider: getSettings().provider }, 30_000),
 }

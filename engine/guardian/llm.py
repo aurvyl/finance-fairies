@@ -119,6 +119,7 @@ def run_agent(
     max_turns: int = 8,
     code_execution: bool = True,
     web_search: bool = False,
+    thinking_level: str | None = "low",
 ) -> AgentRun:
     if provider not in PROVIDERS:
         raise ValueError(f"unknown provider {provider!r}; choose one of {list(PROVIDERS)}")
@@ -130,14 +131,18 @@ def run_agent(
         return run
     loop = {"gemini": _gemini, "openai": _openai_compat, "openrouter": _openai_compat, "anthropic": _anthropic}[provider]
     try:
-        loop(run, key, system, prompt, tools, final_tool, max_turns, code_execution=code_execution, web_search=web_search)
+        loop(run, key, system, prompt, tools, final_tool, max_turns, code_execution=code_execution, web_search=web_search,
+             thinking_level=thinking_level)
     except Exception as exc:
         run.error = f"{type(exc).__name__}: {exc}"
     return run
 
 
-def _gemini(run, key, system, prompt, tools, final_tool, max_turns, code_execution, web_search):
-    """Gemini Interactions API: function tools plus built-in code execution and Google Search."""
+def _gemini(run, key, system, prompt, tools, final_tool, max_turns, code_execution, web_search, thinking_level):
+    """Gemini Interactions API: function tools plus built-in code execution and Google Search.
+
+    thinking_level "low" keeps one decision fast enough for a live demo; the engine already did the maths.
+    """
     from google import genai
 
     client = genai.Client(api_key=key)
@@ -148,7 +153,11 @@ def _gemini(run, key, system, prompt, tools, final_tool, max_turns, code_executi
     if web_search:
         params.append({"type": "google_search"})
 
-    inter = client.interactions.create(model=run.model, system_instruction=system, input=prompt, tools=params)
+    config = {"thinking_level": thinking_level} if thinking_level else None
+    extra = {"generation_config": config} if config else {}
+    if params:
+        extra["tools"] = params
+    inter = client.interactions.create(model=run.model, system_instruction=system, input=prompt, **extra)
     seen: set[str] = set()
     for _ in range(max_turns):
         _collect_sources(inter.model_dump(), run.sources)
@@ -166,8 +175,29 @@ def _gemini(run, key, system, prompt, tools, final_tool, max_turns, code_executi
             out = _run_tool(by_name[c.name], dict(c.arguments), run) if c.name in by_name else json.dumps({"error": "unknown tool"})
             results.append({"type": "function_result", "call_id": c.id, "name": c.name, "result": out})
         inter = client.interactions.create(
-            model=run.model, system_instruction=system, previous_interaction_id=inter.id, input=results, tools=params
+            model=run.model, system_instruction=system, previous_interaction_id=inter.id, input=results, **extra
         )
+
+
+def gemini_grounded(prompt: str, model: str | None = None, api_key: str | None = None,
+                    thinking_level: str | None = "low") -> dict:
+    """One Google-Search-grounded Gemini answer with its url citations: {"text", "sources", "error"}."""
+    key = resolve_key("gemini", api_key)
+    if not key:
+        return {"text": "", "sources": [], "error": "no GEMINI_API_KEY"}
+    from google import genai
+
+    client = genai.Client(api_key=key)  # keep a reference: a dropped client closes its connection
+    try:
+        inter = client.interactions.create(
+            model=model or PROVIDERS["gemini"]["default_model"], input=prompt, tools=[{"type": "google_search"}],
+            **({"generation_config": {"thinking_level": thinking_level}} if thinking_level else {}),
+        )
+    except Exception as exc:
+        return {"text": "", "sources": [], "error": f"{type(exc).__name__}: {exc}"}
+    sources: list[dict] = []
+    _collect_sources(inter.model_dump(), sources)
+    return {"text": inter.output_text or "", "sources": sources, "error": None}
 
 
 def _collect_sources(node: Any, out: list[dict]) -> None:
@@ -193,7 +223,7 @@ def _openai_compat(run, key, system, prompt, tools, final_tool, max_turns, **_):
     spec = [{"type": "function", "function": {"name": t.name, "description": t.description, "parameters": t.parameters}} for t in tools]
     messages: list[dict] = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
     for _ in range(max_turns):
-        msg = client.chat.completions.create(model=run.model, messages=messages, tools=spec).choices[0].message
+        msg = client.chat.completions.create(model=run.model, messages=messages, **({"tools": spec} if spec else {})).choices[0].message
         if not msg.tool_calls:
             run.text = msg.content or ""
             return
@@ -223,7 +253,7 @@ def _anthropic(run, key, system, prompt, tools, final_tool, max_turns, **_):
             max_tokens=16000,
             system=system,
             messages=messages,
-            tools=spec,
+            **({"tools": spec} if spec else {}),
             # Route refused requests to a fallback model server-side instead of failing the plan.
             extra_headers={"anthropic-beta": "server-side-fallback-2026-07-01"},
             extra_body={"fallbacks": "default"},

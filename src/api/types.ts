@@ -84,7 +84,7 @@ export interface ReplayEvent {
   shock?: { label: string; suggested_path: string; main_loss_driver?: string } & Record<string, unknown>
   plans?: PlanOut[]
   chosen?: string | null
-  agent?: string | null
+  agent?: AgentNote | null
   attribution?: Attribution
   approval?: 'auto' | 'ask' | 'none' | string
   approval_reasons?: string[]
@@ -125,8 +125,26 @@ export interface AnalyzeOut {
   chosen: string | null
   approval: string
   approval_reasons: string[]
-  agent: string | null
+  agent: AgentNote | null
+  agent_agrees_with_engine?: boolean
+  cached?: boolean
   simulated: boolean
+}
+
+/** What the AI agent proposed and how the engine checked it. Every number still comes from the engine. */
+export interface AgentNote {
+  provider: string
+  model: string
+  error: string | null
+  decision?: 'ROTATE' | 'HOLD' | 'HEDGE_REQUEST' | string
+  explanation?: string
+  key_factors?: string[]
+  news_considered?: string[]
+  sources?: { url: string; title: string | null }[]
+  tool_calls?: string[]
+  checks_run?: number
+  news_brief?: string | null
+  news_error?: string | null
 }
 
 export interface PortfolioIn {
@@ -142,4 +160,6 @@ export interface AgentConfig {
   provider: string
   model?: string
   live?: boolean
+  thinking_level?: 'minimal' | 'low' | 'medium' | 'high'
+  code_execution?: boolean
 }
