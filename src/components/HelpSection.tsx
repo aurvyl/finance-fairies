@@ -68,13 +68,13 @@ export function HelpSection() {
             </li>
           </ol>
           <p>
-            On Overview, the amber stretch of each lane is the zone between “Fairy steps in” and the hard sell-off. Replay and What-if run on the Guardian engine,
+            On Overview, each gauge marks where your fairy steps in and where the hard sell-off is; open “See the exact numbers” for the amounts. Replay and What-if run on the Guardian engine,
             which draws its own lines from your limits; Guardrails lists them under “When the engine steps in”.
           </p>
         </Topic>
 
         <Topic title="How fast it’s falling">
-          <p>A fast fall matters as much as a deep one, so the fairy also checks speed. Each check is shown on Overview and lights up when it’s crossed:</p>
+          <p>A fast fall matters as much as a deep one, so the fairy also checks speed. Overview shows each check under “How fast it’s falling”, with a tick where it flags:</p>
           <dl className="help-defs">
             <div>
               <dt>Today</dt>
