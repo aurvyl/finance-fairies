@@ -1,0 +1,735 @@
+{
+  "start": "2025-01-02",
+  "end": "2025-03-14",
+  "simulated": true,
+  "limits": {
+    "max_drawdown": 0.1,
+    "max_daily_loss": 0.02
+  },
+  "thresholds": {
+    "rotation_loss": 0.05,
+    "emergency_loss": 0.08000000000000002,
+    "shock_day": -0.02,
+    "daily_var_limit": 0.02,
+    "rerisk_loss": 0.04000000000000001
+  },
+  "nav": {
+    "hold": {
+      "2025-01-02": 10000.0,
+      "2025-01-03": 10195.95,
+      "2025-01-06": 10457.26,
+      "2025-01-07": 10193.04,
+      "2025-01-08": 10110.73,
+      "2025-01-10": 9925.88,
+      "2025-01-13": 9884.56,
+      "2025-01-14": 9797.7,
+      "2025-01-15": 10081.64,
+      "2025-01-16": 9987.61,
+      "2025-01-17": 10191.83,
+      "2025-01-21": 10304.83,
+      "2025-01-22": 10497.88,
+      "2025-01-23": 10519.48,
+      "2025-01-24": 10527.21,
+      "2025-01-27": 9859.84,
+      "2025-01-28": 10112.89,
+      "2025-01-29": 10072.04,
+      "2025-01-30": 10114.23,
+      "2025-01-31": 10115.92,
+      "2025-02-03": 10021.89,
+      "2025-02-04": 10223.25,
+      "2025-02-05": 10110.37,
+      "2025-02-06": 10169.19,
+      "2025-02-07": 9985.72,
+      "2025-02-10": 10171.16,
+      "2025-02-11": 10162.47,
+      "2025-02-12": 10128.1,
+      "2025-02-13": 10209.77,
+      "2025-02-14": 10239.12,
+      "2025-02-18": 10162.56,
+      "2025-02-19": 10165.55,
+      "2025-02-20": 10112.74,
+      "2025-02-21": 9833.06,
+      "2025-02-24": 9612.43,
+      "2025-02-25": 9417.89,
+      "2025-02-26": 9573.85,
+      "2025-02-27": 9173.95,
+      "2025-02-28": 9312.78,
+      "2025-03-03": 8974.87,
+      "2025-03-04": 9011.43,
+      "2025-03-05": 9188.23,
+      "2025-03-06": 8873.71,
+      "2025-03-07": 8992.74,
+      "2025-03-10": 8625.16,
+      "2025-03-11": 8698.69,
+      "2025-03-12": 8924.88,
+      "2025-03-13": 8724.2,
+      "2025-03-14": 8968.87
+    },
+    "cash_exit": {
+      "2025-01-02": 10000.0,
+      "2025-01-03": 10195.95,
+      "2025-01-06": 10352.16,
+      "2025-01-07": 10352.42,
+      "2025-01-08": 10352.5,
+      "2025-01-10": 10352.69,
+      "2025-01-13": 10352.73,
+      "2025-01-14": 10352.82,
+      "2025-01-15": 10352.53,
+      "2025-01-16": 10352.63,
+      "2025-01-17": 10352.42,
+      "2025-01-21": 10352.31,
+      "2025-01-22": 10352.12,
+      "2025-01-23": 10352.09,
+      "2025-01-24": 10352.09,
+      "2025-01-27": 10352.76,
+      "2025-01-28": 10352.5,
+      "2025-01-29": 10352.54,
+      "2025-01-30": 10352.5,
+      "2025-01-31": 10352.5,
+      "2025-02-03": 10352.59,
+      "2025-02-04": 10352.39,
+      "2025-02-05": 10352.5,
+      "2025-02-06": 10352.45,
+      "2025-02-07": 10352.63,
+      "2025-02-10": 10352.44,
+      "2025-02-11": 10352.45,
+      "2025-02-12": 10352.49,
+      "2025-02-13": 10352.4,
+      "2025-02-14": 10352.38,
+      "2025-02-18": 10352.45,
+      "2025-02-19": 10352.45,
+      "2025-02-20": 10352.5,
+      "2025-02-21": 10352.78,
+      "2025-02-24": 10353.0,
+      "2025-02-25": 10353.2,
+      "2025-02-26": 10353.04,
+      "2025-02-27": 10353.44,
+      "2025-02-28": 10353.3,
+      "2025-03-03": 10353.64,
+      "2025-03-04": 10353.6,
+      "2025-03-05": 10353.43,
+      "2025-03-06": 10353.74,
+      "2025-03-07": 10353.62,
+      "2025-03-10": 10353.99,
+      "2025-03-11": 10353.92,
+      "2025-03-12": 10353.69,
+      "2025-03-13": 10353.89,
+      "2025-03-14": 10353.65
+    },
+    "guardian": {
+      "2025-01-02": 10000.0,
+      "2025-01-03": 10195.95,
+      "2025-01-06": 10387.38,
+      "2025-01-07": 10256.53,
+      "2025-01-08": 10230.84,
+      "2025-01-10": 10104.4,
+      "2025-01-13": 10058.04,
+      "2025-01-14": 10027.22,
+      "2025-01-15": 10240.65,
+      "2025-01-16": 10248.11,
+      "2025-01-17": 10357.22,
+      "2025-01-21": 10426.74,
+      "2025-01-22": 10513.16,
+      "2025-01-23": 10544.65,
+      "2025-01-24": 10577.38,
+      "2025-01-27": 10388.04,
+      "2025-01-28": 10432.58,
+      "2025-01-29": 10426.63,
+      "2025-01-30": 10485.7,
+      "2025-01-31": 10466.54,
+      "2025-02-03": 10452.46,
+      "2025-02-04": 10512.8,
+      "2025-02-05": 10434.79,
+      "2025-02-06": 10445.55,
+      "2025-02-07": 10376.11,
+      "2025-02-10": 10472.41,
+      "2025-02-11": 10576.82,
+      "2025-02-12": 10590.9,
+      "2025-02-13": 10666.67,
+      "2025-02-14": 10566.74,
+      "2025-02-18": 10574.74,
+      "2025-02-19": 10631.97,
+      "2025-02-20": 10611.93,
+      "2025-02-21": 10546.3,
+      "2025-02-24": 10430.13,
+      "2025-02-25": 10381.41,
+      "2025-02-26": 10418.5,
+      "2025-02-27": 10222.37,
+      "2025-02-28": 10348.15,
+      "2025-03-03": 10247.27,
+      "2025-03-04": 10141.17,
+      "2025-03-05": 10253.28,
+      "2025-03-06": 10089.08,
+      "2025-03-07": 10177.47,
+      "2025-03-10": 10052.87,
+      "2025-03-11": 9992.5,
+      "2025-03-12": 9961.98,
+      "2025-03-13": 9894.12,
+      "2025-03-14": 10015.94
+    }
+  },
+  "summary": {
+    "hold": {
+      "final_value": 8968.8682540038,
+      "total_return": -0.1031131746,
+      "max_drawdown": 0.180679762,
+      "worst_day": -0.0633949138,
+      "trades": 0.0,
+      "costs": 0.0,
+      "max_loss_vs_baseline": 0.1374844048,
+      "days_over_daily_limit": 10.0
+    },
+    "cash_exit": {
+      "final_value": 10353.6469989385,
+      "total_return": 0.0353646999,
+      "max_drawdown": 7.05355e-05,
+      "worst_day": -2.7454e-05,
+      "trades": 1.0,
+      "costs": 20.756379067,
+      "max_loss_vs_baseline": 0.0,
+      "days_over_daily_limit": 0.0
+    },
+    "guardian": {
+      "final_value": 10015.9436353962,
+      "total_return": 0.0015943635,
+      "max_drawdown": 0.0724268636,
+      "worst_day": -0.0188252946,
+      "trades": 5.0,
+      "costs": 31.1507873433,
+      "max_loss_vs_baseline": 0.0105879982,
+      "days_over_daily_limit": 0.0
+    }
+  },
+  "events": [
+    {
+      "date": "2025-01-03",
+      "strategy": "cash_exit",
+      "kind": "exit",
+      "reasons": [
+        "Risk budget: 99% one-day VaR 3.3% > your 2% daily limit"
+      ]
+    },
+    {
+      "date": "2025-01-03",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Risk budget: 99% one-day VaR 3.3% > your 2% daily limit"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.0,
+        "portfolio_day_return": 0.019594952567445256,
+        "spike_ratio": NaN,
+        "short_annual_vol": NaN,
+        "daily_var_99": 0.03307760240858342
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.016365039065916465,
+        "spy": 0.012503689781776739,
+        "smh": 0.02896366951265672,
+        "holdings_down": 0,
+        "portfolio_corr_qqq": 0.9255682704244946,
+        "main_loss_driver": "AVGO",
+        "driver_corr_smh_minus_qqq": 0.05252060168502637
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.2254581680854061,
+            "vol_after": 0.13176590440784208,
+            "vol_reduction": 0.4155638470462172,
+            "cvar_before": 0.0381912561632145,
+            "cvar_after": 0.02226795578610561,
+            "cost_nav": 0.0007000000000000001,
+            "turnover": 0.35000000000000003,
+            "daily_var_before": 0.033035083882949526,
+            "daily_var_after": 0.019306897337056535,
+            "stress_equities_down_20": 0.20000000000000007,
+            "stress_tech_down_30_defensive_down_15": 0.24750000000000003,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "NVDA",
+              "weight": 0.1
+            },
+            {
+              "type": "TRIM",
+              "ticker": "AMD",
+              "weight": 0.1
+            },
+            {
+              "type": "TRIM",
+              "ticker": "AVGO",
+              "weight": 0.1
+            },
+            {
+              "type": "TRIM",
+              "ticker": "AMZN",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLU",
+              "weight": 0.15
+            },
+            {
+              "type": "ADD",
+              "ticker": "PG",
+              "weight": 0.15
+            },
+            {
+              "type": "ADD",
+              "ticker": "KO",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": "engine"
+    },
+    {
+      "date": "2025-01-06",
+      "strategy": "cash_exit",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-01-06",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-01-15",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Risk budget: 99% one-day VaR 2.1% > your 2% daily limit"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.014126092192729978,
+        "portfolio_day_return": 0.021284392323406953,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.20113705764159717,
+        "daily_var_99": 0.020629088645241253
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.023006197773013604,
+        "spy": 0.018189981207548556,
+        "smh": 0.02350881597748855,
+        "holdings_down": 2,
+        "portfolio_corr_qqq": 0.9162518862965084,
+        "main_loss_driver": "KO",
+        "driver_corr_smh_minus_qqq": -0.16047098408289304
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.1418483568442232,
+            "vol_after": 0.12246422958739313,
+            "vol_reduction": 0.13665387240345384,
+            "cvar_before": 0.02225475267369559,
+            "cvar_after": 0.01913353512214225,
+            "cost_nav": 0.0002,
+            "turnover": 0.1,
+            "daily_var_before": 0.020784220890291152,
+            "daily_var_after": 0.017943976620744102,
+            "stress_equities_down_20": 0.2001428126223099,
+            "stress_tech_down_30_defensive_down_15": 0.23258307018026927,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "AMZN",
+              "weight": 0.05
+            },
+            {
+              "type": "TRIM",
+              "ticker": "META",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "KO",
+              "weight": 0.1
+            }
+          ]
+        }
+      ],
+      "chosen": "engine"
+    },
+    {
+      "date": "2025-01-16",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-02-05",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "GOOGL -7.3% today, costing the portfolio 1.1%"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.013480392978223787,
+        "portfolio_day_return": -0.007419873932153598,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.08891308962946702,
+        "daily_var_99": 0.017571175621070842
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.004537858994349886,
+        "spy": 0.004054355500294093,
+        "smh": 0.023481147497859123,
+        "holdings_down": 3,
+        "portfolio_corr_qqq": 0.8913533478754617,
+        "main_loss_driver": "GOOGL",
+        "driver_corr_smh_minus_qqq": -0.14489373566615527
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.11864482445589361,
+            "vol_after": 0.10219899787929712,
+            "vol_reduction": 0.13861393998446392,
+            "cvar_before": 0.018377409558784075,
+            "cvar_after": 0.016028950754586695,
+            "cost_nav": 0.0002,
+            "turnover": 0.1,
+            "daily_var_before": 0.017384341234838466,
+            "daily_var_after": 0.014974629202243126,
+            "stress_equities_down_20": 0.20018019831369857,
+            "stress_tech_down_30_defensive_down_15": 0.21635119043887724,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "GOOGL",
+              "weight": 0.1
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLP",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": "engine"
+    },
+    {
+      "date": "2025-02-06",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-02-19",
+      "strategy": "guardian",
+      "kind": "re-risk",
+      "detail": "moved 5% back to the original holdings"
+    },
+    {
+      "date": "2025-02-20",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-03-06",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 5.4% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.05414938441106587,
+        "portfolio_day_return": -0.01601409327909964,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.20995877374267935,
+        "daily_var_99": 0.01736186432371186
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": -0.027509385208026926,
+        "spy": -0.017751154657069668,
+        "smh": -0.0419354410390701,
+        "holdings_down": 9,
+        "portfolio_corr_qqq": 0.8657306106896085,
+        "main_loss_driver": "META",
+        "driver_corr_smh_minus_qqq": -0.19036866672953323
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.11675907235501919,
+            "vol_after": 0.10369869039293865,
+            "vol_reduction": 0.11185753448236524,
+            "cvar_before": 0.016957857045486475,
+            "cvar_after": 0.014481570547958079,
+            "cost_nav": 0.0003,
+            "turnover": 0.15,
+            "daily_var_before": 0.017108032865246654,
+            "daily_var_after": 0.015194370489096888,
+            "stress_equities_down_20": 0.20024747293683554,
+            "stress_tech_down_30_defensive_down_15": 0.19578789517815887,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "TRIM",
+              "ticker": "META",
+              "weight": 0.1
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.15
+            }
+          ]
+        }
+      ],
+      "chosen": "engine"
+    },
+    {
+      "date": "2025-03-07",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-03-12",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 6.6% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.00380192230772447,
+        "hwm_drawdown": 0.06606492170897149,
+        "portfolio_day_return": -0.003054579632642773,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.15172452804616265,
+        "daily_var_99": 0.01572458440913106
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.011280850557297883,
+        "spy": 0.005306567865676515,
+        "smh": 0.029409085287183334,
+        "holdings_down": 5,
+        "portfolio_corr_qqq": 0.768752792107736,
+        "main_loss_driver": "PG",
+        "driver_corr_smh_minus_qqq": -0.12926006314191812
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": false,
+          "rejections": [
+            "volatility falls only 1.4% (< 10%)"
+          ],
+          "values": {
+            "vol_before": 0.10854680176458707,
+            "vol_after": 0.10702079348866513,
+            "vol_reduction": 0.014058528221140065,
+            "cvar_before": 0.014708671634715079,
+            "cvar_after": 0.014120321624739487,
+            "cost_nav": 9.999999999999999e-05,
+            "turnover": 0.049999999999999996,
+            "daily_var_before": 0.01590473626203095,
+            "daily_var_after": 0.0156811390784414,
+            "stress_equities_down_20": 0.20031111843421529,
+            "stress_tech_down_30_defensive_down_15": 0.18880017768917035,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": null
+    },
+    {
+      "date": "2025-03-13",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 7.2% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.01058799820107692,
+        "hwm_drawdown": 0.07242686363866135,
+        "portfolio_day_return": -0.006811974491129913,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.12386335683811493,
+        "daily_var_99": 0.015999569958599965
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": -0.01799054638517361,
+        "spy": -0.01333024354055512,
+        "smh": -0.004398712585469644,
+        "holdings_down": 10,
+        "portfolio_corr_qqq": 0.7766087273986468,
+        "main_loss_driver": "AMD",
+        "driver_corr_smh_minus_qqq": 0.014730136780584102
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": false,
+          "rejections": [
+            "volatility falls only 1.4% (< 10%)"
+          ],
+          "values": {
+            "vol_before": 0.10891561173705952,
+            "vol_after": 0.1074229046919128,
+            "vol_reduction": 0.013705170648541709,
+            "cvar_before": 0.01464476246954094,
+            "cvar_after": 0.014065917020034948,
+            "cost_nav": 9.999999999999999e-05,
+            "turnover": 0.049999999999999996,
+            "daily_var_before": 0.01595877585829379,
+            "daily_var_after": 0.01574005811181405,
+            "stress_equities_down_20": 0.20031325230089833,
+            "stress_tech_down_30_defensive_down_15": 0.1883076301850748,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": null
+    },
+    {
+      "date": "2025-03-14",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 6.1% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.0610059070830864,
+        "portfolio_day_return": 0.012312728892059921,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.1470736195899378,
+        "daily_var_99": 0.016242433282235225
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.0241704507369902,
+        "spy": 0.020655728935006223,
+        "smh": 0.031974518323147016,
+        "holdings_down": 1,
+        "portfolio_corr_qqq": 0.7766423089507948,
+        "main_loss_driver": "PG",
+        "driver_corr_smh_minus_qqq": -0.13852443885071822
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": false,
+          "rejections": [
+            "volatility falls only 1.8% (< 10%)"
+          ],
+          "values": {
+            "vol_before": 0.11162105392856994,
+            "vol_after": 0.10956941529747415,
+            "vol_reduction": 0.01838039114384915,
+            "cvar_before": 0.014744584155853552,
+            "cvar_after": 0.014155824801640168,
+            "cost_nav": 9.999999999999999e-05,
+            "turnover": 0.049999999999999996,
+            "daily_var_before": 0.016355188685098814,
+            "daily_var_after": 0.016054573919835242,
+            "stress_equities_down_20": 0.20030944222270244,
+            "stress_tech_down_30_defensive_down_15": 0.18899212486120492,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": null
+    }
+  ]
+}
