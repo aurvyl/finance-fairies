@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from . import metrics as m
-from .config import BENCHMARK, ETFS, SECTOR, TECH_SECTORS, Policy
+from .config import BENCHMARK, STRESS_SHOCK_OVERRIDES, TECH_SECTORS, Policy, asset_class, sector_of
 
 
 @dataclass
@@ -73,12 +73,12 @@ def caps_ok(w_new: pd.Series, w_old: pd.Series, policy: Policy) -> tuple[bool, l
     """Position and sector caps. A cap already breached before trading may shrink but never grow."""
     problems: list[str] = []
     for t, w in w_new.items():
-        cap = policy.cap_etf if t in ETFS else policy.cap_stock
+        cap = {"etf": policy.cap_etf, "crypto": policy.cap_crypto}.get(asset_class(t), policy.cap_stock)
         old = float(w_old.get(t, 0.0))
         if w > cap + 1e-9 and w > old + 1e-9:
             problems.append(f"{t} weight {w:.1%} above cap {cap:.0%}")
-    sec_new = w_new.groupby(lambda t: SECTOR.get(t, "other")).sum()
-    sec_old = w_old.groupby(lambda t: SECTOR.get(t, "other")).sum()
+    sec_new = w_new.groupby(sector_of).sum()
+    sec_old = w_old.groupby(sector_of).sum()
     for s, w in sec_new.items():
         old = float(sec_old.get(s, 0.0))
         if w > policy.cap_sector + 1e-9 and w > old + 1e-9:
@@ -89,9 +89,13 @@ def caps_ok(w_new: pd.Series, w_old: pd.Series, policy: Policy) -> tuple[bool, l
 def stress_loss(w: pd.Series, scenario: str) -> float:
     """Loss (positive fraction) under a hypothetical scenario; not a forecast."""
     if scenario == "equities_down_20":
-        return float(w.sum() * 0.20)
+        shock = pd.Series({t: STRESS_SHOCK_OVERRIDES.get(sector_of(t), 0.20) for t in w.index}, dtype=float)
+        return float((w * shock).sum())
     if scenario == "tech_down_30_defensive_down_15":
-        shock = pd.Series({t: (0.30 if SECTOR.get(t) in TECH_SECTORS else 0.15) for t in w.index})
+        def loss(t: str) -> float:
+            s = sector_of(t)
+            return STRESS_SHOCK_OVERRIDES.get(s, 0.30 if s in TECH_SECTORS else 0.15)
+        shock = pd.Series({t: loss(t) for t in w.index}, dtype=float)
         return float((w * shock).sum())
     raise ValueError(scenario)
 
