@@ -5,6 +5,20 @@
 
 # Finance Fairies: Portfolio Guardian
 
+## Live presentation
+
+The on-stage deck for Halloween at Imperial: Gemini Edition (about 4 minutes). Open [`presentation/index.html`](presentation/index.html) in Chrome to present it (works offline; → next, N notes, V fallback recording, C cue card).
+
+<table>
+<tr><td width="50%"><img src="presentation/preview/slide-01.jpg" alt="Slide 1: Hook"><br><sub>1 · Hook</sub></td><td width="50%"><img src="presentation/preview/slide-02.jpg" alt="Slide 2: Meet Alex's fairy (live)"><br><sub>2 · Meet Alex's fairy (live)</sub></td></tr>
+<tr><td width="50%"><img src="presentation/preview/slide-03.jpg" alt="Slide 3: The crash (live)"><br><sub>3 · The crash (live)</sub></td><td width="50%"><img src="presentation/preview/slide-04.jpg" alt="Slide 4: Rules become lines"><br><sub>4 · Rules become lines</sub></td></tr>
+<tr><td width="50%"><img src="presentation/preview/slide-05.jpg" alt="Slide 5: Market or your stocks?"><br><sub>5 · Market or your stocks?</sub></td><td width="50%"><img src="presentation/preview/slide-06.jpg" alt="Slide 6: Five percent at a time"><br><sub>6 · Five percent at a time</sub></td></tr>
+<tr><td width="50%"><img src="presentation/preview/slide-07.jpg" alt="Slide 7: One gate, eight checks"><br><sub>7 · One gate, eight checks</sub></td><td width="50%"><img src="presentation/preview/slide-08.jpg" alt="Slide 8: What-if (live)"><br><sub>8 · What-if (live)</sub></td></tr>
+<tr><td width="50%"><img src="presentation/preview/slide-09.jpg" alt="Slide 9: A real day, a real answer"><br><sub>9 · A real day, a real answer</sub></td><td width="50%"><img src="presentation/preview/slide-10.jpg" alt="Slide 10: Proof"><br><sub>10 · Proof</sub></td></tr>
+<tr><td width="50%"><img src="presentation/preview/slide-11.jpg" alt="Slide 11: Close"><br><sub>11 · Close</sub></td></tr>
+</table>
+
+
 ![Finance Fairies overview: limits drawn on the portfolio chart, agent actions with reasons](docs/overview.png)
 
 An agentic portfolio guardian. You set two rules for the whole portfolio in plain language, "never fall more than 10% from where I started" and "never lose more than 2% in a day", and the agent keeps the portfolio inside them. When risk builds up it **rotates** money from the riskiest holdings into calmer assets instead of selling everything to cash, then explains, by text or voice, why the market moved and what it did.

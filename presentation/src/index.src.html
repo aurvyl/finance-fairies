@@ -617,7 +617,9 @@ body.presenter #pbar{display:flex;position:fixed;left:20px;right:20px;top:14px;h
   const start = /^#s(\d+)$/.exec(location.hash);
   slides[0].classList.add('active');
   if (isPresenter) notesEl.classList.add('show');
-  go(start ? +start[1] - 1 : 0, 0);
+  const first = start ? +start[1] - 1 : 0;
+  // ?full opens the slide fully built, for static previews
+  if (/full/.test(location.search)) { go(first, maxStep[first], true); } else go(first, 0);
 })();
 </script>
 </body>
