@@ -68,7 +68,7 @@ function HitRow({ g, move, haven, scale }: { g: HitGroup; move: number; haven?: 
 
 /**
  * The story behind a simulated sell-off: the headline, how the panic spread, which of the
- * user's holdings it reached and why, and what the fairy did about it. Always labelled as fiction.
+ * user's holdings it reached and why, and what the fairy did about it. Carries the app's usual simulated tag.
  */
 export function ScenarioStory({ s }: { s: Snapshot }) {
   const ui = useUI()
@@ -91,7 +91,10 @@ export function ScenarioStory({ s }: { s: Snapshot }) {
     <section className="panel story" aria-labelledby="story-h">
       <header className="story-head">
         <p className="story-kicker">
-          <Newspaper size={14} aria-hidden /> Fictional scenario · simulated
+          <Newspaper size={14} aria-hidden /> Breaking
+          <span className="demo-tag" title="This news, and the prices and trades it causes, are simulated">
+            Simulated
+          </span>
         </p>
         <button className="icon-btn sm" onClick={() => sim.clearScenario()} aria-label="Hide this story" title="Hide this story">
           <X size={16} aria-hidden />
@@ -159,7 +162,6 @@ export function ScenarioStory({ s }: { s: Snapshot }) {
         )}
       </div>
 
-      <p className="story-note">{sc.disclaimer}</p>
     </section>
   )
 }

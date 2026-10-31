@@ -68,7 +68,7 @@ export function localAnswer(q: string, s: Snapshot): Answer {
       const beat = state.done ? sc.after : sc.beats[state.beat]
       return {
         source: 'agent',
-        text: `In this simulated scenario, ${sc.headline.replace(/^./, (c) => c.toLowerCase())}. ${beat.text} You’re ${pct(change)} today. Remember, this is made-up news for the demo.`,
+        text: `In this simulated scenario, ${sc.headline.replace(/^./, (c) => c.toLowerCase())}. ${beat.text} You’re ${pct(change)} today.`,
       }
     }
     const moves = sim.sectorMoves('open')
@@ -127,7 +127,6 @@ function scenarioContext() {
   return {
     simulatedScenario: {
       fictional: true,
-      note: sc.disclaimer,
       headline: sc.headline,
       storySoFar: sc.beats.slice(0, state.beat + 1).map((b) => `${b.title}: ${b.text}`).concat(state.done ? [`${sc.after.title}: ${sc.after.text}`] : []),
       hit: sc.hits.filter((g) => g.from <= state.beat).map((g) => `${g.label}: ${g.why}`),

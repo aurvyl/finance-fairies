@@ -1,7 +1,7 @@
 import type { Holding, Sector } from './types'
 
 /**
- * Story-driven sell-offs for the demo. Each scenario is fiction: a headline, the beats of how
+ * Story-driven sell-offs for the demo (simulated): a headline, the beats of how
  * the panic spread (each beat changes which sectors and symbols are falling), the groups of
  * holdings it hits and why, and where the money ran. The sim plays the beats on a tick clock.
  * Add a scenario by adding an entry to SCENARIOS; nothing else needs to change.
@@ -55,7 +55,6 @@ export interface Scenario {
   haven: HitGroup
   /** one line on where the fairy's sales went, and why that fits this story */
   fairy: string
-  disclaimer: string
 }
 
 const musk: Scenario = {
@@ -155,7 +154,6 @@ const musk: Scenario = {
     why: 'Where the money ran. Prices rose as investors looked for somewhere safe.',
   },
   fairy: 'It moved the money into short-dated Treasuries, the same place other investors were running to.',
-  disclaimer: 'Fictional scenario for the demo. Elon Musk has not sold his Tesla shares; the news, prices and trades here are all simulated.',
 }
 
 export const SCENARIOS: Record<string, Scenario> = { [musk.id]: musk }

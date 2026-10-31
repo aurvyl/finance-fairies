@@ -109,12 +109,11 @@ export class Simulation {
       id: nid(),
       kind: 'market',
       t: this.now,
-      title: `Simulated scenario: ${sc.headline}`,
+      title: sc.headline,
       summary: `${sc.dek} I’m watching your limits closely.`,
       why: [
         ...sc.beats.slice(0, 1).map((b) => b.text),
         `If it spreads the way panics usually do, ${listOf(sc.hits.slice(1).map((g) => g.noun))} are next. Together with ${sc.hits[0].noun} that’s ${pct(exposed, 0, false)} of your money.`,
-        sc.disclaimer,
       ],
       value: this.value(),
     })
