@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/11821931-f869-4646-a48f-5a00912fb6c4
 
 ## Live presentation
 
-The on-stage deck for Halloween at Imperial: Gemini Edition (about 4 minutes). Open [`presentation/index.html`](presentation/index.html) in Chrome to present it (works offline; → next, N notes, V fallback recording, C cue card).
+The on-stage deck for Halloween at Imperial: Gemini Edition (about 4 minutes). **[▶ Open the live deck](https://smgonthebeat.github.io/finance-fairies/presentation/)** in the browser, or open [`presentation/index.html`](presentation/index.html) locally (works offline; → next, N notes, V fallback recording, C cue card).
 
 <table>
 <tr><td width="50%"><img src="presentation/preview/slide-01.jpg" alt="Slide 1: Hook"><br><sub>1 · Hook</sub></td><td width="50%"><img src="presentation/preview/slide-02.jpg" alt="Slide 2: Meet Alex's fairy (live)"><br><sub>2 · Meet Alex's fairy (live)</sub></td></tr>
