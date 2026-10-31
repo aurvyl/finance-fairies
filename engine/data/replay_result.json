@@ -207,6 +207,17 @@
         "spike_ratio": NaN,
         "short_annual_vol": 0.5209704236864664
       },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": -0.029114747300440946,
+        "spy": -0.0141452694378712,
+        "smh": -0.09834439706190823,
+        "holdings_down": 5,
+        "portfolio_corr_qqq": 0.9368086952674873,
+        "main_loss_driver": "AVGO",
+        "driver_corr_smh_minus_qqq": 0.04939228180625177
+      },
       "plans": [
         {
           "source": "engine",
@@ -274,6 +285,17 @@
         "portfolio_day_return": -0.019710319237450036,
         "spike_ratio": NaN,
         "short_annual_vol": 0.19572498023992468
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.004537858994349886,
+        "spy": 0.004054355500294093,
+        "smh": 0.023481147497859123,
+        "holdings_down": 3,
+        "portfolio_corr_qqq": 0.9041491582019598,
+        "main_loss_driver": "GOOGL",
+        "driver_corr_smh_minus_qqq": -0.14489373566615527
       },
       "plans": [
         {

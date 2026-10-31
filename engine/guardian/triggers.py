@@ -68,6 +68,41 @@ def evaluate(
     return TriggerResult("rotation" if reasons else None, reasons, values)
 
 
+def classify_shock(asset_returns: pd.DataFrame, weights: pd.Series, window: int = 60) -> dict:
+    """Label today's move as broad-tech, sector-led, mixed or none (research v2, section 1.2).
+
+    broad-tech: QQQ <= -3%, SPY <= -1.5%, at least 5 of 7 holdings down, portfolio corr vs QQQ >= 0.8
+    sector-led: SMH falls >= 3pp more than QQQ and the main loss driver tracks SMH more than QQQ (>= 0.1)
+    Broad-tech suggests evaluating HEDGE; sector-led suggests ROTATE; mixed goes to a human.
+    """
+    today = asset_returns.iloc[-1]
+    hist = asset_returns.iloc[-window - 1 : -1]
+    held = [t for t, w in weights.items() if w > 0 and t in asset_returns.columns]
+    w = weights.reindex(held).fillna(0.0)
+    port_hist = (hist[held] * w).sum(axis=1)
+    corr_qqq = float(port_hist.corr(hist["QQQ"])) if len(hist) > 2 else float("nan")
+    down = int((today[held] < 0).sum())
+
+    contrib = (w * today[held]).sort_values()
+    driver = contrib.index[0] if len(contrib) else None
+    corr_gap = float(hist[driver].corr(hist["SMH"]) - hist[driver].corr(hist["QQQ"])) if driver else float("nan")
+
+    broad = today["QQQ"] <= -0.03 and today["SPY"] <= -0.015 and down >= 5 and corr_qqq >= 0.8
+    sector = (today["SMH"] - today["QQQ"]) <= -0.03 and corr_gap >= 0.1
+    label = "mixed" if broad and sector else "broad-tech" if broad else "sector-led" if sector else "none"
+    return {
+        "label": label,
+        "suggested_path": {"broad-tech": "HEDGE", "sector-led": "ROTATE", "mixed": "HUMAN_CHOICE", "none": "ROTATE"}[label],
+        "qqq": float(today["QQQ"]),
+        "spy": float(today["SPY"]),
+        "smh": float(today["SMH"]),
+        "holdings_down": down,
+        "portfolio_corr_qqq": corr_qqq,
+        "main_loss_driver": driver,
+        "driver_corr_smh_minus_qqq": corr_gap,
+    }
+
+
 def recovery_ok(nav: pd.Series, policy: Policy) -> bool:
     """One close of the re-risk condition (loss and drawdown below 12%, calm volatility)."""
     baseline_loss, hwm_dd = m.drawdowns(nav, policy.baseline)

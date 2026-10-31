@@ -17,7 +17,7 @@ import pandas as pd
 from . import metrics as m
 from .config import Policy
 from .rotation import MarketWindow, Plan, actions_between, check_plan, engine_plan, pick_best
-from .triggers import evaluate, recovery_ok
+from .triggers import classify_shock, evaluate, recovery_ok
 
 # An agent planner receives the decision context and may return target weights.
 AgentPlanner = Callable[[dict], dict[str, float] | None]
@@ -153,9 +153,10 @@ def replay(
 
         if trig.kind == "rotation" and i - last_trade_i > policy.cooldown_sessions:
             w_now = books["guardian"].weights(px_close)
+            shock = classify_shock(r_hist, w_prev)
             plans: list[Plan] = [engine_plan(w_now, window, policy)]
             if agent is not None:
-                ctx = {"date": str(day.date()), "trigger": trig, "weights": w_now, "window": window, "policy": policy, "engine_plan": plans[0]}
+                ctx = {"date": str(day.date()), "trigger": trig, "shock": shock, "weights": w_now, "window": window, "policy": policy, "engine_plan": plans[0]}
                 proposal = agent(ctx)
                 if proposal:
                     universe = list(dict.fromkeys(list(w_now.index) + policy.candidates))
@@ -171,6 +172,7 @@ def replay(
                 "kind": "trigger",
                 "reasons": trig.reasons,
                 "values": trig.values,
+                "shock": shock,
                 "plans": [
                     {"source": p.source, "passed": p.check.passed, "rejections": p.check.reasons, "values": p.check.values, "actions": p.actions}
                     for p in plans
