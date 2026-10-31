@@ -52,6 +52,7 @@ export function useListen(onFinal: (text: string) => void) {
   const rec = useRef<Recognition | null>(null)
   const finalText = useRef('')
   const heard = useRef('')
+  const holding = useRef(false)
   const cancelled = useRef(false)
   const audio = useRef<{ ctx: AudioContext; stream: MediaStream; raf: number } | null>(null)
   const cb = useRef(onFinal)
@@ -110,54 +111,76 @@ export function useListen(onFinal: (text: string) => void) {
     setInterim('')
     finalText.current = ''
     heard.current = ''
-    const r = new Ctor()
-    r.lang = navigator.language || 'en-US'
-    r.interimResults = true
-    r.continuous = true
-    r.onresult = (e) => {
-      let live = ''
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const res = e.results[i]
-        if (res.isFinal) finalText.current += res[0].transcript
-        else live += res[0].transcript
-      }
-      heard.current = (finalText.current + ' ' + live).trim()
-      setInterim(heard.current)
-    }
+    holding.current = true
     let failed = false
-    r.onerror = (e) => {
-      if (e.error === 'aborted') return
-      failed = true
-      const map: Record<string, ListenError> = { 'not-allowed': 'not-allowed', 'service-not-allowed': 'not-allowed', 'audio-capture': 'not-allowed', 'no-speech': 'no-speech', network: 'network' }
-      setError(map[e.error] ?? null)
-    }
-    r.onend = () => {
+    const finish = () => {
       setListening(false)
       stopMeter()
-      const text = cancelled.current ? '' : finalText.current.trim() || heard.current
+      const text = cancelled.current ? '' : (finalText.current.trim() || heard.current).trim()
       heard.current = ''
       if (text) cb.current(text)
       else if (!failed && !cancelled.current) setError('no-speech')
       cancelled.current = false
     }
-    rec.current = r
-    try {
+    const begin = () => {
+      const r = new Ctor()
+      r.lang = navigator.language || 'en-US'
+      r.interimResults = true
+      r.continuous = false
+      const base = finalText.current
+      r.onresult = (e) => {
+        let fin = ''
+        let live = ''
+        for (let i = 0; i < e.results.length; i++) {
+          const res = e.results[i]
+          if (res.isFinal) fin += res[0].transcript
+          else live += res[0].transcript
+        }
+        finalText.current = (base + ' ' + fin).trim()
+        heard.current = (finalText.current + ' ' + live).trim()
+        setInterim(heard.current)
+      }
+      r.onerror = (e) => {
+        if (e.error === 'aborted' || (e.error === 'no-speech' && holding.current)) return
+        failed = true
+        const map: Record<string, ListenError> = { 'not-allowed': 'not-allowed', 'service-not-allowed': 'not-allowed', 'audio-capture': 'not-allowed', 'no-speech': 'no-speech', network: 'network' }
+        setError(map[e.error] ?? null)
+      }
+      r.onend = () => {
+        if (holding.current && !failed && !cancelled.current) {
+          finalText.current = heard.current || finalText.current
+          begin()
+          return
+        }
+        finish()
+      }
+      rec.current = r
       r.start()
+    }
+    try {
+      begin()
       setListening(true)
       void startMeter()
     } catch {
+      holding.current = false
       setError('unsupported')
     }
   }, [])
 
-  const stop = useCallback(() => rec.current?.stop(), [])
+  const stop = useCallback(() => {
+    holding.current = false
+    rec.current?.stop()
+  }, [])
   const cancel = useCallback(() => {
     finalText.current = ''
     cancelled.current = true
+    holding.current = false
     rec.current?.abort()
   }, [])
 
   useEffect(() => () => {
+    holding.current = false
+    cancelled.current = true
     rec.current?.abort()
     stopMeter()
   }, [])
