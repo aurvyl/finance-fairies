@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
 
 import pandas as pd
@@ -10,6 +12,19 @@ import yfinance as yf
 from .config import ALL_TICKERS, BENCHMARK
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+
+def _cache_dir() -> Path:
+    """engine/data/ when writable; otherwise a temp dir (read-only serverless filesystems)."""
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        if os.access(DATA_DIR, os.W_OK):
+            return DATA_DIR
+    except OSError:
+        pass
+    tmp = Path(tempfile.gettempdir()) / "guardian-data"
+    tmp.mkdir(parents=True, exist_ok=True)
+    return tmp
 
 
 def fetch_prices(
@@ -24,10 +39,11 @@ def fetch_prices(
     """
     tickers = tickers or ALL_TICKERS
     cache_name = cache_name or f"prices_{start}_{end}"
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    paths = {k: DATA_DIR / f"{cache_name}_{k}.parquet" for k in ("open", "close", "volume")}
-    if all(p.exists() for p in paths.values()):
-        return {k: pd.read_parquet(p) for k, p in paths.items()}
+    for folder in dict.fromkeys([DATA_DIR, _cache_dir()]):
+        found = {k: folder / f"{cache_name}_{k}.parquet" for k in ("open", "close", "volume")}
+        if all(p.exists() for p in found.values()):
+            return {k: pd.read_parquet(p) for k, p in found.items()}
+    paths = {k: _cache_dir() / f"{cache_name}_{k}.parquet" for k in ("open", "close", "volume")}
 
     raw = yf.download(
         tickers,
