@@ -51,6 +51,7 @@ export function useListen(onFinal: (text: string) => void) {
   const [level, setLevel] = useState(0)
   const rec = useRef<Recognition | null>(null)
   const finalText = useRef('')
+  const heard = useRef('')
   const cancelled = useRef(false)
   const audio = useRef<{ ctx: AudioContext; stream: MediaStream; raf: number } | null>(null)
   const cb = useRef(onFinal)
@@ -108,6 +109,7 @@ export function useListen(onFinal: (text: string) => void) {
     setError(null)
     setInterim('')
     finalText.current = ''
+    heard.current = ''
     const r = new Ctor()
     r.lang = navigator.language || 'en-US'
     r.interimResults = true
@@ -119,7 +121,8 @@ export function useListen(onFinal: (text: string) => void) {
         if (res.isFinal) finalText.current += res[0].transcript
         else live += res[0].transcript
       }
-      setInterim((finalText.current + ' ' + live).trim())
+      heard.current = (finalText.current + ' ' + live).trim()
+      setInterim(heard.current)
     }
     let failed = false
     r.onerror = (e) => {
@@ -131,7 +134,8 @@ export function useListen(onFinal: (text: string) => void) {
     r.onend = () => {
       setListening(false)
       stopMeter()
-      const text = finalText.current.trim()
+      const text = cancelled.current ? '' : finalText.current.trim() || heard.current
+      heard.current = ''
       if (text) cb.current(text)
       else if (!failed && !cancelled.current) setError('no-speech')
       cancelled.current = false
