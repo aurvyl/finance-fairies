@@ -22,6 +22,7 @@ const ERRORS: Record<string, string> = {
   'not-allowed': 'Microphone access is blocked. Allow it in your browser’s site settings, or type instead.',
   'no-speech': 'I didn’t catch anything. Hold the button and speak, or type below.',
   network: 'Speech recognition needs a connection right now. You can type instead.',
+  allowed: 'Microphone is on. Hold the button again and ask your question.',
   unsupported: 'This browser can’t do speech recognition. Type your question instead; I can still answer out loud.',
 }
 
@@ -91,7 +92,7 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
     const down = (e: KeyboardEvent) => {
       if (e.code !== 'Space' || e.repeat || isField(e.target)) return
       e.preventDefault()
-      listen.start()
+      void listen.start()
     }
     const up = (e: KeyboardEvent) => {
       if (e.code !== 'Space' || isField(e.target)) return
@@ -207,7 +208,7 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
               onPointerDown={(e) => {
                 e.preventDefault()
                 if (state === 'speaking') stopSpeaking()
-                listen.start()
+                void listen.start()
               }}
               onPointerUp={() => listen.stop()}
               onPointerLeave={() => listen.listening && listen.stop()}
@@ -215,7 +216,7 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
                 if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
                   e.preventDefault()
                   if (listen.listening) listen.stop()
-                  else listen.start()
+                  else void listen.start()
                 }
               }}
             >

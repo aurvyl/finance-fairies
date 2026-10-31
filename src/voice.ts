@@ -30,7 +30,15 @@ function recognitionCtor(): (new () => Recognition) | undefined {
 export const canListen = typeof window !== 'undefined' && !!recognitionCtor()
 export const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window
 
-export type ListenError = 'not-allowed' | 'no-speech' | 'network' | 'unsupported' | null
+export type ListenError = 'not-allowed' | 'no-speech' | 'network' | 'unsupported' | 'allowed' | null
+
+async function micPermission(): Promise<PermissionState | 'unknown'> {
+  try {
+    return (await navigator.permissions.query({ name: 'microphone' as PermissionName })).state
+  } catch {
+    return 'unknown'
+  }
+}
 
 /**
  * Push-to-talk recognition plus a live microphone level for the waveform.
@@ -79,10 +87,20 @@ export function useListen(onFinal: (text: string) => void) {
     }
   }
 
-  const start = useCallback(() => {
+  const start = useCallback(async () => {
     const Ctor = recognitionCtor()
     if (!Ctor) {
       setError('unsupported')
+      return
+    }
+    if ((await micPermission()) === 'prompt') {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ audio: true })
+        s.getTracks().forEach((t) => t.stop())
+        setError('allowed')
+      } catch {
+        setError('not-allowed')
+      }
       return
     }
     window.speechSynthesis?.cancel()
@@ -102,7 +120,11 @@ export function useListen(onFinal: (text: string) => void) {
       }
       setInterim((finalText.current + ' ' + live).trim())
     }
-    r.onerror = (e) => setError((['not-allowed', 'no-speech', 'network'].includes(e.error) ? e.error : null) as ListenError)
+    r.onerror = (e) => {
+      if (e.error === 'aborted') return
+      const map: Record<string, ListenError> = { 'not-allowed': 'not-allowed', 'service-not-allowed': 'not-allowed', 'audio-capture': 'not-allowed', 'no-speech': 'no-speech', network: 'network' }
+      setError(map[e.error] ?? null)
+    }
     r.onend = () => {
       setListening(false)
       stopMeter()
