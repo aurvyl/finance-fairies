@@ -97,6 +97,11 @@ function Legend({ period }: { period: Period }) {
       <li>
         <i className="k-limit" /> {period === '1D' ? 'Daily loss limit' : 'Floor from your maximum drop'}
       </li>
+      {period === '1D' && (
+        <li>
+          <i className="k-limit dashed" /> Floor, when near
+        </li>
+      )}
       <li>
         <i className="k-ward" /> Agent steps in
       </li>

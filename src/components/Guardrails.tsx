@@ -2,6 +2,7 @@ import { Check, Hand, Pause, Pencil, Send, Zap } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import { localAnswer } from '../engine/ask'
 import { compactMoney, pct } from '../engine/format'
+import { LimitGauge, limitLines } from './LimitGauge'
 import { sim } from '../engine/sim'
 import type { Autonomy, Snapshot } from '../engine/types'
 import { useUI } from '../store'
@@ -36,9 +37,7 @@ function Rule({ k, s }: { k: Key; s: Snapshot }) {
 
   const lossNow = k === 'dailyLoss' ? Math.max(0, 1 - s.value / s.open) : Math.max(0, 1 - s.value / s.highWater)
   const used = Math.min(1.2, lossNow / limit)
-  const base = k === 'dailyLoss' ? s.open : s.highWater
-  const room = Math.max(0, s.value - base * (1 - limit))
-  const tone = used >= 0.85 ? 'crit' : used >= s.guardrails.actAt ? 'warn' : used >= s.guardrails.actAt * 0.75 ? 'near' : 'ok'
+    const tone = used >= 0.85 ? 'crit' : used >= s.guardrails.actAt ? 'warn' : used >= s.guardrails.actAt * 0.75 ? 'near' : 'ok'
   const status =
     used >= 1 ? 'Limit reached' : used >= s.guardrails.actAt ? 'Agent is reducing risk' : used >= s.guardrails.actAt * 0.75 ? 'Getting close' : 'Plenty of room'
 
@@ -57,29 +56,23 @@ function Rule({ k, s }: { k: Key; s: Snapshot }) {
     <section className={`rule tone-${tone}`} aria-labelledby={`rule-${k}`}>
       <header className="rule-head">
         <h3 id={`rule-${k}`}>{m.label}</h3>
-        <span className="rule-status">
-          <span className="status-dot" aria-hidden />
-          {status}
-        </span>
+        <span className="rule-limit">{pct(limit, m.digits, false)}</span>
+        {!editing && (
+          <button className="icon-btn sm" aria-label={`Change ${m.label.toLowerCase()}`} title="Change limit" onClick={() => setEditing(true)}>
+            <Pencil size={14} aria-hidden />
+          </button>
+        )}
       </header>
       <p className="rule-quote">“{m.quote(limit)}”</p>
-
-      <div className="rule-read">
-        <span className="rule-used">{pct(lossNow, 2, false)}</span>
-        <span className="rule-of">of {pct(limit, m.digits, false)}</span>
-        <span className="rule-left">
-          {compactMoney(room)} <span>until the limit</span>
+      <div className="rule-bar">
+        <div className="meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(used * 100)} aria-label={`${m.label} used`}>
+          <div className="meter-fill" style={{ transform: `scaleX(${Math.min(1, used)})` }} />
+          <div className="meter-act" style={{ left: `${s.guardrails.actAt * 100}%` }} />
+        </div>
+        <span className="rule-status">
+          <span className="status-dot" aria-hidden />
+          {status} <span className="rule-used-text">· {pct(Math.min(used, 1), 0, false)} used</span>
         </span>
-      </div>
-
-      <div className="meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(used * 100)} aria-label={`${m.label} used`}>
-        <div className="meter-fill" style={{ transform: `scaleX(${Math.min(1, used)})` }} />
-        <div className="meter-act" style={{ left: `${s.guardrails.actAt * 100}%` }} title="The agent starts acting here" />
-      </div>
-      <div className="meter-scale" aria-hidden>
-        <span>0</span>
-        <span style={{ left: `${s.guardrails.actAt * 100}%` }}>agent acts</span>
-        <span>limit</span>
       </div>
 
       {editing ? (
@@ -115,11 +108,7 @@ function Rule({ k, s }: { k: Key; s: Snapshot }) {
             </button>
           </div>
         </div>
-      ) : (
-        <button className="btn ghost sm rule-change" onClick={() => setEditing(true)}>
-          <Pencil size={13} aria-hidden /> Change limit
-        </button>
-      )}
+      ) : null}
     </section>
   )
 }
@@ -130,6 +119,37 @@ const MODES: { id: Autonomy; label: string; icon: typeof Zap; hint: string }[] =
   { id: 'paused', label: 'Paused', icon: Pause, hint: 'Watches and explains, never trades' },
 ]
 
+function Summary({ s }: { s: Snapshot }) {
+  const ui = useUI()
+  const lines = limitLines(s, ui.preview)
+  const [near] = lines
+  const actingOn = lines.find((l) => l.roomActs <= 0 && l.room > 0)
+  const when = near.key === 'dailyLoss' ? 'today' : 'from here'
+  const hit = near.room <= 0
+  const acting = !!actingOn
+  const tone = hit ? 'crit' : near.roomActs <= 0 ? 'warn' : near.roomActs < 0.004 ? 'near' : 'ok'
+  return (
+    <div className={`summary tone-${tone}`} aria-live="polite">
+      <p className="summary-room">
+        {hit ? (
+          <>Limit reached</>
+        ) : (
+          <>
+            {pct(near.room, 2, false)} <span>{compactMoney(s.value - near.at)}</span>
+          </>
+        )}
+      </p>
+      <p className="summary-text">
+        {hit
+          ? `Your ${near.name.toLowerCase()} has been reached. I’ve moved risk to Treasuries and won’t add any back ${near.key === 'dailyLoss' ? 'until tomorrow' : 'until you recover'}.`
+          : `left before your ${near.name.toLowerCase()} ${when}. ${
+              acting ? `I’m already reducing risk: your ${actingOn!.name.toLowerCase()} is past ${pct(s.guardrails.actAt, 0, false)}.` : `I’ll start reducing risk after a further ${pct(near.roomActs, 2, false)} fall.`
+            }`}
+      </p>
+    </div>
+  )
+}
+
 export function Guardrails({ s }: { s: Snapshot }) {
   const [text, setText] = useState('')
   const [reply, setReply] = useState<string | null>(null)
@@ -138,10 +158,14 @@ export function Guardrails({ s }: { s: Snapshot }) {
   return (
     <div className="panel guardrails">
       <header className="panel-head">
-        <h2>Your guardrails</h2>
+        <h2>Room to your limits</h2>
       </header>
-      <Rule k="dailyLoss" s={s} />
-      <Rule k="maxDrawdown" s={s} />
+      <Summary s={s} />
+      <LimitGauge s={s} />
+      <div className="rules">
+        <Rule k="dailyLoss" s={s} />
+        <Rule k="maxDrawdown" s={s} />
+      </div>
 
       <div className="mode">
         <div className="mode-label" id="mode-label">
