@@ -112,6 +112,7 @@ export function useListen(onFinal: (text: string) => void) {
     finalText.current = ''
     heard.current = ''
     holding.current = true
+    cancelled.current = false
     let failed = false
     const finish = () => {
       setListening(false)
