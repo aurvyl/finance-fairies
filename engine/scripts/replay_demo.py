@@ -16,6 +16,7 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 
 from guardian.data import DATA_DIR, fetch_prices  # noqa: E402
+from guardian.config import policy_from_limits  # noqa: E402
 from guardian.simulator import replay  # noqa: E402
 
 
@@ -23,10 +24,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--start", default="2025-01-02")
     ap.add_argument("--end", default="2025-03-14")
+    ap.add_argument("--max-drawdown", type=float, default=0.10, help="user limit, e.g. 0.10 = never fall more than 10%%")
+    ap.add_argument("--max-daily-loss", type=float, default=0.02, help="user limit, e.g. 0.02 = lose at most 2%% in a day")
     args = ap.parse_args()
 
     frames = fetch_prices("2023-10-01", "2025-03-15", cache_name="replay_2025q1")
-    res = replay(frames, args.start, args.end)
+    policy = policy_from_limits(args.max_drawdown, args.max_daily_loss)
+    res = replay(frames, args.start, args.end, policy=policy)
 
     summary = res.summary()
     print(summary.round(4).to_string())
@@ -38,6 +42,8 @@ def main() -> None:
         "start": args.start,
         "end": args.end,
         "simulated": True,
+        "limits": {"max_drawdown": args.max_drawdown, "max_daily_loss": args.max_daily_loss},
+        "thresholds": {"rotation_loss": policy.rotation_loss, "emergency_loss": policy.emergency_loss, "shock_day": policy.shock_portfolio_return, "daily_var_limit": policy.daily_var_limit, "rerisk_loss": policy.rerisk_loss},
         "nav": {k: {str(d.date()): round(float(v), 2) for d, v in s.items()} for k, s in res.nav.items()},
         "summary": json.loads(summary.to_json(orient="index")),
         "events": res.events,

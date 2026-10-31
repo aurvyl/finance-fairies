@@ -64,6 +64,13 @@ def portfolio_vol(w: pd.Series, cov_daily: pd.DataFrame) -> float:
     return float(np.sqrt(max(var, 0.0) * K))
 
 
+def daily_var(w: pd.Series, cov_daily: pd.DataFrame, z: float = 2.326) -> float:
+    """Parametric one-day VaR (positive fraction of NAV): z * sqrt(w' S w)."""
+    cols = cov_daily.columns
+    wv = w.reindex(cols).fillna(0.0).values
+    return float(z * np.sqrt(max(float(wv @ cov_daily.values @ wv), 0.0)))
+
+
 def historical_cvar(w: pd.Series, r: pd.DataFrame, alpha: float) -> float:
     """F5: Rockafellar-Uryasev historical CVaR of the daily loss, as a positive fraction."""
     wv = w.reindex(r.columns).fillna(0.0)

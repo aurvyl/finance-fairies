@@ -99,8 +99,9 @@ def stress_loss(w: pd.Series, scenario: str) -> float:
 STRESS_SCENARIOS = ["equities_down_20", "tech_down_30_defensive_down_15"]
 
 
-def check_plan(w_old: pd.Series, w_new: pd.Series, window: MarketWindow, policy: Policy) -> PlanCheck:
+def check_plan(w_old: pd.Series, w_new: pd.Series, window: MarketWindow, policy: Policy, max_steps: int | None = None) -> PlanCheck:
     """Deterministic acceptance test shared by engine and agent plans."""
+    max_steps = max_steps or policy.max_steps
     universe = w_old.index.union(w_new.index)
     w_old = w_old.reindex(universe).fillna(0.0)
     w_new = w_new.reindex(universe).fillna(0.0)
@@ -127,8 +128,12 @@ def check_plan(w_old: pd.Series, w_new: pd.Series, window: MarketWindow, policy:
         reasons.append(f"CVaR + cost {cvar1 + cost:.2%} worse than now {cvar0:.2%}")
     if cost > policy.max_cost_nav + 1e-12:
         reasons.append(f"cost {cost:.2%} of NAV above limit {policy.max_cost_nav:.2%}")
-    if turn > policy.step * policy.max_steps + 1e-9:
-        reasons.append(f"turnover {turn:.1%} above limit {policy.step * policy.max_steps:.0%}")
+    if turn > policy.step * max_steps + 1e-9:
+        reasons.append(f"turnover {turn:.1%} above limit {policy.step * max_steps:.0%}")
+    var0 = m.daily_var(w_old, cov, policy.var_z)
+    var1 = m.daily_var(w_new, cov, policy.var_z)
+    if policy.daily_var_limit is not None and var1 > var0 + 1e-12:
+        reasons.append(f"one-day VaR rises to {var1:.2%}")
     stress = {}
     for s in STRESS_SCENARIOS:
         before, after = stress_loss(w_old, s), stress_loss(w_new, s)
@@ -146,8 +151,13 @@ def check_plan(w_old: pd.Series, w_new: pd.Series, window: MarketWindow, policy:
         "cvar_after": cvar1,
         "cost_nav": cost,
         "turnover": turn,
+        "daily_var_before": var0,
+        "daily_var_after": var1,
         **{f"stress_{k}": v for k, v in stress.items()},
     }
+    if policy.daily_var_limit is not None:
+        values["daily_var_limit"] = policy.daily_var_limit
+        values["budget_met"] = float(var1 <= policy.daily_var_limit + 1e-12)
     return PlanCheck(passed=not reasons, reasons=reasons, values=values)
 
 
@@ -160,8 +170,20 @@ def actions_between(w_old: pd.Series, w_new: pd.Series) -> list[dict]:
     return acts
 
 
-def engine_plan(weights: pd.Series, window: MarketWindow, policy: Policy) -> Plan:
-    """Greedy 5% swaps from the loss-driving holdings into screened candidates, minimising variance."""
+def risk_ranking(weights: pd.Series, cov: pd.DataFrame) -> list[str]:
+    """Holdings ordered by their contribution to portfolio variance, w_i * (S w)_i (largest first)."""
+    w = weights.reindex(cov.columns).fillna(0.0)
+    rc = w * (cov.values @ w.values)
+    return list(rc[w > 0].sort_values(ascending=False).index)
+
+
+def engine_plan(weights: pd.Series, window: MarketWindow, policy: Policy, max_steps: int | None = None) -> Plan:
+    """Greedy 5% swaps from the riskiest holdings into screened candidates, minimising variance.
+
+    Sources are the loss-driving holdings first, then the largest risk contributors, so a proactive
+    risk-budget rotation works even when nothing has fallen yet.
+    """
+    max_steps = max_steps or policy.max_steps
     universe = list(dict.fromkeys(list(weights.index) + policy.candidates))
     w0 = weights.reindex(universe).fillna(0.0)
     r = window.returns[universe].iloc[-policy.cov_window:]
@@ -170,13 +192,20 @@ def engine_plan(weights: pd.Series, window: MarketWindow, policy: Policy) -> Pla
 
     held = w0[w0 > 0].index
     losers = [t for t in loss_ranking(w0[held], window.returns[held]) if t in policy.holdings]
-    crash_basket = losers[:3]
-    screens = {t: screen_candidates(window, t, crash_basket, policy) for t in losers[:3]}
+    risky = [t for t in risk_ranking(w0[held], cov.loc[held, held]) if t in policy.holdings]
+    sources = list(dict.fromkeys(losers[:3] + risky))
+    crash_basket = sources[:3]
+    screens = {t: screen_candidates(window, t, crash_basket, policy) for t in sources}
+
+    def done(w: pd.Series, v: float) -> bool:
+        vol_ok = v <= min(policy.target_annual_vol, (1 - policy.min_vol_reduction) * vol0)
+        var_ok = policy.daily_var_limit is None or m.daily_var(w, cov, policy.var_z) <= policy.daily_var_limit
+        return vol_ok and var_ok
 
     proposal = w0.copy()
-    for _ in range(policy.max_steps):
+    for _ in range(max_steps):
         best, best_vol = None, m.portfolio_vol(proposal, cov)
-        for loser in losers[:3]:
+        for loser in sources:
             if proposal[loser] < policy.step - 1e-9:
                 continue
             for cand in screens.get(loser, {}):
@@ -191,11 +220,11 @@ def engine_plan(weights: pd.Series, window: MarketWindow, policy: Policy) -> Pla
         if best is None:
             break
         proposal = best
-        if best_vol <= min(policy.target_annual_vol, (1 - policy.min_vol_reduction) * vol0):
+        if done(proposal, best_vol):
             break
 
     plan = Plan("engine", w0, proposal, actions_between(w0, proposal))
-    plan.check = check_plan(w0, proposal, window, policy)
+    plan.check = check_plan(w0, proposal, window, policy, max_steps)
     return plan
 
 

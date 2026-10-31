@@ -42,17 +42,27 @@ class ReplayResult:
     events: list[dict] = field(default_factory=list)
     trades: dict[str, int] = field(default_factory=dict)
     costs: dict[str, float] = field(default_factory=dict)
+    policy: Policy | None = None
 
     def summary(self) -> pd.DataFrame:
+        """Per strategy: return, drawdowns and how often the user's limits were breached."""
         rows = {}
         for name, nav in self.nav.items():
-            rows[name] = {
+            day_r = nav.pct_change().dropna()
+            row = {
                 "final_value": float(nav.iloc[-1]),
                 "total_return": float(nav.iloc[-1] / nav.iloc[0] - 1),
                 "max_drawdown": float((1 - nav / nav.cummax()).max()),
+                "worst_day": float(day_r.min()) if len(day_r) else 0.0,
                 "trades": self.trades.get(name, 0),
                 "costs": self.costs.get(name, 0.0),
             }
+            if self.policy is not None:
+                p = self.policy
+                row["max_loss_vs_baseline"] = float(max(0.0, 1 - nav.min() / p.baseline))
+                if p.daily_var_limit is not None:
+                    row["days_over_daily_limit"] = int((day_r < -p.daily_var_limit).sum())
+            rows[name] = row
         return pd.DataFrame(rows).T
 
 
@@ -154,7 +164,8 @@ def replay(
         if trig.kind == "rotation" and i - last_trade_i > policy.cooldown_sessions:
             w_now = books["guardian"].weights(px_close)
             shock = classify_shock(r_hist, w_prev)
-            plans: list[Plan] = [engine_plan(w_now, window, policy)]
+            steps = policy.max_steps_budget if trig.budget_breach else policy.max_steps
+            plans: list[Plan] = [engine_plan(w_now, window, policy, steps)]
             if agent is not None:
                 ctx = {"date": str(day.date()), "trigger": trig, "shock": shock, "weights": w_now, "window": window, "policy": policy, "engine_plan": plans[0]}
                 proposal = agent(ctx)
@@ -163,7 +174,7 @@ def replay(
                     w0 = w_now.reindex(universe).fillna(0.0)
                     w1 = pd.Series(proposal, dtype=float).reindex(universe).fillna(0.0)
                     agent_plan = Plan("agent", w0, w1, actions_between(w0, w1))
-                    agent_plan.check = check_plan(w0, w1, window, policy)
+                    agent_plan.check = check_plan(w0, w1, window, policy, steps)
                     plans.append(agent_plan)
             best = pick_best(plans)
             log({
@@ -198,10 +209,16 @@ def replay(
                     w_new[defensive.index] -= defensive / defensive.sum() * move
                     for t, w in w_start.items():
                         w_new[t] = w_new.get(t, 0.0) + w * move
+                    if policy.daily_var_limit is not None:
+                        names = list(w_new[w_new > 1e-9].index)
+                        cov = m.shrunk_cov(r_hist[names].iloc[-policy.cov_window:], policy.cov_shrink)
+                        if m.daily_var(w_new[names], cov, policy.var_z) > policy.daily_var_limit:
+                            recovery_streak = 0
+                            continue  # re-risking would break the daily budget
                     pending["guardian"] = w_new[w_new > 1e-9]
                     last_trade_i = i
                     recovery_streak = 0
                     log({"date": str(day.date()), "strategy": "guardian", "kind": "re-risk", "detail": f"moved {move:.0%} back to the original holdings"})
 
     nav_series = {name: pd.Series(v, index=days) for name, v in nav.items()}
-    return ReplayResult(nav=nav_series, events=events, trades=trades, costs=costs)
+    return ReplayResult(nav=nav_series, events=events, trades=trades, costs=costs, policy=policy)

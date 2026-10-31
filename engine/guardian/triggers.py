@@ -15,6 +15,7 @@ class TriggerResult:
     kind: str | None  # "emergency" | "rotation" | None
     reasons: list[str] = field(default_factory=list)
     values: dict[str, float] = field(default_factory=dict)
+    budget_breach: bool = False  # ex-ante daily VaR above the user's daily-loss limit
 
 
 def evaluate(
@@ -65,7 +66,18 @@ def evaluate(
     if ratio == ratio and ratio >= policy.spike_ratio and short_vol >= policy.spike_min_annual_vol:
         reasons.append(f"Volatility spike: 5d/60d = {ratio:.2f}, short-window vol {short_vol:.0%}")
 
-    return TriggerResult("rotation" if reasons else None, reasons, values)
+    budget_breach = False
+    if policy.daily_var_limit is not None:
+        held = [t for t, w in weights_prev.items() if w > 0]
+        hist = asset_returns[held].iloc[-policy.cov_window:]
+        if len(hist) >= 20:
+            var1d = m.daily_var(weights_prev[held], m.shrunk_cov(hist, policy.cov_shrink), policy.var_z)
+            values["daily_var_99"] = var1d
+            if var1d > policy.daily_var_limit:
+                budget_breach = True
+                reasons.append(f"Risk budget: 99% one-day VaR {var1d:.1%} > your {policy.daily_var_limit:.0%} daily limit")
+
+    return TriggerResult("rotation" if reasons else None, reasons, values, budget_breach)
 
 
 def classify_shock(asset_returns: pd.DataFrame, weights: pd.Series, window: int = 60) -> dict:

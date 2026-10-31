@@ -86,6 +86,31 @@ def test_classify_shock_broad_vs_none():
     assert classify_shock(r, w)["label"] == "broad-tech"
 
 
+def test_policy_from_limits_derives_lines():
+    from guardian.config import policy_from_limits
+
+    p = policy_from_limits(max_drawdown=0.10, max_daily_loss=0.02)
+    assert p.rotation_loss == pytest.approx(0.05)
+    assert p.emergency_loss == pytest.approx(0.08)
+    assert p.shock_portfolio_return == pytest.approx(-0.02)
+    assert p.daily_var_limit == pytest.approx(0.02)
+    assert p.rerisk_loss < p.rotation_loss
+
+
+def test_budget_trigger_and_budget_plan():
+    from guardian.config import policy_from_limits
+
+    p = policy_from_limits(max_drawdown=0.10, max_daily_loss=0.02)
+    win = synthetic_window(crash_last_day=False)
+    w = pd.Series({t: 1 / 7 for t in p.holdings})
+    nav = pd.Series(10_000.0, index=win.returns.index)
+    res = evaluate(nav, win.returns, w, p)
+    assert res.budget_breach and res.kind == "rotation"
+    plan = engine_plan(w, win, p, p.max_steps_budget)
+    assert plan.check.passed, plan.check.reasons
+    assert plan.check.values["daily_var_after"] < plan.check.values["daily_var_before"]
+
+
 def test_check_rejects_concentration_breach():
     policy = Policy()
     win = synthetic_window()
