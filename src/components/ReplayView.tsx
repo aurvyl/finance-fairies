@@ -1,7 +1,7 @@
 import { ChevronDown, History, Play, RotateCcw } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { engine } from '../api/client'
-import { approvalLabel, rulesFor, STRATEGY_LABEL } from '../api/portfolio'
+import { approvalLabel, approvalWhy, rulesFor, STRATEGY_LABEL } from '../api/portfolio'
 import { useSettings } from '../api/settings'
 import type { ReplayEvent, ReplayOut, Strategy } from '../api/types'
 import { useConnection, useRequest } from '../api/useEngine'
@@ -110,7 +110,7 @@ function EventRow({ e, id, open, active, onToggle, onHover }: { e: ReplayEvent; 
           <p className="item-title static">{KIND[e.kind] ?? e.kind}</p>
         )}
         <p className="item-summary">{e.reasons?.join(' · ') ?? e.detail}</p>
-        {e.approval && e.kind === 'trigger' && e.chosen && <span className={`route route-${e.approval}`}>{approvalLabel(e.approval)}</span>}
+        {e.approval && e.kind === 'trigger' && e.chosen && <span className={`route route-${e.approval}`}>{approvalLabel(e.approval, true)}</span>}
         {detail && (
           <div className="reveal" aria-hidden={!open}>
             <div className="reveal-inner">
@@ -123,7 +123,7 @@ function EventRow({ e, id, open, active, onToggle, onHover }: { e: ReplayEvent; 
               {e.plans?.map((p, i) => <PlanDetails key={i} plan={p} chosen={p.source === e.chosen} />)}
               {e.approval_reasons && e.approval_reasons.length > 0 && (
                 <>
-                  <h4 className="why-head">Why it {e.approval === 'ask' ? 'needed approval' : 'went ahead'}</h4>
+                  <h4 className="why-head">{approvalWhy(e.approval, true)}</h4>
                   <ul className="why">
                     {e.approval_reasons.map((r) => (
                       <li key={r}>{r}</li>

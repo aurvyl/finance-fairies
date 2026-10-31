@@ -13,9 +13,19 @@ export const STRATEGY_LABEL = { guardian: 'Guardian', hold: 'Buy and hold', cash
 
 export const ACTION_LABEL: Record<string, string> = { TRIM: 'Trim', ADD: 'Add', SELL: 'Sell', BUY: 'Buy' }
 
-export function approvalLabel(a: string | undefined | null) {
+/** `replay`: the replay assumes you approve "ask" plans and trades them, so say that instead of "needs approval". */
+export function approvalLabel(a: string | undefined | null, replay = false) {
   if (a === 'auto') return 'Placed automatically'
-  if (a === 'ask') return 'Needs your approval'
+  if (a === 'ask') return replay ? 'Asked you first (replay assumes yes)' : 'Needs your approval'
+  if (a === 'blocked') return 'Paused: no trade'
   if (a === 'none') return 'No trade'
   return a ?? ''
+}
+
+/** Heading over the approval reasons, matching the route. */
+export function approvalWhy(a: string | undefined | null, replay = false) {
+  if (a === 'ask') return replay ? 'Why it asked first' : 'Why it would ask you first'
+  if (a === 'blocked') return 'Why it didn’t trade'
+  if (a === 'none') return 'Why there was no trade'
+  return replay ? 'Why it went ahead' : 'Why it would go ahead'
 }

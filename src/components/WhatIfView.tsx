@@ -1,7 +1,7 @@
 import { FlaskConical, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { engine } from '../api/client'
-import { approvalLabel, rulesFor } from '../api/portfolio'
+import { approvalLabel, approvalWhy, rulesFor } from '../api/portfolio'
 import { useSettings } from '../api/settings'
 import { useConnection, useRequest } from '../api/useEngine'
 import { pct } from '../engine/format'
@@ -163,7 +163,8 @@ export function WhatIfView({ s }: { s: Snapshot }) {
                 </>
               )}
             </p>
-            {req.data.chosen && <span className={`route route-${req.data.approval}`}>{approvalLabel(req.data.approval)}</span>}
+            {/* the engine only trades when a limit check fires, so a passing plan on a calm day is not "placed" */}
+            {req.data.chosen && req.data.snapshot.trigger.kind && <span className={`route route-${req.data.approval}`}>{approvalLabel(req.data.approval)}</span>}
             {req.data.cached && <span className="source-tag cached">Instant: recorded agent answer</span>}
             {req.data.agent && <AgentCard a={req.data.agent} agrees={req.data.agent_agrees_with_engine} />}
             <dl className="plan-values wide">
@@ -185,9 +186,9 @@ export function WhatIfView({ s }: { s: Snapshot }) {
             {req.data.plans.map((p, i) => (
               <PlanDetails key={i} plan={p} chosen={p.source === req.data.chosen} />
             ))}
-            {req.data.approval_reasons.length > 0 && (
+            {req.data.snapshot.trigger.kind && req.data.approval_reasons.length > 0 && (
               <>
-                <h4 className="why-head">Why {req.data.approval === 'ask' ? 'it would ask you first' : 'it would go ahead'}</h4>
+                <h4 className="why-head">{approvalWhy(req.data.approval)}</h4>
                 <ul className="why">
                   {req.data.approval_reasons.map((r) => (
                     <li key={r}>{r}</li>

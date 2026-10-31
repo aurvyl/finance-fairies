@@ -163,7 +163,20 @@ export class Simulation {
   approve(id: string) {
     const item = this.activity.find((a) => a.id === id)
     if (!item?.pending || !item.trades) return
-    this.execute(item.trades)
+    // The proposal was sized at the prices of the moment it was made, and other proposals may have
+    // been approved since: never sell more than is held now, and buy only what the sells raise.
+    const sells = item.trades
+      .filter((t) => t.side === 'Sell')
+      .map((t) => {
+        const h = this.holdings.find((x) => x.symbol === t.symbol)
+        return { ...t, amount: Math.min(t.amount, h ? Math.max(0, h.qty * h.price) : 0) }
+      })
+      .filter((t) => t.amount > 0)
+    const raised = sells.reduce((a, t) => a + t.amount, 0)
+    const buys = item.trades.filter((t) => t.side === 'Buy')
+    const planned = buys.reduce((a, t) => a + t.amount, 0)
+    const trades = [...sells, ...buys.map((t) => ({ ...t, amount: planned > 0 ? (t.amount / planned) * raised : 0 }))]
+    this.execute(trades)
     this.activity = this.activity.map((a) =>
       a.id === id ? { ...a, pending: false, title: a.title.replace('Proposed: ', ''), usedAfter: item.rule === 'daily' ? this.dailyUsed() : this.ddUsed() } : a,
     )
