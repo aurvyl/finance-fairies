@@ -5,7 +5,8 @@ import type { ActivityItem, Snapshot } from './types'
 export interface Answer {
   text: string
   /** where the answer came from, shown quietly under it */
-  source: 'agent' | 'claude'
+  source: 'agent' | 'claude' | 'engine'
+  model?: string
   /** an item in the feed the answer is about, so the UI can highlight it */
   focus?: string
 }
@@ -108,6 +109,9 @@ export function contextFor(s: Snapshot) {
   }
 }
 
+import { engine } from '../api/client'
+import { getConnection } from '../api/useEngine'
+
 let remote: boolean | null = null
 
 export async function remoteAvailable() {
@@ -128,7 +132,17 @@ export async function remoteAvailable() {
 export async function ask(q: string, s: Snapshot): Promise<Answer> {
   const local = localAnswer(q, s)
   const isCommand = parseRule(q) || /\b(pause|resume|ask me|ask first|unpause|automatic|stop trading)\b/i.test(q)
-  if (isCommand || !(await remoteAvailable())) return local
+  if (isCommand) return local
+  // the Guardian engine answers with its AI agent (Gemini by default) when it is connected
+  if (getConnection().state === 'online') {
+    try {
+      const j = await engine.ask(q, contextFor(s))
+      if (j.answer) return { source: 'engine', text: j.answer, focus: local.focus, model: j.model }
+    } catch {
+      /* fall through to the optional Claude route, then the local explainer */
+    }
+  }
+  if (!(await remoteAvailable())) return local
   try {
     const r = await fetch('/api/ask', {
       method: 'POST',

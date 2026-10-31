@@ -5,7 +5,15 @@ export function useSim() {
   return useSyncExternalStore(sim.subscribe, sim.getSnapshot)
 }
 
-export type View = 'overview' | 'holdings' | 'activity' | 'guardrails'
+export type View = 'overview' | 'holdings' | 'activity' | 'guardrails' | 'replay' | 'whatif' | 'settings'
+
+export const VIEWS: View[] = ['overview', 'holdings', 'activity', 'guardrails', 'replay', 'whatif', 'settings']
+
+/** Plain #name hash routing, so links work inside a sandboxed frame too. */
+export function viewFromHash(): View {
+  const h = window.location.hash.replace(/^#\/?/, '') as View
+  return VIEWS.includes(h) ? h : 'overview'
+}
 
 export interface UI {
   /** activity item hovered in the feed or on the chart; both highlight together */
