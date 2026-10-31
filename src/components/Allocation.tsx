@@ -1,5 +1,7 @@
+import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
 import { pct } from '../engine/format'
 import type { Sector, Snapshot } from '../engine/types'
+import './visuals.css'
 
 /** Muted chart-ink series, ordered light to dark so neighbours stay distinguishable. */
 const SERIES: Record<Sector, string> = {
@@ -37,32 +39,25 @@ export function Allocation({ s }: { s: Snapshot }) {
           <span key={r.sector} style={{ flexGrow: r.w, background: SERIES[r.sector] }} title={`${r.sector} ${pct(r.w, 1, false)}`} />
         ))}
       </div>
-      <table className="alloc">
-        <thead>
-          <tr>
-            <th scope="col">Sector</th>
-            <th scope="col" className="num">
-              Weight
-            </th>
-            <th scope="col" className="num">
-              Today
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.sector}>
-              <td>
-                <span className="swatch" style={{ background: SERIES[r.sector] }} aria-hidden />
-                {r.sector}
-                <span className="count">{r.n}</span>
-              </td>
-              <td className="num">{pct(r.w, 1, false)}</td>
-              <td className={`num ${r.d < 0 ? 'down' : 'up'}`}>{pct(r.d, 2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ul className="alloc-bars">
+        {rows.map((r) => {
+          const flat = Math.abs(r.d) < 0.001
+          const Dir = flat ? Minus : r.d < 0 ? ArrowDownRight : ArrowUpRight
+          const tip = `${r.sector}: ${pct(r.w, 1, false)} of your money, ${r.n} holdings, ${pct(r.d, 2)} today`
+          return (
+            <li key={r.sector} title={tip} aria-label={tip}>
+              <span className="alloc-name">{r.sector}</span>
+              <span className="alloc-track" aria-hidden>
+                <span style={{ width: `${(r.w / rows[0].w) * 100}%`, background: SERIES[r.sector] }} />
+              </span>
+              <span className={`alloc-dir ${flat ? 'flat' : r.d < 0 ? 'down' : 'up'}`} aria-hidden>
+                <Dir size={15} />
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="alloc-note">Bar length is your share. The arrow shows today’s move. Hover for the numbers.</p>
     </div>
   )
 }

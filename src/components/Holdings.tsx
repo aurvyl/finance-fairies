@@ -74,8 +74,8 @@ export function Holdings({ s, compact }: { s: Snapshot; compact?: boolean }) {
       <div className="filters">
         <div className="chips" role="group" aria-label="Filter by asset class">
           {CLASSES.filter((c) => counts[c]).map((c) => (
-            <button key={c} className="chip" aria-pressed={cls === c} onClick={() => setCls(c)}>
-              {PLURAL[c]} <span className="count">{counts[c]}</span>
+            <button key={c} className="chip" aria-pressed={cls === c} onClick={() => setCls(c)} title={`${counts[c]} holdings`}>
+              {PLURAL[c]}
             </button>
           ))}
         </div>

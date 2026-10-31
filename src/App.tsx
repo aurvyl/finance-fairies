@@ -73,13 +73,14 @@ function Rail({ s, view, setView }: { s: Snapshot; view: View; setView: (v: View
           </li>
         ))}
       </ul>
-      <div className={`watch mode-${s.autonomy}`}>
+      <div
+        className={`watch mode-${s.autonomy}`}
+        title={`${s.holdings.length} positions · ${pct(s.guardrails.dailyLoss, 1, false)} a day · ${pct(s.guardrails.maxDrawdown, 0, false)} max`}
+      >
         <span className="watch-dot" aria-hidden />
         <div>
           <strong>{watch}</strong>
-          <span>
-            {s.holdings.length} positions · {pct(s.guardrails.dailyLoss, 1, false)} a day · {pct(s.guardrails.maxDrawdown, 0, false)} max
-          </span>
+          <span>Guarding both of your limits</span>
         </div>
       </div>
       <EngineStatus onOpen={() => setView('settings')} />

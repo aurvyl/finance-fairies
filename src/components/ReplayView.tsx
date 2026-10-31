@@ -12,6 +12,8 @@ import { useUI } from '../store'
 import { AgentCard, useElapsed } from './AgentCard'
 import { AttributionBar, PlanDetails } from './PlanDetails'
 import { SeriesChart, type Series } from './SeriesChart'
+import { ShieldCheck, ShieldAlert } from 'lucide-react'
+import './visuals.css'
 
 const SAVED = saved as unknown as ReplayOut
 
@@ -31,13 +33,63 @@ function Outcome({ r }: { r: ReplayOut }) {
   const g = r.summary.guardian
   const h = r.summary.hold
   const kept = g.max_drawdown <= r.limits.max_drawdown && (g.days_over_daily_limit ?? 0) === 0
+  const Icon = kept ? ShieldCheck : ShieldAlert
+  const tip = `Worst fall from a peak ${pct(g.max_drawdown, 1, false)} against your ${pct(r.limits.max_drawdown, 0, false)} limit (buy and hold: ${pct(h.max_drawdown, 1, false)}). ${g.days_over_daily_limit ?? 0} days over your ${pct(r.limits.max_daily_loss, 0, false)} daily limit (buy and hold: ${h.days_over_daily_limit ?? 0}).`
   return (
-    <p className="outcome">
-      {kept ? 'Guardian kept you inside both limits.' : 'Guardian did not keep you inside both limits on this period.'} Its worst fall from a peak was{' '}
-      <strong>{pct(g.max_drawdown, 1, false)}</strong> against your {pct(r.limits.max_drawdown, 0, false)} limit (buy and hold: {pct(h.max_drawdown, 1, false)}), with{' '}
-      <strong>{g.days_over_daily_limit ?? 0}</strong> {g.days_over_daily_limit === 1 ? 'day' : 'days'} over your {pct(r.limits.max_daily_loss, 0, false)} daily limit
-      (buy and hold: {h.days_over_daily_limit ?? 0}).
+    <p className={`outcome verdict ${kept ? 'kept' : 'missed'}`} title={tip}>
+      <span className="verdict-icon" aria-hidden>
+        <Icon size={20} />
+      </span>
+      {kept ? 'Guardian kept you inside both limits.' : 'Guardian did not keep you inside both limits on this period.'}
     </p>
+  )
+}
+
+const BAR_ROWS: { label: string; key: 'max_drawdown' | 'days_over_daily_limit' | 'total_return'; hint: string; fmt: (v: number) => string; limit?: (r: ReplayOut) => number }[] = [
+  { label: 'Worst fall from a peak', key: 'max_drawdown', hint: 'Shorter is safer. The red mark is your limit.', fmt: (v) => pct(-v, 1), limit: (r) => r.limits.max_drawdown },
+  { label: 'Days over your daily limit', key: 'days_over_daily_limit', hint: 'Shorter is safer', fmt: (v) => `${v} ${v === 1 ? 'day' : 'days'}` },
+  { label: 'Return', key: 'total_return', hint: 'Right is better', fmt: (v) => pct(v, 1) },
+]
+
+/** The comparison as bars: one row per question, one bar per strategy. Exact figures are in the tooltips and the table below. */
+function CompareBars({ r }: { r: ReplayOut }) {
+  return (
+    <div className="cmp">
+      {BAR_ROWS.map((row) => {
+        const vals = ORDER.map((k) => Number(r.summary[k][row.key] ?? 0))
+        const lim = row.limit?.(r)
+        const diverging = vals.some((v) => v < 0)
+        const max = Math.max(1e-9, ...vals.map(Math.abs), lim ?? 0)
+        return (
+          <div key={row.key} className="cmp-row">
+            <p className="cmp-head">
+              <strong>{row.label}</strong> <span>{row.hint}</span>
+            </p>
+            <ul className={`cmp-bars ${diverging ? 'diverging' : ''}`}>
+              {ORDER.map((k, i) => {
+                const v = vals[i]
+                const w = (Math.abs(v) / max) * (diverging ? 50 : 100)
+                const tip = `${STRATEGY_LABEL[k]}: ${row.fmt(v)}`
+                return (
+                  <li key={k} title={tip} aria-label={tip}>
+                    <span className="cmp-name">{STRATEGY_LABEL[k]}</span>
+                    <span className="cmp-track">
+                      {diverging && <i className="cmp-zero" />}
+                      <span
+                        className={`cmp-bar ${CLASS[k]}`}
+                        style={diverging ? (v < 0 ? { right: '50%', width: `${w}%` } : { left: '50%', width: `${w}%` }) : { left: 0, width: `${Math.max(w, v === 0 ? 0 : 1)}%` }}
+                      />
+                      {!diverging && v === 0 && <span className="cmp-none">None</span>}
+                      {lim !== undefined && <i className="cmp-limit" style={{ left: `${(lim / max) * 100}%` }} title={`Your limit: ${pct(lim, 0, false)}`} />}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
@@ -51,6 +103,8 @@ function Compare({ r }: { r: ReplayOut }) {
     { label: 'Trading costs', key: 'costs', get: (s) => money(s.costs, true) },
   ]
   return (
+    <details className="exact">
+      <summary>See the exact numbers</summary>
     <div className="table-wrap">
       <table className="table compare">
         <thead>
@@ -81,6 +135,7 @@ function Compare({ r }: { r: ReplayOut }) {
         </tbody>
       </table>
     </div>
+    </details>
   )
 }
 
@@ -273,6 +328,7 @@ export function ReplayView({ s }: { s: Snapshot }) {
               <i className="k-marker" /> Guardian traded
             </li>
           </ul>
+          <CompareBars r={r} />
           <Compare r={r} />
         </div>
       </section>
