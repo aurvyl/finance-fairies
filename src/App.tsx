@@ -9,6 +9,7 @@ import { Guardrails } from './components/Guardrails'
 import { Holdings } from './components/Holdings'
 import { PortfolioChart, type Period } from './components/PortfolioChart'
 import { ReplayView } from './components/ReplayView'
+import { Decisions, SafetyPanel } from './components/SafetyPanel'
 import { RollingNumber, useSettled } from './components/RollingNumber'
 import { SettingsView } from './components/SettingsView'
 import { VoicePanel } from './components/VoicePanel'
@@ -115,21 +116,27 @@ function Legend({ period }: { period: Period }) {
   return (
     <ul className="legend" aria-label="Chart key">
       <li>
-        <i className="k-line" /> Portfolio
+        <i className="k-line" /> Your money
       </li>
       <li>
-        <i className="k-limit" /> {period === '1D' ? 'Daily loss limit' : 'Floor from your maximum drop'}
+        <i className="k-ward" /> Fairy sells some
+      </li>
+      <li>
+        <i className="k-limit" /> Hard sell-off {period === '1D' ? '(today)' : '(from your best day)'}
       </li>
       {period === '1D' && (
         <li>
-          <i className="k-limit dashed" /> Floor, when near
+          <i className="k-limit dashed" /> Peak limit, when near
         </li>
       )}
       <li>
-        <i className="k-ward" /> Agent steps in
+        <i className="k-dec d-sell" /> Sold
       </li>
       <li>
-        <i className="k-marker" /> Agent action
+        <i className="k-dec d-ask" /> Asked you
+      </li>
+      <li>
+        <i className="k-dec d-hold" /> Held
       </li>
     </ul>
   )
@@ -236,16 +243,19 @@ export default function App() {
 
           {view === 'overview' && (
             <div className="grid overview">
+              <div className="span-all">
+                <SafetyPanel s={s} />
+              </div>
               <div className="col">
-                <Activity s={s} limit={3} />
                 <section className="panel hero" aria-label="Portfolio value">
                   <Headline s={s} period={period} setPeriod={setPeriod} />
                   <PortfolioChart s={s} period={period} />
                   <Legend period={period} />
                 </section>
+                <Decisions s={s} />
               </div>
               <div className="col">
-                <Guardrails s={s} />
+                <Activity s={s} limit={3} />
                 <Allocation s={s} />
               </div>
               <div className="span-all">

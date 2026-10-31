@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clock, compactMoney, pct } from '../engine/format'
 import type { Point, Snapshot } from '../engine/types'
 import { useUI } from '../store'
+import { DECISION_LABEL, decisionOf } from './decision'
 
 export type Period = '1D' | '1W' | '1M' | '3M' | '1Y'
 const DAYS: Record<Exclude<Period, '1D'>, number> = { '1W': 5, '1M': 21, '3M': 63, '1Y': 252 }
@@ -141,7 +142,7 @@ export function PortfolioChart({ s, period, height = 300 }: { s: Snapshot; perio
             <stop offset="100%" stopColor="var(--ink)" stopOpacity="0" />
           </linearGradient>
           <pattern id="ward" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <line x1="0" y1="0" x2="0" y2="6" stroke="var(--limit)" strokeOpacity="0.22" strokeWidth="2" />
+            <line x1="0" y1="0" x2="0" y2="6" stroke="var(--trim)" strokeOpacity="0.45" strokeWidth="2" />
           </pattern>
         </defs>
 
@@ -166,30 +167,41 @@ export function PortfolioChart({ s, period, height = 300 }: { s: Snapshot; perio
           fill="url(#ward)"
         />
 
-        {intraday && guide(s.open, 'Open', compactMoney(s.open), 'open')}
-        {!intraday && guide(s.highWater, 'Peak', compactMoney(s.highWater), 'peak')}
+        {intraday && guide(s.open, 'Start of day', compactMoney(s.open), 'open')}
+        {!intraday && guide(s.highWater, 'Best day', compactMoney(s.highWater), 'peak')}
         {intraday
-          ? guide(dailyLine, `Daily limit ${pct(-g.dailyLoss, 1)}`, compactMoney(dailyLine), 'limit', dailyDy)
-          : guide(floor, `Floor ${pct(-g.maxDrawdown, 0)}`, compactMoney(floor), 'limit')}
-        {floorNear && guide(floor, `Floor ${pct(-g.maxDrawdown, 0)}`, compactMoney(floor), 'limit second', floorDy)}
+          ? guide(dailyLine, `Hard sell-off ${pct(-g.dailyLoss, 1)}`, compactMoney(dailyLine), 'limit', dailyDy)
+          : guide(floor, `Hard sell-off ${pct(-g.maxDrawdown, 0)}`, compactMoney(floor), 'limit')}
+        {floorNear && guide(floor, `Peak limit ${pct(-g.maxDrawdown, 0)}`, compactMoney(floor), 'limit second', floorDy)}
 
         <path d={area} fill="url(#area)" className="area" />
         <path d={line} className="value-line" />
 
-        {markers.map((m) => (
-          <g
-            key={m.id}
-            className={`marker ${ui.hovered === m.id ? 'on' : ''} ${m.pending ? 'pending' : ''}`}
-            transform={`translate(${sx(m.t)},${sy(m.value)})`}
-            onPointerEnter={() => ui.setHovered(m.id)}
-            onPointerLeave={() => ui.setHovered(null)}
-            onClick={() => ui.setExpanded(m.id)}
-          >
-            <line y1={0} y2={PAD.top + ih - sy(m.value)} className="marker-stem" />
-            <rect x={-5} y={-5} width={10} height={10} transform="rotate(45)" rx={1.5} />
-            <title>{m.title}</title>
-          </g>
-        ))}
+        {markers.map((m) => {
+          const d = decisionOf(m)
+          return (
+            <g
+              key={m.id}
+              className={`marker d-${d} ${ui.hovered === m.id ? 'on' : ''}`}
+              transform={`translate(${sx(m.t)},${sy(m.value)})`}
+              onPointerEnter={() => ui.setHovered(m.id)}
+              onPointerLeave={() => ui.setHovered(null)}
+              onClick={() => ui.setExpanded(m.id)}
+            >
+              <line y1={0} y2={PAD.top + ih - sy(m.value)} className="marker-stem" />
+              <g className="marker-dot">
+                <circle r={9} />
+                {d === 'sell' && <path d="M0,-4V3.5M-3.2,0.6L0,3.8L3.2,0.6" />}
+                {d === 'hold' && <path d="M-1.8,-3.2V3.2M1.8,-3.2V3.2" />}
+                {d === 'ask' && <path d="M-2.4,-1.6a2.4,2.4 0 1 1 3.2,2.2c-.8.3-.8.9-.8,1.5M0,4.2v.1" />}
+              </g>
+              <text y={-15} textAnchor="middle" className="marker-label">
+                {DECISION_LABEL[d]}
+              </text>
+              <title>{m.title}</title>
+            </g>
+          )
+        })}
 
         {intraday && s.marketOpen && (
           <g className="head" transform={`translate(${sx(last.t)},${sy(last.v)})`}>
