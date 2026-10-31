@@ -3,6 +3,8 @@ import { compactMoney, pct } from '../engine/format'
 import { sim } from '../engine/sim'
 import type { ActivityItem, Snapshot } from '../engine/types'
 import { useUI } from '../store'
+import { useTween } from '../motion'
+import { TweenNumber } from './TweenNumber'
 import { decisionOf, riskChange, soldAmount, type Decision } from './decision'
 import { FairyMark } from './FairyAvatar'
 import { SCENARIOS } from '../engine/scenarios'
@@ -65,7 +67,9 @@ const laneTip = (l: Lane, actAt: number) =>
 
 /** One limit as a half dial: the needle walks from calm teal into the amber band where the fairy acts, and stops at the coral end. */
 function LaneGauge({ l, actAt }: { l: Lane; actAt: number }) {
-  const t = Math.min(1, Math.max(0, l.used))
+  const target = Math.min(1, Math.max(0, l.used))
+  // the needle sweeps up from empty when the dial first appears, then follows the market along the arc
+  const t = useTween(target, { from: 0, duration: 900 })
   const zone = laneZone(l, actAt)
   const Icon = ZONE_ICON[zone]
   const [nx, ny] = at(t)
@@ -83,7 +87,7 @@ function LaneGauge({ l, actAt }: { l: Lane; actAt: number }) {
           role="meter"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={Math.round(t * 100)}
+          aria-valuenow={Math.round(target * 100)}
           aria-label={laneTip(l, actAt)}
         >
           <path d={arc(0, actAt)} className="dial-safe" />
@@ -93,14 +97,14 @@ function LaneGauge({ l, actAt }: { l: Lane; actAt: number }) {
           <line {...tick(1, R - 12, R + 12)} className="dial-end" />
           <circle cx={nx} cy={ny} r="9" className="dial-pin" />
         </svg>
-        <span className="dial-fairy" style={{ left: `${(fx / 200) * 100}%`, top: `${(fy / 106) * 100}%` }} aria-hidden>
+        <span className={`dial-fairy ${t >= actAt ? 'awake' : ''}`} style={{ left: `${(fx / 200) * 100}%`, top: `${(fy / 106) * 100}%` }} aria-hidden>
           <FairyMark size={18} />
         </span>
         <div className="dial-center">
-          <span className="dial-icon" aria-hidden>
+          <span className="dial-icon" key={`icon-${zone}`} aria-hidden>
             <Icon size={18} />
           </span>
-          <strong>{ZONE_WORD[zone]}</strong>
+          <strong key={`word-${zone}`}>{ZONE_WORD[zone]}</strong>
         </div>
       </div>
       <p className="dial-name">{l.name}</p>
@@ -123,13 +127,17 @@ export function SafetyPanel({ s }: { s: Snapshot }) {
       ? 'Hard sell-off reached. Your fairy moved most of your money somewhere safe.'
       : zone === 'trim'
         ? 'Your fairy is protecting you by selling the riskiest holdings.'
-        : `You’re safe. You can lose ${compactMoney(near.roomToTrim)} more before your fairy steps in.`
+        : (
+            <>
+              You’re safe. You can lose <TweenNumber value={near.roomToTrim} format={compactMoney} /> more before your fairy steps in.
+            </>
+          )
   const Icon = ZONE_ICON[zone]
   const checks = speedChecks(s)
   return (
     <section className={`panel safety zone-${zone}`} aria-labelledby="safety-h">
       <header className="safety-head">
-        <span className="safety-icon" aria-hidden>
+        <span className="safety-icon" key={zone} aria-hidden>
           <Icon size={20} />
         </span>
         <div>
