@@ -112,6 +112,9 @@ export function contextFor(s: Snapshot) {
 import { engine } from '../api/client'
 import { getConnection } from '../api/useEngine'
 
+const VOICE_STYLE =
+  'How to answer: you are talking out loud to the portfolio owner, like a calm friend who manages their money. Answer the question directly in your first sentence. Use two or three short sentences, everyday words and round numbers (say "about 1%" or "around $2.5 million"), and name at most two causes. No jargon, lists, percentages to two decimals or mention of models, tools or data. If the question is unclear, answer the most likely meaning without pointing that out.'
+
 let remote: boolean | null = null
 
 export async function remoteAvailable() {
@@ -136,7 +139,7 @@ export async function ask(q: string, s: Snapshot): Promise<Answer> {
   // the Guardian engine answers with its AI agent (Gemini by default) when it is connected
   if (getConnection().state === 'online') {
     try {
-      const j = await engine.ask(q, contextFor(s))
+      const j = await engine.ask(`${q}\n\n${VOICE_STYLE}`, contextFor(s))
       if (j.answer) return { source: 'engine', text: j.answer, focus: local.focus, model: j.model }
     } catch {
       /* fall through to the optional Claude route, then the local explainer */

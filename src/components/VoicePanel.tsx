@@ -168,7 +168,7 @@ export function VoicePanel({ open, onClose, seed }: { open: boolean; onClose: ()
               <div className="a">
                 <p>{speaking.id === t.id ? <SpokenText text={t.a} charIndex={speaking.charIndex} /> : t.a}</p>
                 <div className="a-meta">
-                  <span>{t.source === 'engine' ? `Answered by the Guardian agent${t.model ? ` (${t.model})` : ''} from your portfolio data` : t.source === 'claude' ? 'Answered by Claude from your portfolio data' : 'From your portfolio data'}</span>
+                  <span>From your portfolio data</span>
                   {canSpeak && (
                     <button className="tool" onClick={() => (speaking.id === t.id ? stopSpeaking() : speak(t.id, t.a!))}>
                       {speaking.id === t.id ? <Square size={11} aria-hidden /> : <Volume2 size={13} aria-hidden />}
