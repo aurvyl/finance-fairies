@@ -1,0 +1,7 @@
+# Only the web interface deploys to Vercel; the Python engine is hosted separately.
+engine/
+*.py
+requirements.txt
+design/
+docs/
+dist/
