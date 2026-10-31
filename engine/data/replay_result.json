@@ -1,0 +1,1679 @@
+{
+  "start": "2025-01-02",
+  "end": "2025-03-14",
+  "simulated": true,
+  "limits": {
+    "max_drawdown": 0.1,
+    "max_daily_loss": 0.02
+  },
+  "thresholds": {
+    "rotation_loss": 0.05,
+    "emergency_loss": 0.08000000000000002,
+    "shock_day": -0.02,
+    "daily_var_limit": 0.02,
+    "rerisk_loss": 0.04000000000000001
+  },
+  "nav": {
+    "hold": {
+      "2025-01-02": 10000.0,
+      "2025-01-03": 10195.95,
+      "2025-01-06": 10457.26,
+      "2025-01-07": 10193.04,
+      "2025-01-08": 10110.73,
+      "2025-01-10": 9925.88,
+      "2025-01-13": 9884.56,
+      "2025-01-14": 9797.7,
+      "2025-01-15": 10081.64,
+      "2025-01-16": 9987.61,
+      "2025-01-17": 10191.83,
+      "2025-01-21": 10304.83,
+      "2025-01-22": 10497.88,
+      "2025-01-23": 10519.48,
+      "2025-01-24": 10527.21,
+      "2025-01-27": 9859.84,
+      "2025-01-28": 10112.89,
+      "2025-01-29": 10072.04,
+      "2025-01-30": 10114.23,
+      "2025-01-31": 10115.92,
+      "2025-02-03": 10021.89,
+      "2025-02-04": 10223.25,
+      "2025-02-05": 10110.37,
+      "2025-02-06": 10169.19,
+      "2025-02-07": 9985.72,
+      "2025-02-10": 10171.16,
+      "2025-02-11": 10162.47,
+      "2025-02-12": 10128.1,
+      "2025-02-13": 10209.77,
+      "2025-02-14": 10239.12,
+      "2025-02-18": 10162.56,
+      "2025-02-19": 10165.55,
+      "2025-02-20": 10112.74,
+      "2025-02-21": 9833.06,
+      "2025-02-24": 9612.43,
+      "2025-02-25": 9417.89,
+      "2025-02-26": 9573.85,
+      "2025-02-27": 9173.95,
+      "2025-02-28": 9312.78,
+      "2025-03-03": 8974.87,
+      "2025-03-04": 9011.43,
+      "2025-03-05": 9188.23,
+      "2025-03-06": 8873.71,
+      "2025-03-07": 8992.74,
+      "2025-03-10": 8625.16,
+      "2025-03-11": 8698.69,
+      "2025-03-12": 8924.88,
+      "2025-03-13": 8724.2,
+      "2025-03-14": 8968.87
+    },
+    "cash_exit": {
+      "2025-01-02": 10000.0,
+      "2025-01-03": 10195.95,
+      "2025-01-06": 10352.16,
+      "2025-01-07": 10352.42,
+      "2025-01-08": 10352.5,
+      "2025-01-10": 10352.69,
+      "2025-01-13": 10352.73,
+      "2025-01-14": 10352.82,
+      "2025-01-15": 10352.53,
+      "2025-01-16": 10352.63,
+      "2025-01-17": 10352.42,
+      "2025-01-21": 10352.31,
+      "2025-01-22": 10352.12,
+      "2025-01-23": 10352.09,
+      "2025-01-24": 10352.09,
+      "2025-01-27": 10352.76,
+      "2025-01-28": 10352.5,
+      "2025-01-29": 10352.54,
+      "2025-01-30": 10352.5,
+      "2025-01-31": 10352.5,
+      "2025-02-03": 10352.59,
+      "2025-02-04": 10352.39,
+      "2025-02-05": 10352.5,
+      "2025-02-06": 10352.45,
+      "2025-02-07": 10352.63,
+      "2025-02-10": 10352.44,
+      "2025-02-11": 10352.45,
+      "2025-02-12": 10352.49,
+      "2025-02-13": 10352.4,
+      "2025-02-14": 10352.38,
+      "2025-02-18": 10352.45,
+      "2025-02-19": 10352.45,
+      "2025-02-20": 10352.5,
+      "2025-02-21": 10352.78,
+      "2025-02-24": 10353.0,
+      "2025-02-25": 10353.2,
+      "2025-02-26": 10353.04,
+      "2025-02-27": 10353.44,
+      "2025-02-28": 10353.3,
+      "2025-03-03": 10353.64,
+      "2025-03-04": 10353.6,
+      "2025-03-05": 10353.43,
+      "2025-03-06": 10353.74,
+      "2025-03-07": 10353.62,
+      "2025-03-10": 10353.99,
+      "2025-03-11": 10353.92,
+      "2025-03-12": 10353.69,
+      "2025-03-13": 10353.89,
+      "2025-03-14": 10353.65
+    },
+    "guardian": {
+      "2025-01-02": 10000.0,
+      "2025-01-03": 10195.95,
+      "2025-01-06": 10387.38,
+      "2025-01-07": 10256.53,
+      "2025-01-08": 10230.84,
+      "2025-01-10": 10104.4,
+      "2025-01-13": 10058.04,
+      "2025-01-14": 10027.22,
+      "2025-01-15": 10240.65,
+      "2025-01-16": 10248.11,
+      "2025-01-17": 10357.22,
+      "2025-01-21": 10426.74,
+      "2025-01-22": 10513.16,
+      "2025-01-23": 10544.65,
+      "2025-01-24": 10577.38,
+      "2025-01-27": 10388.04,
+      "2025-01-28": 10432.58,
+      "2025-01-29": 10426.63,
+      "2025-01-30": 10485.7,
+      "2025-01-31": 10466.54,
+      "2025-02-03": 10452.46,
+      "2025-02-04": 10512.8,
+      "2025-02-05": 10434.79,
+      "2025-02-06": 10445.55,
+      "2025-02-07": 10376.11,
+      "2025-02-10": 10472.41,
+      "2025-02-11": 10576.82,
+      "2025-02-12": 10590.9,
+      "2025-02-13": 10666.67,
+      "2025-02-14": 10566.74,
+      "2025-02-18": 10574.74,
+      "2025-02-19": 10631.97,
+      "2025-02-20": 10611.93,
+      "2025-02-21": 10546.3,
+      "2025-02-24": 10430.13,
+      "2025-02-25": 10381.41,
+      "2025-02-26": 10418.5,
+      "2025-02-27": 10222.37,
+      "2025-02-28": 10348.15,
+      "2025-03-03": 10247.27,
+      "2025-03-04": 10141.17,
+      "2025-03-05": 10253.28,
+      "2025-03-06": 10089.08,
+      "2025-03-07": 10177.47,
+      "2025-03-10": 10052.87,
+      "2025-03-11": 9992.5,
+      "2025-03-12": 9961.98,
+      "2025-03-13": 9894.12,
+      "2025-03-14": 10015.94
+    }
+  },
+  "summary": {
+    "hold": {
+      "final_value": 8968.8682540038,
+      "total_return": -0.1031131746,
+      "max_drawdown": 0.180679762,
+      "worst_day": -0.0633949138,
+      "trades": 0.0,
+      "costs": 0.0,
+      "max_loss_vs_baseline": 0.1374844048,
+      "days_over_daily_limit": 10.0
+    },
+    "cash_exit": {
+      "final_value": 10353.6469989385,
+      "total_return": 0.0353646999,
+      "max_drawdown": 7.05355e-05,
+      "worst_day": -2.7454e-05,
+      "trades": 1.0,
+      "costs": 20.756379067,
+      "max_loss_vs_baseline": 0.0,
+      "days_over_daily_limit": 0.0
+    },
+    "guardian": {
+      "final_value": 10015.9436353962,
+      "total_return": 0.0015943635,
+      "max_drawdown": 0.0724268636,
+      "worst_day": -0.0188252946,
+      "trades": 5.0,
+      "costs": 31.1507873433,
+      "max_loss_vs_baseline": 0.0105879982,
+      "days_over_daily_limit": 0.0
+    }
+  },
+  "events": [
+    {
+      "date": "2025-01-03",
+      "strategy": "cash_exit",
+      "kind": "exit",
+      "reasons": [
+        "Risk budget: 99% one-day VaR 3.3% > your 2% daily limit"
+      ]
+    },
+    {
+      "date": "2025-01-03",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Risk budget: 99% one-day VaR 3.3% > your 2% daily limit"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.0,
+        "portfolio_day_return": 0.019594952567445256,
+        "spike_ratio": NaN,
+        "short_annual_vol": NaN,
+        "daily_var_99": 0.03307760240858342
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.016365039065916465,
+        "spy": 0.012503689781776739,
+        "smh": 0.02896366951265672,
+        "holdings_down": 0,
+        "portfolio_corr_qqq": 0.9255682704244946,
+        "main_loss_driver": "AVGO",
+        "driver_corr_smh_minus_qqq": 0.05252060168502637
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.2254581680854061,
+            "vol_after": 0.13176590440784208,
+            "vol_reduction": 0.4155638470462172,
+            "cvar_before": 0.0381912561632145,
+            "cvar_after": 0.02226795578610561,
+            "cost_nav": 0.0007000000000000001,
+            "turnover": 0.35000000000000003,
+            "daily_var_before": 0.033035083882949526,
+            "daily_var_after": 0.019306897337056535,
+            "stress_equities_down_20": 0.20000000000000007,
+            "stress_tech_down_30_defensive_down_15": 0.24750000000000003,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "NVDA",
+              "weight": 0.1
+            },
+            {
+              "type": "TRIM",
+              "ticker": "AMD",
+              "weight": 0.1
+            },
+            {
+              "type": "TRIM",
+              "ticker": "AVGO",
+              "weight": 0.1
+            },
+            {
+              "type": "TRIM",
+              "ticker": "AMZN",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLU",
+              "weight": 0.15
+            },
+            {
+              "type": "ADD",
+              "ticker": "PG",
+              "weight": 0.15
+            },
+            {
+              "type": "ADD",
+              "ticker": "KO",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": "engine",
+      "attribution": {
+        "portfolio_return": 0.019594952567445385,
+        "benchmark": "SPY",
+        "benchmark_return": 0.012503689781776739,
+        "portfolio_beta": 1.5092062324291624,
+        "market_part": 0.01887064654701829,
+        "stock_specific_part": 0.0007243060204270947,
+        "market_share": 0.9630360921806751,
+        "main_driver": "market",
+        "unusual_moves": [],
+        "holdings": [
+          {
+            "ticker": "AVGO",
+            "weight": 0.14285714285714285,
+            "beta": 2.34229855183112,
+            "return": 0.0024571037915130933,
+            "market_part": 0.02928737446840123,
+            "stock_specific": -0.026830270676888136,
+            "contribution": 0.0003510148273590133,
+            "z_score": -0.07270497670888634,
+            "unusual": false
+          },
+          {
+            "ticker": "META",
+            "weight": 0.14285714285714285,
+            "beta": 1.1735383871098357,
+            "return": 0.008994714685736538,
+            "market_part": 0.014673559939428009,
+            "stock_specific": -0.005678845253691471,
+            "contribution": 0.0012849592408195054,
+            "z_score": 0.5083478587713909,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.14285714285714285,
+            "beta": 1.1995629424207317,
+            "return": 0.011395772606065169,
+            "market_part": 0.014998962905744142,
+            "stock_specific": -0.0036031902996789735,
+            "contribution": 0.001627967515152167,
+            "z_score": 0.8150466647151443,
+            "unusual": false
+          },
+          {
+            "ticker": "GOOGL",
+            "weight": 0.14285714285714285,
+            "beta": 1.1488359271548654,
+            "return": 0.012458389189149877,
+            "market_part": 0.014364688043304296,
+            "stock_specific": -0.0019062988541544198,
+            "contribution": 0.001779769884164268,
+            "z_score": 0.5241492824675413,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.14285714285714285,
+            "beta": 1.5823783123969961,
+            "return": 0.018027432561515733,
+            "market_part": 0.019785567535623442,
+            "stock_specific": -0.0017581349741077092,
+            "contribution": 0.002575347508787962,
+            "z_score": 0.7993704643864988,
+            "unusual": false
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.14285714285714285,
+            "beta": 1.4941592522655938,
+            "return": 0.039293754464789776,
+            "market_part": 0.018682503774900477,
+            "stock_specific": 0.0206112506898893,
+            "contribution": 0.005613393494969967,
+            "z_score": 1.7822842575235491,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.14285714285714288,
+            "beta": 1.6236702538249947,
+            "return": 0.044537500673347497,
+            "market_part": 0.02030186916172643,
+            "stock_specific": 0.024235631511621065,
+            "contribution": 0.0063625000961925,
+            "z_score": 1.8456048150676798,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "ask",
+      "approval_reasons": [
+        "ADD XLU 15% of the portfolio is above the 10% auto limit",
+        "ADD PG 15% of the portfolio is above the 10% auto limit"
+      ],
+      "approval_assumed_in_replay": true
+    },
+    {
+      "date": "2025-01-06",
+      "strategy": "cash_exit",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-01-06",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-01-15",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Risk budget: 99% one-day VaR 2.1% > your 2% daily limit"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.014126092192729978,
+        "portfolio_day_return": 0.021284392323406953,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.20113705764159717,
+        "daily_var_99": 0.020629088645241253
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.023006197773013604,
+        "spy": 0.018189981207548556,
+        "smh": 0.02350881597748855,
+        "holdings_down": 2,
+        "portfolio_corr_qqq": 0.9162518862965084,
+        "main_loss_driver": "KO",
+        "driver_corr_smh_minus_qqq": -0.16047098408289304
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.1418483568442232,
+            "vol_after": 0.12246422958739313,
+            "vol_reduction": 0.13665387240345384,
+            "cvar_before": 0.02225475267369559,
+            "cvar_after": 0.01913353512214225,
+            "cost_nav": 0.0002,
+            "turnover": 0.1,
+            "daily_var_before": 0.020784220890291152,
+            "daily_var_after": 0.017943976620744102,
+            "stress_equities_down_20": 0.2001428126223099,
+            "stress_tech_down_30_defensive_down_15": 0.23258307018026927,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "AMZN",
+              "weight": 0.05
+            },
+            {
+              "type": "TRIM",
+              "ticker": "META",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "KO",
+              "weight": 0.1
+            }
+          ]
+        }
+      ],
+      "chosen": "engine",
+      "attribution": {
+        "portfolio_return": 0.02128439232340706,
+        "benchmark": "SPY",
+        "benchmark_return": 0.018189981207548556,
+        "portfolio_beta": 0.9427307690535813,
+        "market_part": 0.01714825497286244,
+        "stock_specific_part": 0.00413613735054462,
+        "market_share": 0.805672753645121,
+        "main_driver": "market",
+        "unusual_moves": [],
+        "holdings": [
+          {
+            "ticker": "KO",
+            "weight": 0.05212622750831097,
+            "beta": 0.0689597463019509,
+            "return": -0.0043521227520345596,
+            "market_part": 0.0012543764893098027,
+            "stock_specific": -0.005606499241344362,
+            "contribution": -0.0002268597407166499,
+            "z_score": -0.2592597247721631,
+            "unusual": false
+          },
+          {
+            "ticker": "PG",
+            "weight": 0.15209447790784483,
+            "beta": 0.04827478722551097,
+            "return": -0.0005633822142736555,
+            "market_part": 0.0008781174724304497,
+            "stock_specific": -0.0014414996867041052,
+            "contribution": -8.56873237425172e-05,
+            "z_score": 0.05371889058513972,
+            "unusual": false
+          },
+          {
+            "ticker": "AVGO",
+            "weight": 0.03966454038809898,
+            "beta": 2.2694679796971853,
+            "return": 0.014686233061176779,
+            "market_part": 0.04128157990182499,
+            "stock_specific": -0.02659534684064821,
+            "contribution": 0.0005825226844040809,
+            "z_score": 0.22972212168273803,
+            "unusual": false
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.042349751160005486,
+            "beta": 1.6203863626419843,
+            "return": 0.03333622937947234,
+            "market_part": 0.029474797485425655,
+            "stock_specific": 0.0038614318940466824,
+            "contribution": 0.0014117810188335176,
+            "z_score": 1.4608462753874278,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.042425913389463006,
+            "beta": 1.7430573454863951,
+            "return": 0.034001005514072036,
+            "market_part": 0.031706180358077,
+            "stock_specific": 0.0022948251559950367,
+            "contribution": 0.0014425237150946743,
+            "z_score": 1.4071776173450676,
+            "unusual": false
+          },
+          {
+            "ticker": "XLU",
+            "weight": 0.15220196988930124,
+            "beta": 0.24085891023791195,
+            "return": 0.014666982115230764,
+            "market_part": 0.004381219050898243,
+            "stock_specific": 0.010285763064332522,
+            "contribution": 0.0022323435702692727,
+            "z_score": 1.566931326372756,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.0919714498189993,
+            "beta": 1.6663622633141975,
+            "return": 0.025670516796895804,
+            "market_part": 0.03031109825465333,
+            "stock_specific": -0.004640581457757528,
+            "contribution": 0.002360954647413481,
+            "z_score": 1.2255892127426273,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.1423709262680469,
+            "beta": 1.2105536102734218,
+            "return": 0.0255971852890986,
+            "market_part": 0.0220199474216036,
+            "stock_specific": 0.003577237867495,
+            "contribution": 0.0036442949794637915,
+            "z_score": 1.8738907731633232,
+            "unusual": false
+          },
+          {
+            "ticker": "GOOGL",
+            "weight": 0.14347999906548164,
+            "beta": 1.206045182209677,
+            "return": 0.031055601548268585,
+            "market_part": 0.021937939199848495,
+            "stock_specific": 0.00911766234842009,
+            "contribution": 0.004455857681123547,
+            "z_score": 1.5071032184733542,
+            "unusual": false
+          },
+          {
+            "ticker": "META",
+            "weight": 0.14204400611540663,
+            "beta": 1.1538305325644327,
+            "return": 0.038485686519023954,
+            "market_part": 0.020988155704042773,
+            "stock_specific": 0.01749753081498118,
+            "contribution": 0.005466661091263861,
+            "z_score": 2.128164179940207,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "auto",
+      "approval_reasons": [],
+      "approval_assumed_in_replay": false
+    },
+    {
+      "date": "2025-01-16",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-02-05",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "GOOGL -7.3% today, costing the portfolio 1.1%"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.013480392978223787,
+        "portfolio_day_return": -0.007419873932153598,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.08891308962946702,
+        "daily_var_99": 0.017571175621070842
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.004537858994349886,
+        "spy": 0.004054355500294093,
+        "smh": 0.023481147497859123,
+        "holdings_down": 3,
+        "portfolio_corr_qqq": 0.8913533478754617,
+        "main_loss_driver": "GOOGL",
+        "driver_corr_smh_minus_qqq": -0.14489373566615527
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.11864482445589361,
+            "vol_after": 0.10219899787929712,
+            "vol_reduction": 0.13861393998446392,
+            "cvar_before": 0.018377409558784075,
+            "cvar_after": 0.016028950754586695,
+            "cost_nav": 0.0002,
+            "turnover": 0.1,
+            "daily_var_before": 0.017384341234838466,
+            "daily_var_after": 0.014974629202243126,
+            "stress_equities_down_20": 0.20018019831369857,
+            "stress_tech_down_30_defensive_down_15": 0.21635119043887724,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "GOOGL",
+              "weight": 0.1
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLP",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": "engine",
+      "attribution": {
+        "portfolio_return": -0.007419873932153542,
+        "benchmark": "SPY",
+        "benchmark_return": 0.004054355500294093,
+        "portfolio_beta": 0.7790698662269482,
+        "market_part": 0.003158626197250611,
+        "stock_specific_part": -0.010578500129404153,
+        "market_share": null,
+        "main_driver": "stock-specific (partly offset)",
+        "unusual_moves": [
+          "GOOGL"
+        ],
+        "holdings": [
+          {
+            "ticker": "GOOGL",
+            "weight": 0.15008696876020577,
+            "beta": 1.3982490040968647,
+            "return": -0.07292383633714872,
+            "market_part": 0.005668998540540862,
+            "stock_specific": -0.07859283487768957,
+            "contribution": -0.010944917546207997,
+            "z_score": -3.786270078562662,
+            "unusual": true
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.04150792262353391,
+            "beta": 1.796548363028785,
+            "return": -0.06267780639137688,
+            "market_part": 0.007283845737190105,
+            "stock_specific": -0.06996165212856698,
+            "contribution": -0.0026016255379061105,
+            "z_score": -2.4713592340572816,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.0444869974416242,
+            "beta": 1.4404222507458528,
+            "return": -0.024332807771026643,
+            "market_part": 0.005839983875057447,
+            "stock_specific": -0.03017279164608409,
+            "contribution": -0.0010824935570571959,
+            "z_score": -1.638428149140888,
+            "unusual": false
+          },
+          {
+            "ticker": "META",
+            "weight": 0.10594394122575362,
+            "beta": 0.8964178895454347,
+            "return": 0.0009657722268177071,
+            "market_part": 0.003634396801040556,
+            "stock_specific": -0.002668624574222849,
+            "contribution": 0.00010231771603544036,
+            "z_score": -0.15435104519759366,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.1340447623373609,
+            "beta": 1.071190387238774,
+            "return": 0.002231070077867603,
+            "market_part": 0.004342986638363683,
+            "stock_specific": -0.0021119165604960802,
+            "contribution": 0.0002990632583457601,
+            "z_score": 0.13146840900334814,
+            "unusual": false
+          },
+          {
+            "ticker": "PG",
+            "weight": 0.1537399589761587,
+            "beta": -0.12344231423703517,
+            "return": 0.005233921535766406,
+            "market_part": -0.0005004790256959554,
+            "stock_specific": 0.005734400561462362,
+            "contribution": 0.0008046628821931608,
+            "z_score": 0.40475623320393506,
+            "unusual": false
+          },
+          {
+            "ticker": "KO",
+            "weight": 0.1498927472643341,
+            "beta": -0.19504398218618488,
+            "return": 0.007180472610158528,
+            "market_part": -0.0007907776419758218,
+            "stock_specific": 0.00797125025213435,
+            "contribution": 0.0010763007661929657,
+            "z_score": 0.7454896554739567,
+            "unusual": false
+          },
+          {
+            "ticker": "XLU",
+            "weight": 0.1490400229922175,
+            "beta": 0.37450808122642326,
+            "return": 0.010050186936532368,
+            "market_part": 0.0015183888990249362,
+            "stock_specific": 0.008531798037507431,
+            "contribution": 0.0014978800920968682,
+            "z_score": 0.9109402867689761,
+            "unusual": false
+          },
+          {
+            "ticker": "AVGO",
+            "weight": 0.03632119510712664,
+            "beta": 2.5798953881993394,
+            "return": 0.043024702236528656,
+            "market_part": 0.010459813057329357,
+            "stock_specific": 0.0325648891791993,
+            "contribution": 0.0015627086043589853,
+            "z_score": 0.7832676109067019,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.03582978959632517,
+            "beta": 2.531258877412245,
+            "return": 0.05208597122172298,
+            "market_part": 0.010262623352304587,
+            "stock_specific": 0.041823347869418395,
+            "contribution": 0.0018662293897945823,
+            "z_score": 1.5191209758340616,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "auto",
+      "approval_reasons": [],
+      "approval_assumed_in_replay": false
+    },
+    {
+      "date": "2025-02-06",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-02-19",
+      "strategy": "guardian",
+      "kind": "re-risk",
+      "detail": "moved 5% back to the original holdings"
+    },
+    {
+      "date": "2025-02-20",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-03-06",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 5.4% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.05414938441106587,
+        "portfolio_day_return": -0.01601409327909964,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.20995877374267935,
+        "daily_var_99": 0.01736186432371186
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": -0.027509385208026926,
+        "spy": -0.017751154657069668,
+        "smh": -0.0419354410390701,
+        "holdings_down": 9,
+        "portfolio_corr_qqq": 0.8657306106896085,
+        "main_loss_driver": "META",
+        "driver_corr_smh_minus_qqq": -0.19036866672953323
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": true,
+          "rejections": [],
+          "values": {
+            "vol_before": 0.11675907235501919,
+            "vol_after": 0.10369869039293865,
+            "vol_reduction": 0.11185753448236524,
+            "cvar_before": 0.016957857045486475,
+            "cvar_after": 0.01448157054795808,
+            "cost_nav": 0.0003,
+            "turnover": 0.15,
+            "daily_var_before": 0.017108032865246654,
+            "daily_var_after": 0.015194370489096888,
+            "stress_equities_down_20": 0.20024747293683554,
+            "stress_tech_down_30_defensive_down_15": 0.19578789517815887,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "TRIM",
+              "ticker": "META",
+              "weight": 0.1
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.15
+            }
+          ]
+        }
+      ],
+      "chosen": "engine",
+      "attribution": {
+        "portfolio_return": -0.01601409327909972,
+        "benchmark": "SPY",
+        "benchmark_return": -0.017751154657069668,
+        "portfolio_beta": 0.7522805953253,
+        "market_part": -0.013353849193131841,
+        "stock_specific_part": -0.002660244085967877,
+        "market_share": 0.8338810671572764,
+        "main_driver": "market",
+        "unusual_moves": [],
+        "holdings": [
+          {
+            "ticker": "META",
+            "weight": 0.1086522334136164,
+            "beta": 1.0179686662189453,
+            "return": -0.04347498808707173,
+            "market_part": -0.01807011923010343,
+            "stock_specific": -0.025404868856968302,
+            "contribution": -0.00472365455329071,
+            "z_score": -2.591156638526461,
+            "unusual": false
+          },
+          {
+            "ticker": "XLU",
+            "weight": 0.13847839373114285,
+            "beta": 0.5371709088519232,
+            "return": -0.020776918702245628,
+            "market_part": -0.009535403880309162,
+            "stock_specific": -0.011241514821936466,
+            "contribution": -0.0028771543285695156,
+            "z_score": -1.9354561141611641,
+            "unusual": false
+          },
+          {
+            "ticker": "AVGO",
+            "weight": 0.037804897072921215,
+            "beta": 2.797315319949349,
+            "return": -0.0633157186971176,
+            "market_part": -0.04965557686901122,
+            "stock_specific": -0.01366014182810639,
+            "contribution": -0.0023936442284425642,
+            "z_score": -1.3059039991942694,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.04142399645149102,
+            "beta": 2.8636848161798194,
+            "return": -0.05737434022012877,
+            "market_part": -0.0508337120611101,
+            "stock_specific": -0.006540628159018673,
+            "contribution": -0.002376674465685253,
+            "z_score": -1.3892473431322154,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.04597055227380089,
+            "beta": 1.4389480886240846,
+            "return": -0.03676331176651382,
+            "market_part": -0.025542990064660917,
+            "stock_specific": -0.0112203217018529,
+            "contribution": -0.0016900297453205629,
+            "z_score": -2.130460667063113,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.13992704176599322,
+            "beta": 1.0716661009169648,
+            "return": -0.010298692177502677,
+            "market_part": -0.019023310698115872,
+            "stock_specific": 0.008724618520613195,
+            "contribution": -0.0014410655304565247,
+            "z_score": -0.5790086778917504,
+            "unusual": false
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.04284362983593422,
+            "beta": 1.570035351663775,
+            "return": -0.027736793012804184,
+            "market_part": -0.027869940344450433,
+            "stock_specific": 0.00013314733164624878,
+            "contribution": -0.0011883448926765091,
+            "z_score": -0.8780812257031345,
+            "unusual": false
+          },
+          {
+            "ticker": "GOOGL",
+            "weight": 0.044106483273391305,
+            "beta": 1.2675796437239748,
+            "return": -0.0038723040927891583,
+            "market_part": -0.022501002295897545,
+            "stock_specific": 0.018628698203108387,
+            "contribution": -0.0001707937156980897,
+            "z_score": -0.18549394355646243,
+            "unusual": false
+          },
+          {
+            "ticker": "XLV",
+            "weight": 0.04673136687036477,
+            "beta": 0.26529170287983117,
+            "return": -0.0027390800698606776,
+            "market_part": -0.004709234047057258,
+            "stock_specific": 0.0019701539771965803,
+            "contribution": -0.0001280009556319637,
+            "z_score": -0.38023413190948047,
+            "unusual": false
+          },
+          {
+            "ticker": "PG",
+            "weight": 0.15146692967972183,
+            "beta": -0.00611562740532499,
+            "return": 0.0002864145032523968,
+            "market_part": 0.00010855944789693759,
+            "stock_specific": 0.00017785505535545924,
+            "contribution": 4.338232542338325e-05,
+            "z_score": 0.012898023282212678,
+            "unusual": false
+          },
+          {
+            "ticker": "XLP",
+            "weight": 0.048091364713928046,
+            "beta": 0.12820551358086296,
+            "return": 0.0018193795562011505,
+            "market_part": -0.002275795899462944,
+            "stock_specific": 0.0040951754556640945,
+            "contribution": 8.749644579033408e-05,
+            "z_score": 0.19700318457204755,
+            "unusual": false
+          },
+          {
+            "ticker": "KO",
+            "weight": 0.1557206603283992,
+            "beta": -0.08992725747893494,
+            "return": 0.005422468435964278,
+            "market_part": 0.0015963126553946991,
+            "stock_specific": 0.003826155780569579,
+            "contribution": 0.0008443903654582595,
+            "z_score": 0.268298943574739,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "ask",
+      "approval_reasons": [
+        "ADD XLV 15% of the portfolio is above the 10% auto limit"
+      ],
+      "approval_assumed_in_replay": true
+    },
+    {
+      "date": "2025-03-07",
+      "strategy": "guardian",
+      "kind": "fill",
+      "detail": "filled at open"
+    },
+    {
+      "date": "2025-03-12",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 6.6% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.00380192230772447,
+        "hwm_drawdown": 0.06606492170897149,
+        "portfolio_day_return": -0.003054579632642773,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.15172452804616265,
+        "daily_var_99": 0.01572458440913106
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.011280850557297883,
+        "spy": 0.005306567865676515,
+        "smh": 0.029409085287183334,
+        "holdings_down": 5,
+        "portfolio_corr_qqq": 0.768752792107736,
+        "main_loss_driver": "PG",
+        "driver_corr_smh_minus_qqq": -0.12926006314191812
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": false,
+          "rejections": [
+            "volatility falls only 1.4% (< 10%)"
+          ],
+          "values": {
+            "vol_before": 0.10854680176458707,
+            "vol_after": 0.10702079348866513,
+            "vol_reduction": 0.014058528221140065,
+            "cvar_before": 0.01470867163471508,
+            "cvar_after": 0.014120321624739487,
+            "cost_nav": 9.999999999999999e-05,
+            "turnover": 0.049999999999999996,
+            "daily_var_before": 0.01590473626203095,
+            "daily_var_after": 0.0156811390784414,
+            "stress_equities_down_20": 0.20031111843421534,
+            "stress_tech_down_30_defensive_down_15": 0.18880017768917035,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": null,
+      "attribution": {
+        "portfolio_return": -0.003054579632642693,
+        "benchmark": "SPY",
+        "benchmark_return": 0.005306567865676515,
+        "portfolio_beta": 0.6102187905024101,
+        "market_part": 0.0032381674247120786,
+        "stock_specific_part": -0.0062927470573547716,
+        "market_share": null,
+        "main_driver": "stock-specific (partly offset)",
+        "unusual_moves": [],
+        "holdings": [
+          {
+            "ticker": "PG",
+            "weight": 0.15410051012882503,
+            "beta": 0.01555166717851649,
+            "return": -0.02743736646140671,
+            "market_part": 8.252597730721175e-05,
+            "stock_specific": -0.02751989243871392,
+            "contribution": -0.004228112168294289,
+            "z_score": -2.2826256268465785,
+            "unusual": false
+          },
+          {
+            "ticker": "KO",
+            "weight": 0.16332833569557106,
+            "beta": -0.04802171688192596,
+            "return": -0.015484240517158021,
+            "market_part": -0.00025483049966024373,
+            "stock_specific": -0.015229410017497778,
+            "contribution": -0.002529015233177348,
+            "z_score": -1.4014767586220716,
+            "unusual": false
+          },
+          {
+            "ticker": "XLV",
+            "weight": 0.19500584880249158,
+            "beta": 0.2928153938241326,
+            "return": -0.009995668095387988,
+            "market_part": 0.0015538447594425553,
+            "stock_specific": -0.011549512854830545,
+            "contribution": -0.001949213741289119,
+            "z_score": -1.2258972989522339,
+            "unusual": false
+          },
+          {
+            "ticker": "XLP",
+            "weight": 0.04892263887731827,
+            "beta": 0.1362252667385652,
+            "return": -0.02172605246521564,
+            "market_part": 0.0007228886229680818,
+            "stock_specific": -0.02244894108818372,
+            "contribution": -0.0010628958189854152,
+            "z_score": -2.515732573113895,
+            "unusual": false
+          },
+          {
+            "ticker": "XLU",
+            "weight": 0.1411717134336843,
+            "beta": 0.48209795513435666,
+            "return": -0.003100545751936634,
+            "market_part": 0.002558285516824335,
+            "stock_specific": -0.00565883126876097,
+            "contribution": -0.0004377093563804257,
+            "z_score": -0.28587194891982504,
+            "unusual": false
+          },
+          {
+            "ticker": "META",
+            "weight": 0.005380745911878655,
+            "beta": 1.1228976366479277,
+            "return": 0.02286580113254244,
+            "market_part": 0.0059587325150799965,
+            "stock_specific": 0.016907068617462443,
+            "contribution": 0.00012303506596575805,
+            "z_score": 1.2301808012283704,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.0446313757893165,
+            "beta": 1.352842109959214,
+            "return": 0.011699491808345508,
+            "market_part": 0.00717894846804358,
+            "stock_specific": 0.004520543340301928,
+            "contribution": 0.0005221644154422985,
+            "z_score": 0.7947920852712721,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.08851121460941014,
+            "beta": 1.0422515651011035,
+            "return": 0.007412227476897515,
+            "market_part": 0.00553077866331657,
+            "stock_specific": 0.0018814488135809448,
+            "contribution": 0.0006560652569414426,
+            "z_score": 0.6119946356077763,
+            "unusual": false
+          },
+          {
+            "ticker": "AVGO",
+            "weight": 0.036671936783764326,
+            "beta": 2.769165902626184,
+            "return": 0.021779204010391462,
+            "market_part": 0.014694766793603209,
+            "stock_specific": 0.007084437216788253,
+            "contribution": 0.0007986855926697822,
+            "z_score": 0.35489802499526196,
+            "unusual": false
+          },
+          {
+            "ticker": "GOOGL",
+            "weight": 0.04309216515123634,
+            "beta": 1.292322538062534,
+            "return": 0.01871495653547317,
+            "market_part": 0.006857797252572158,
+            "stock_specific": 0.011857159282901012,
+            "contribution": 0.0008064679978248197,
+            "z_score": 0.9773038386550865,
+            "unusual": false
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.04169120865155114,
+            "beta": 1.4806698424716886,
+            "return": 0.041649428382845244,
+            "market_part": 0.00785727500573657,
+            "stock_specific": 0.033792153377108676,
+            "contribution": 0.0017364150089270373,
+            "z_score": 1.8458428789620132,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.03904314665586668,
+            "beta": 2.7200424813752058,
+            "return": 0.06427589891338026,
+            "market_part": 0.014434090024940676,
+            "stock_specific": 0.04984180888843958,
+            "contribution": 0.0025095333477127674,
+            "z_score": 1.6620581906280534,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "none",
+      "approval_reasons": [],
+      "approval_assumed_in_replay": false
+    },
+    {
+      "date": "2025-03-13",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 7.2% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.01058799820107692,
+        "hwm_drawdown": 0.07242686363866135,
+        "portfolio_day_return": -0.006811974491129913,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.12386335683811493,
+        "daily_var_99": 0.015999569958599965
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": -0.01799054638517361,
+        "spy": -0.01333024354055512,
+        "smh": -0.004398712585469644,
+        "holdings_down": 10,
+        "portfolio_corr_qqq": 0.7766087273986468,
+        "main_loss_driver": "AMD",
+        "driver_corr_smh_minus_qqq": 0.014730136780584102
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": false,
+          "rejections": [
+            "volatility falls only 1.4% (< 10%)"
+          ],
+          "values": {
+            "vol_before": 0.10891561173705952,
+            "vol_after": 0.1074229046919128,
+            "vol_reduction": 0.013705170648541709,
+            "cvar_before": 0.01464476246954094,
+            "cvar_after": 0.014065917020034948,
+            "cost_nav": 9.999999999999999e-05,
+            "turnover": 0.049999999999999996,
+            "daily_var_before": 0.01595877585829379,
+            "daily_var_after": 0.01574005811181405,
+            "stress_equities_down_20": 0.20031325230089833,
+            "stress_tech_down_30_defensive_down_15": 0.1883076301850748,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": null,
+      "attribution": {
+        "portfolio_return": -0.006811974491129939,
+        "benchmark": "SPY",
+        "benchmark_return": -0.01333024354055512,
+        "portfolio_beta": 0.6213589064111846,
+        "market_part": -0.008282865548554088,
+        "stock_specific_part": 0.0014708910574241488,
+        "market_share": null,
+        "main_driver": "market (partly offset)",
+        "unusual_moves": [],
+        "holdings": [
+          {
+            "ticker": "AMD",
+            "weight": 0.0435606832362757,
+            "beta": 1.506204120982717,
+            "return": -0.026589942264430566,
+            "market_part": -0.020078067754487366,
+            "stock_specific": -0.0065118745099432,
+            "contribution": -0.0011582760522517194,
+            "z_score": -0.891116490651194,
+            "unusual": false
+          },
+          {
+            "ticker": "GOOGL",
+            "weight": 0.04403313586904815,
+            "beta": 1.2360410842374157,
+            "return": -0.026030982288011262,
+            "market_part": -0.016476728679016558,
+            "stock_specific": -0.009554253608994704,
+            "contribution": -0.0011462257798927856,
+            "z_score": -1.1949985944219987,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.045291887883010175,
+            "beta": 1.3381773521360647,
+            "return": -0.025139524437347016,
+            "market_part": -0.01783823000442893,
+            "stock_specific": -0.007301294432918087,
+            "contribution": -0.0011386165222485155,
+            "z_score": -1.3328516138871267,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.08944048294388571,
+            "beta": 1.0366787678840859,
+            "return": -0.011740983640893932,
+            "market_part": -0.013819180449217476,
+            "stock_specific": 0.0020781968083235444,
+            "contribution": -0.0010501192470778148,
+            "z_score": -0.5813539698421414,
+            "unusual": false
+          },
+          {
+            "ticker": "XLV",
+            "weight": 0.19364814875228015,
+            "beta": 0.3045062980734804,
+            "return": -0.0053252379425241525,
+            "market_part": -0.004059143112952364,
+            "stock_specific": -0.0012660948295717886,
+            "contribution": -0.0010312224692352033,
+            "z_score": -0.6860469792436894,
+            "unusual": false
+          },
+          {
+            "ticker": "KO",
+            "weight": 0.16129199971964558,
+            "beta": -0.05825883623853849,
+            "return": -0.004575375082872535,
+            "market_part": 0.0007766044754490362,
+            "stock_specific": -0.005351979558321571,
+            "contribution": -0.0007379713965839503,
+            "z_score": -0.5101359729069707,
+            "unusual": false
+          },
+          {
+            "ticker": "AVGO",
+            "weight": 0.03758543006559661,
+            "beta": 2.710849516567222,
+            "return": -0.014776200513983873,
+            "market_part": -0.03613628425763718,
+            "stock_specific": 0.021360083743653308,
+            "contribution": -0.0005553698510535735,
+            "z_score": -0.3278182184307774,
+            "unusual": false
+          },
+          {
+            "ticker": "META",
+            "weight": 0.005520644225253941,
+            "beta": 1.1225829723253309,
+            "return": -0.046678478835935566,
+            "market_part": -0.01496430441557691,
+            "stock_specific": -0.031714174420358655,
+            "contribution": -0.000257695274629246,
+            "z_score": -2.479159383326077,
+            "unusual": false
+          },
+          {
+            "ticker": "XLP",
+            "weight": 0.048006382376175986,
+            "beta": 0.12438014670118243,
+            "return": -0.004642223151074432,
+            "market_part": -0.0016580176471367354,
+            "stock_specific": -0.0029842055039376965,
+            "contribution": -0.00022285633966601575,
+            "z_score": -0.48135831109211186,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.04167999486698882,
+            "beta": 2.760353714691737,
+            "return": -0.0013823583503980164,
+            "market_part": -0.03679618727491686,
+            "stock_specific": 0.035413828924518845,
+            "contribution": -5.761668894892845e-05,
+            "z_score": 0.02048557685794722,
+            "unusual": false
+          },
+          {
+            "ticker": "PG",
+            "weight": 0.15033159779730504,
+            "beta": -0.0003458964389261034,
+            "return": 0.0013065675833094925,
+            "market_part": 4.610883770695708e-06,
+            "stock_specific": 0.0013019566995387968,
+            "contribution": 0.00019641839242907948,
+            "z_score": 0.10715887414486208,
+            "unusual": false
+          },
+          {
+            "ticker": "XLU",
+            "weight": 0.14116520443561073,
+            "beta": 0.4913706576202959,
+            "return": 0.002462198382514824,
+            "market_part": -0.0065500905347612715,
+            "stock_specific": 0.009012288917276096,
+            "contribution": 0.00034757673802873523,
+            "z_score": 0.21533770858797815,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "none",
+      "approval_reasons": [],
+      "approval_assumed_in_replay": false
+    },
+    {
+      "date": "2025-03-14",
+      "strategy": "guardian",
+      "kind": "trigger",
+      "reasons": [
+        "Drawdown from peak 6.1% \u2265 5%"
+      ],
+      "values": {
+        "baseline_loss": 0.0,
+        "hwm_drawdown": 0.0610059070830864,
+        "portfolio_day_return": 0.012312728892059921,
+        "spike_ratio": NaN,
+        "short_annual_vol": 0.1470736195899378,
+        "daily_var_99": 0.016242433282235225
+      },
+      "shock": {
+        "label": "none",
+        "suggested_path": "ROTATE",
+        "qqq": 0.0241704507369902,
+        "spy": 0.020655728935006223,
+        "smh": 0.031974518323147016,
+        "holdings_down": 1,
+        "portfolio_corr_qqq": 0.7766423089507948,
+        "main_loss_driver": "PG",
+        "driver_corr_smh_minus_qqq": -0.13852443885071822
+      },
+      "plans": [
+        {
+          "source": "engine",
+          "passed": false,
+          "rejections": [
+            "volatility falls only 1.8% (< 10%)"
+          ],
+          "values": {
+            "vol_before": 0.11162105392856994,
+            "vol_after": 0.10956941529747413,
+            "vol_reduction": 0.018380391143849262,
+            "cvar_before": 0.014744584155853554,
+            "cvar_after": 0.014155824801640168,
+            "cost_nav": 9.999999999999999e-05,
+            "turnover": 0.049999999999999996,
+            "daily_var_before": 0.016355188685098814,
+            "daily_var_after": 0.016054573919835242,
+            "stress_equities_down_20": 0.20030944222270244,
+            "stress_tech_down_30_defensive_down_15": 0.18899212486120492,
+            "daily_var_limit": 0.02,
+            "budget_met": 1.0
+          },
+          "actions": [
+            {
+              "type": "TRIM",
+              "ticker": "MSFT",
+              "weight": 0.05
+            },
+            {
+              "type": "ADD",
+              "ticker": "XLV",
+              "weight": 0.05
+            }
+          ]
+        }
+      ],
+      "chosen": null,
+      "attribution": {
+        "portfolio_return": 0.012312728892059985,
+        "benchmark": "SPY",
+        "benchmark_return": 0.020655728935006223,
+        "portfolio_beta": 0.6174387893871977,
+        "market_part": 0.012753648267540352,
+        "stock_specific_part": -0.00044091937548036665,
+        "market_share": null,
+        "main_driver": "market (partly offset)",
+        "unusual_moves": [],
+        "holdings": [
+          {
+            "ticker": "PG",
+            "weight": 0.15156044205487632,
+            "beta": -0.002188680244269086,
+            "return": -0.0036775217091505885,
+            "market_part": -4.5208785851025446e-05,
+            "stock_specific": -0.003632312923299563,
+            "contribution": -0.0005573668159052675,
+            "z_score": -0.2888080759704858,
+            "unusual": false
+          },
+          {
+            "ticker": "XLP",
+            "weight": 0.0481112587035346,
+            "beta": 0.13232293964857422,
+            "return": 0.0022689470065779815,
+            "market_part": 0.002733226773264137,
+            "stock_specific": -0.00046427976668615527,
+            "contribution": 0.0001091618964180837,
+            "z_score": 0.3003872951059851,
+            "unusual": false
+          },
+          {
+            "ticker": "KO",
+            "weight": 0.1616552195550285,
+            "beta": -0.033375713641690896,
+            "return": 0.000723417733602405,
+            "market_part": -0.0006893996939951565,
+            "stock_specific": 0.0014128174275975615,
+            "contribution": 0.00011694425255549791,
+            "z_score": -0.0636644155575998,
+            "unusual": false
+          },
+          {
+            "ticker": "META",
+            "weight": 0.005299045916233404,
+            "beta": 1.1890612989287985,
+            "return": 0.029629730480273286,
+            "market_part": 0.024560927877779668,
+            "stock_specific": 0.005068802602493618,
+            "contribution": 0.00015700930230058856,
+            "z_score": 1.5493310458101681,
+            "unusual": false
+          },
+          {
+            "ticker": "GOOGL",
+            "weight": 0.04318105835718449,
+            "beta": 1.2469293394473924,
+            "return": 0.016773339135562004,
+            "market_part": 0.0257562344367317,
+            "stock_specific": -0.008982895301169695,
+            "contribution": 0.0007242905360575494,
+            "z_score": 0.9688541703121909,
+            "unusual": false
+          },
+          {
+            "ticker": "AVGO",
+            "weight": 0.03728403813121921,
+            "beta": 2.6763939217333172,
+            "return": 0.02184354935388333,
+            "market_part": 0.055282867370621665,
+            "stock_specific": -0.033439318016738336,
+            "contribution": 0.0008144157270313547,
+            "z_score": 0.37466307898142814,
+            "unusual": false
+          },
+          {
+            "ticker": "AMZN",
+            "weight": 0.04445610521546439,
+            "beta": 1.3527005063249589,
+            "return": 0.02093969555611075,
+            "market_part": 0.027941014988894022,
+            "stock_specific": -0.007001319432783273,
+            "contribution": 0.0009308973088222516,
+            "z_score": 1.354729369622683,
+            "unusual": false
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.04269323239403604,
+            "beta": 1.5233970618931956,
+            "return": 0.029150959051668757,
+            "market_part": 0.03146687677085075,
+            "stock_specific": -0.0023159177191819924,
+            "contribution": 0.0012445486693019225,
+            "z_score": 1.313148230935839,
+            "unusual": false
+          },
+          {
+            "ticker": "XLV",
+            "weight": 0.19393802717703496,
+            "beta": 0.30412119023071904,
+            "return": 0.007647930279414572,
+            "market_part": 0.006281844868797196,
+            "stock_specific": 0.0013660854106173764,
+            "contribution": 0.0014832245103771717,
+            "z_score": 0.8684288664561054,
+            "unusual": false
+          },
+          {
+            "ticker": "NVDA",
+            "weight": 0.041907853406422446,
+            "beta": 2.691862544818309,
+            "return": 0.052690677698312705,
+            "market_part": 0.055602383056063034,
+            "stock_specific": -0.00291170535775033,
+            "contribution": 0.002208153196865941,
+            "z_score": 1.3341876533105343,
+            "unusual": false
+          },
+          {
+            "ticker": "MSFT",
+            "weight": 0.08899660630878042,
+            "beta": 1.0351056905486207,
+            "return": 0.025846857793494715,
+            "market_part": 0.021380862563054742,
+            "stock_specific": 0.004465995230439973,
+            "contribution": 0.0023002826273666823,
+            "z_score": 1.7864168521582968,
+            "unusual": false
+          },
+          {
+            "ticker": "XLU",
+            "weight": 0.1424833742846768,
+            "beta": 0.4757184559319778,
+            "return": 0.01951924352459211,
+            "market_part": 0.009826311475110637,
+            "stock_specific": 0.009692932049481474,
+            "contribution": 0.002781167680868212,
+            "z_score": 1.7636719703487689,
+            "unusual": false
+          }
+        ]
+      },
+      "approval": "none",
+      "approval_reasons": [],
+      "approval_assumed_in_replay": false
+    }
+  ]
+}
