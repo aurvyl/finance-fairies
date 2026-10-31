@@ -29,3 +29,7 @@ packages = ["guardian"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.vercel]
+# Vercel deploys engine/ as a FastAPI app; the app lives in guardian/api.py
+entrypoint = "guardian.api:app"
