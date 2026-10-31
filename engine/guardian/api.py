@@ -10,6 +10,7 @@ LLM keys: put them in engine/.env.local, or send one per request in the X-LLM-Ke
 from __future__ import annotations
 
 import hashlib
+import json
 import warnings
 
 import pandas as pd
@@ -17,11 +18,11 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from .agent import GuardianAgent, build_context, jsonable, snapshot
+from .agent import GuardianAgent, build_context, escalate_on_disagreement, jsonable, news_brief, snapshot
 from .attribution import attribute_day
 from .config import ALL_TICKERS, BENCHMARK, REFERENCE, Policy, asset_class, policy_from_limits
-from .data import fetch_prices
-from .llm import provider_status
+from .data import DATA_DIR, fetch_prices
+from .llm import provider_status, run_agent
 from .rotation import Plan, actions_between, approval_route, check_plan, pick_best
 from .simulator import replay
 
@@ -41,6 +42,8 @@ class AgentConfig(BaseModel):
     provider: str = "gemini"
     model: str | None = None
     live: bool = False  # live mode lets Gemini use Google Search for news; replay never does
+    code_execution: bool = False  # off by default: the engine does the maths and it halves latency
+    thinking_level: str | None = "low"
 
 
 class PortfolioIn(BaseModel):
@@ -62,6 +65,7 @@ class AnalyzeIn(PortfolioIn):
     date: str = "2026-10-30"
     inject: dict[str, float] | None = Field(None, description="what-if shock: ticker -> that day's return, e.g. {'NVDA': -0.12}")
     agent: AgentConfig | None = None
+    use_cache: bool = True  # agent answers are saved per request so a demo replays instantly; false = fresh call
 
 
 def _policy(p: PortfolioIn) -> Policy:
@@ -92,7 +96,16 @@ def _frames(policy: Policy, start: str, end: str) -> dict[str, pd.DataFrame]:
 def _agent(cfg: AgentConfig | None, key: str | None) -> GuardianAgent | None:
     if cfg is None:
         return None
-    return GuardianAgent(cfg.provider, cfg.model, api_key=key, live=cfg.live)
+    return GuardianAgent(cfg.provider, cfg.model, api_key=key, live=cfg.live, code_execution=cfg.code_execution,
+                         thinking_level=cfg.thinking_level)
+
+
+CACHE_DIR = DATA_DIR / "agent_cache"
+
+
+def _cache_path(req: AnalyzeIn):
+    body = req.model_dump(exclude={"use_cache"})
+    return CACHE_DIR / (hashlib.sha1(json.dumps(body, sort_keys=True).encode()).hexdigest()[:16] + ".json")
 
 
 def _thresholds(policy: Policy) -> dict:
@@ -142,6 +155,9 @@ def run_replay(req: ReplayIn, x_llm_key: str | None = Header(None)) -> dict:
 def analyze(req: AnalyzeIn, x_llm_key: str | None = Header(None)) -> dict:
     """One decision on one date: engine numbers, engine plan, optional agent plan, both checked, approval route.
     `inject` turns it into the "time machine": replace that day's moves and see what Guardian would do."""
+    cache = _cache_path(req)
+    if req.agent is not None and req.use_cache and cache.exists():
+        return {**json.loads(cache.read_text()), "cached": True}
     policy = _policy(req)
     frames = _frames(policy, req.date, req.date)
     weights = pd.Series(policy.initial_weights())
@@ -159,15 +175,63 @@ def analyze(req: AnalyzeIn, x_llm_key: str | None = Header(None)) -> dict:
             plans.append(p)
     best = pick_best(plans)
     route, why = approval_route(best, policy) if best else ("none", ["no plan passed the checks"])
-    return jsonable({
+    route, why = escalate_on_disagreement(route, why, agent_note, best.source if best else None)
+    agrees = len(plans) == 2 and plans[0].actions == plans[1].actions
+    out = jsonable({
         "snapshot": snapshot(ctx),
         "plans": [{"source": p.source, "passed": p.check.passed, "rejections": p.check.reasons, "values": p.check.values, "actions": p.actions} for p in plans],
         "chosen": best.source if best else None,
         "approval": route,
         "approval_reasons": why,
         "agent": agent_note,
+        "agent_agrees_with_engine": agrees,
         "simulated": True,
+        "cached": False,
     })
+    if agent is not None and agent_note and not agent_note.get("error"):
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps(out, indent=1))
+    return out
+
+
+class NewsIn(BaseModel):
+    tickers: list[str] | None = None  # default: the demo holdings
+    date: str | None = None  # default: today
+
+
+@app.post("/news")
+def news(req: NewsIn, x_llm_key: str | None = Header(None)) -> dict:
+    """Google-Search-grounded market news with source links (Gemini). Live data, so never used in replays."""
+    tickers = [t.upper() for t in (req.tickers or Policy().holdings)]
+    date = req.date or str(pd.Timestamp.today().date())
+    return {"date": date, "tickers": tickers, **news_brief(tickers, date, x_llm_key)}
+
+
+ASK_SYSTEM = """You are the voice of Finance Fairies, an agent that manages a user's whole portfolio against
+portfolio-level guardrails (a maximum drop from the peak, and a daily loss limit).
+Answer the user's question using only the JSON context you are given. Quote the numbers from it.
+Your answer will often be read aloud: two to four short sentences, plain spoken English, no lists, no markdown.
+Returns, weights, VaR and limits in the context are fractions (0.1 = 10%): always say them as percentages.
+If the context does not contain the answer, say so briefly and say what you can tell them instead.
+Never give personalised investment advice beyond explaining the agent's rules and actions."""
+
+
+class AskIn(BaseModel):
+    question: str = Field(..., min_length=1, max_length=1000)
+    context: dict | list | None = None
+    provider: str = "gemini"
+    model: str | None = None
+
+
+@app.post("/ask")
+def ask(req: AskIn, x_llm_key: str | None = Header(None)) -> dict:
+    """Same contract as the frontend's /api/ask ({question, context} -> {answer}), on the chosen provider."""
+    prompt = f"Portfolio context:\n{json.dumps(req.context, default=str)[:20000]}\n\nQuestion: {req.question}"
+    run = run_agent(req.provider, ASK_SYSTEM, prompt, [], final_tool="", model=req.model, api_key=x_llm_key,
+                    code_execution=False)
+    if run.error:
+        raise HTTPException(502, run.error)
+    return {"answer": run.text.strip(), "provider": run.provider, "model": run.model}
 
 
 class AttributionIn(BaseModel):
