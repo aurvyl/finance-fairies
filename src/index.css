@@ -2518,15 +2518,111 @@ input[type='range']::-moz-range-thumb {
   color: var(--text-2);
   font-weight: 450;
 }
-.decision {
+/* What-if verdict: one column, top to bottom, at every width.
+   (Not .decision: that class is the Overview's side-by-side decision card.) */
+.verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
   animation: rise 360ms var(--ease) both;
 }
-.decision-head {
+.verdict > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.verdict-top {
+  display: grid;
+  gap: 8px;
+}
+.verdict-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.verdict-tags .route,
+.verdict-tags .source-tag.cached {
+  margin: 0;
+}
+.route-hold {
+  background: var(--brand-soft);
+  color: var(--brand-hi);
+}
+.verdict-head {
   font-size: 15.5px;
   max-width: 70ch;
+  text-wrap: pretty;
 }
-.decision-head strong {
+.verdict-head strong {
   font-weight: 650;
+}
+.verdict .agent-card {
+  margin-top: 0;
+}
+.verdict-block .why-head {
+  margin-top: 0;
+}
+.move-gauge {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+.move-lead {
+  font-size: 14px;
+  max-width: 70ch;
+}
+.move-track {
+  display: flex;
+  gap: 3px;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--line);
+}
+.move-track span {
+  min-width: 3px;
+  cursor: help;
+  transition: width var(--mid) var(--ease);
+}
+.move-mkt {
+  background: var(--ink-3);
+}
+.move-own {
+  background: var(--brand);
+}
+.move-scale {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.move-scale span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.move-scale i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.move-top {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.exact-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+  min-width: 0;
+}
+.exact-body > * {
+  min-width: 0;
 }
 
 

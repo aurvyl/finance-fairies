@@ -6,6 +6,7 @@ import { useSettings } from '../api/settings'
 import { useConnection, useRequest } from '../api/useEngine'
 import { pct } from '../engine/format'
 import type { Snapshot } from '../engine/types'
+import type { Attribution } from '../api/types'
 import { useUI } from '../store'
 import { AgentCard, useElapsed } from './AgentCard'
 import { AttributionBar, PlanDetails } from './PlanDetails'
@@ -151,54 +152,118 @@ export function WhatIfView({ s }: { s: Snapshot }) {
           </div>
         )}
         {req.status === 'done' && (
-          <div className="decision">
-            <p className="decision-head">
-              {req.data.snapshot.trigger.kind ? (
-                <>
-                  <strong>A limit check fired.</strong> {req.data.snapshot.trigger.reasons.join(' · ')}
-                </>
-              ) : (
-                <>
-                  <strong>No limit was threatened.</strong> Guardian would hold.
-                </>
-              )}
-            </p>
-            {/* the engine only trades when a limit check fires, so a passing plan on a calm day is not "placed" */}
-            {req.data.chosen && req.data.snapshot.trigger.kind && <span className={`route route-${req.data.approval}`}>{approvalLabel(req.data.approval)}</span>}
-            {req.data.cached && <span className="source-tag cached">Instant: recorded agent answer</span>}
+          <div className="verdict">
+            <div className="verdict-top">
+              <div className="verdict-tags">
+                {/* the engine only trades when a limit check fires, so a passing plan on a calm day is not "placed" */}
+                {req.data.chosen && req.data.snapshot.trigger.kind ? (
+                  <span className={`route route-${req.data.approval}`}>{approvalLabel(req.data.approval)}</span>
+                ) : (
+                  <span className="route route-hold">Would hold</span>
+                )}
+                {req.data.cached && <span className="source-tag cached">Instant: recorded agent answer</span>}
+              </div>
+              <p className="verdict-head">
+                {req.data.snapshot.trigger.kind ? (
+                  <>
+                    <strong>A limit check fired.</strong>{' '}
+                    {req.data.snapshot.trigger.reasons.length === 1 ? 'One of your limits was crossed.' : `${req.data.snapshot.trigger.reasons.length} of your limits were crossed.`}
+                  </>
+                ) : (
+                  <>
+                    <strong>No limit was threatened.</strong> Guardian would hold.
+                  </>
+                )}
+              </p>
+            </div>
             {req.data.agent && <AgentCard a={req.data.agent} agrees={req.data.agent_agrees_with_engine} />}
-            <dl className="plan-values wide">
-              <div>
-                <dt>Volatility now</dt>
-                <dd className="num">{pct(req.data.snapshot.portfolio.annual_vol, 1, false)} a year</dd>
-              </div>
-              <div>
-                <dt>Worst likely day (99%)</dt>
-                <dd className="num">{pct(req.data.snapshot.portfolio.daily_var_99, 2, false)}</dd>
-              </div>
-              <div>
-                <dt>Shock type</dt>
-                <dd>{req.data.snapshot.shock.label === 'none' ? 'None detected' : req.data.snapshot.shock.label.replace(/[-_]/g, ' ').replace(/^./, (c) => c.toUpperCase())}</dd>
-              </div>
-            </dl>
-            <h4 className="why-head">What moved</h4>
-            <AttributionBar a={req.data.snapshot.attribution} />
-            {req.data.plans.map((p, i) => (
-              <PlanDetails key={i} plan={p} chosen={p.source === req.data.chosen} />
-            ))}
+            <section className="verdict-block" aria-labelledby="wi-moved">
+              <h4 className="why-head" id="wi-moved">
+                What moved
+              </h4>
+              <MoveGauge a={req.data.snapshot.attribution} />
+            </section>
             {req.data.snapshot.trigger.kind && req.data.approval_reasons.length > 0 && (
-              <>
+              <section className="verdict-block">
                 <h4 className="why-head">{approvalWhy(req.data.approval)}</h4>
                 <ul className="why">
                   {req.data.approval_reasons.map((r) => (
                     <li key={r}>{r}</li>
                   ))}
                 </ul>
-              </>
+              </section>
             )}
+            <details className="exact">
+              <summary>See the exact numbers</summary>
+              <div className="exact-body">
+                {req.data.snapshot.trigger.reasons.length > 0 && (
+                  <>
+                    <h4 className="why-head">Limit checks</h4>
+                    <ul className="why">
+                      {req.data.snapshot.trigger.reasons.map((r) => (
+                        <li key={r}>{r}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                <dl className="plan-values">
+                  <div>
+                    <dt>Volatility now</dt>
+                    <dd className="num">{pct(req.data.snapshot.portfolio.annual_vol, 1, false)} a year</dd>
+                  </div>
+                  <div>
+                    <dt>Worst likely day (99%)</dt>
+                    <dd className="num">{pct(req.data.snapshot.portfolio.daily_var_99, 2, false)}</dd>
+                  </div>
+                  <div>
+                    <dt>Shock type</dt>
+                    <dd>{req.data.snapshot.shock.label === 'none' ? 'None detected' : req.data.snapshot.shock.label.replace(/[-_]/g, ' ').replace(/^./, (c) => c.toUpperCase())}</dd>
+                  </div>
+                </dl>
+                <AttributionBar a={req.data.snapshot.attribution} />
+                {req.data.plans.map((p, i) => (
+                  <PlanDetails key={i} plan={p} chosen={p.source === req.data.chosen} />
+                ))}
+              </div>
+            </details>
           </div>
         )}
       </section>
+    </div>
+  )
+}
+
+/** Where the day's fall came from, as one gauge: the whole market versus the holdings themselves. Exact splits sit in tooltips. */
+function MoveGauge({ a }: { a: Attribution }) {
+  const total = Math.abs(a.market_part) + Math.abs(a.stock_specific_part) || 1
+  const mkt = (Math.abs(a.market_part) / total) * 100
+  const top = [...a.holdings]
+    .filter((h) => h.contribution !== null)
+    .sort((x, y) => Math.abs(y.contribution!) - Math.abs(x.contribution!))
+    .slice(0, 3)
+  const ownTip = `Your own holdings: ${pct(a.stock_specific_part, 2)}${top.length ? `. Biggest: ${top.map((h) => `${h.ticker} ${pct(h.contribution!, 2)}`).join(', ')}` : ''}`
+  const mktTip = `The market as a whole (${a.benchmark}): ${pct(a.market_part, 2)}`
+  const lead = mkt >= 50 ? 'Mostly the whole market' : 'Mostly your own holdings'
+  return (
+    <div className="move-gauge">
+      <p className="move-lead">
+        <strong>{lead}.</strong> You {a.portfolio_return < 0 ? 'fell' : 'rose'}{' '}
+        <strong className={a.portfolio_return < 0 ? 'down' : 'up'}>{pct(Math.abs(a.portfolio_return), 1, false)}</strong>; the market {a.benchmark_return < 0 ? 'fell' : 'rose'}{' '}
+        {pct(Math.abs(a.benchmark_return), 1, false)}.
+      </p>
+      <div className="move-track" role="img" aria-label={`${mktTip}. ${ownTip}`}>
+        <span className="move-mkt" style={{ width: `${mkt}%` }} title={mktTip} />
+        <span className="move-own" style={{ width: `${100 - mkt}%` }} title={ownTip} />
+      </div>
+      <div className="move-scale" aria-hidden>
+        <span>
+          <i className="move-mkt" /> Market {Math.round(mkt)}%
+        </span>
+        <span>
+          Your holdings {100 - Math.round(mkt)}% <i className="move-own" />
+        </span>
+      </div>
+      {top.length > 0 && <p className="move-top">Led by {top.map((h) => h.ticker).join(', ')}</p>}
     </div>
   )
 }
