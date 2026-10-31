@@ -1,7 +1,8 @@
 <p align="center"><img src="docs/media/readme-hero.png" alt="Finance Fairies. You set the rules. Gemini does the thinking. The maths keeps it honest." width="100%" /></p>
 
-<p align="center"><a href="docs/media/finance-fairies-launch.mp4"><img src="docs/media/finance-fairies-launch-poster.jpg" alt="Play the Finance Fairies launch film (61 s)" width="100%" /></a></p>
-<p align="center"><sub><a href="docs/media/finance-fairies-launch.mp4">▶ Launch film (61 s, MP4)</a> · English voice-over with captions (<a href="docs/media/finance-fairies-launch.srt">SRT</a>) · Simulated results · Not investment advice</sub></p>
+https://github.com/user-attachments/assets/11821931-f869-4646-a48f-5a00912fb6c4
+
+<p align="center"><sub><a href="https://github.com/user-attachments/assets/11821931-f869-4646-a48f-5a00912fb6c4">▶ Launch film (61 s, MP4)</a> · English voice-over with captions (<a href="docs/media/finance-fairies-launch.srt">SRT</a>) · Simulated results · Not investment advice</sub></p>
 
 # Finance Fairies: Portfolio Guardian
 
