@@ -14,7 +14,7 @@ BENCHMARK = "SPY"
 REFERENCE = ["QQQ", "SMH"]
 ALL_TICKERS = HOLDINGS + CANDIDATES + [BENCHMARK] + REFERENCE
 
-ETFS = {"USMV", "SPLV", "XLP", "XLV", "XLU", "SPY", "QQQ", "SMH"}
+ETFS = {"USMV", "SPLV", "XLP", "XLV", "XLU", "SPY", "QQQ", "SMH", "GLD", "IEF", "TLT", "SHY", "BND", "PSQ", "SH"}
 
 SECTOR = {
     "NVDA": "semis",
@@ -31,10 +31,28 @@ SECTOR = {
     "XLU": "utilities",
     "PG": "staples",
     "KO": "staples",
+    "GLD": "gold",
+    "IEF": "treasuries",
+    "TLT": "treasuries",
+    "SHY": "treasuries",
+    "BND": "bonds",
 }
+
+
+def asset_class(ticker: str) -> str:
+    """equity | etf | crypto. Crypto uses Yahoo's "-USD" pairs (BTC-USD, ETH-USD, SOL-USD)."""
+    if ticker.endswith("-USD"):
+        return "crypto"
+    return "etf" if ticker in ETFS else "equity"
+
+
+def sector_of(ticker: str) -> str:
+    return "crypto" if asset_class(ticker) == "crypto" else SECTOR.get(ticker, "other")
 
 # Sectors that take the larger hit in the "tech crash" stress scenario.
 TECH_SECTORS = {"semis", "software", "comm", "discretionary"}
+# Per-scenario shock by sector for the stress test (positive = loss fraction).
+STRESS_SHOCK_OVERRIDES = {"crypto": 0.45, "gold": 0.0, "treasuries": 0.0, "bonds": 0.05}
 
 
 @dataclass(frozen=True)
@@ -72,6 +90,7 @@ class Policy:
     cap_stock: float = 0.20
     cap_etf: float = 0.40
     cap_sector: float = 0.40
+    cap_crypto: float = 0.10  # per coin; the "crypto" sector also counts against cap_sector
 
     # Costs (per leg, fraction of traded value)
     cost_per_leg: float = 0.0010
@@ -101,6 +120,13 @@ class Policy:
 
     holdings: list[str] = field(default_factory=lambda: list(HOLDINGS))
     candidates: list[str] = field(default_factory=lambda: list(CANDIDATES))
+    start_weights: dict[str, float] | None = None  # None = equal weight across holdings
+
+    def initial_weights(self) -> dict[str, float]:
+        if self.start_weights:
+            total = sum(self.start_weights.values())
+            return {t: w / total for t, w in self.start_weights.items()}
+        return {t: 1 / len(self.holdings) for t in self.holdings}
 
 
 def policy_from_limits(max_drawdown: float = 0.10, max_daily_loss: float = 0.02, baseline: float = 10_000.0, **overrides) -> Policy:
