@@ -3,6 +3,45 @@
 .panel.story {
   display: grid;
   gap: 6px;
+  container-type: inline-size;
+  scroll-margin-top: 16px;
+}
+
+/* the link from "What your fairy decided" down to the story */
+.story-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.story-link:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.story-link > span {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+}
+.story-link-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.story-link svg {
+  flex: none;
+  color: var(--text-2);
 }
 .story-head {
   display: flex;
@@ -236,7 +275,7 @@
   flex: none;
 }
 
-@media (max-width: 900px) {
+@container (max-width: 680px) {
   .story-body {
     grid-template-columns: 1fr;
   }

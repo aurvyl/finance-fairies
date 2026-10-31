@@ -88,7 +88,7 @@ export function ScenarioStory({ s }: { s: Snapshot }) {
   const pending = actions.find((a) => a.pending)
 
   return (
-    <section className="panel story" aria-labelledby="story-h">
+    <section className="panel story" id="story" aria-labelledby="story-h">
       <header className="story-head">
         <p className="story-kicker">
           <Newspaper size={14} aria-hidden /> Breaking

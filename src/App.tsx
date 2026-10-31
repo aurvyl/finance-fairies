@@ -230,9 +230,9 @@ export default function App() {
             </div>
             <div className="top-actions">
               {demo && (
-              <button className="btn ghost" onClick={() => sim.triggerShock()} disabled={s.shock > 0} title="Demo: play a fictional news-driven sell-off and watch your fairy respond">
+              <button className="btn ghost" onClick={() => sim.triggerShock()} disabled={s.shock > 0} title="Demo: play a simulated, news-driven market crash and watch your fairy respond">
                 <TrendingDown size={16} aria-hidden />
-                {s.shock > 0 ? 'Sell-off in progress' : 'Simulate a sell-off'}
+                {s.shock > 0 ? 'Crash in progress' : 'Simulate a crash'}
               </button>
               )}
               <TopSettings onOpen={() => setView('settings')} />
@@ -245,11 +245,6 @@ export default function App() {
 
           {view === 'overview' && (
             <div className="grid overview">
-              {s.scenario && (
-                <div className="span-all">
-                  <ScenarioStory s={s} />
-                </div>
-              )}
               <div className="span-all">
                 <SafetyPanel s={s} />
               </div>
@@ -260,6 +255,7 @@ export default function App() {
                   <Legend period={period} />
                 </section>
                 <Decisions s={s} />
+                {s.scenario && <ScenarioStory s={s} />}
               </div>
               <div className="col">
                 <Activity s={s} limit={3} />

@@ -38,7 +38,7 @@ The interface has two halves. **Overview, Holdings, Activity and Guardrails** ru
 
 A clickable build lives in [`design/artifact/`](design/artifact/index.html); open `index.html` from a local server (for example `npx serve design/artifact`).
 
-Press **Simulate a sell-off** to watch the agent respond, then open **Talk to your fairy**.
+Press **Simulate a crash** to play a simulated news-driven crash (Elon Musk sells 90% of his Tesla shares), see how it spreads through the portfolio, and watch the agent respond, then open **Talk to your fairy**.
 
 ### Connecting the engine
 

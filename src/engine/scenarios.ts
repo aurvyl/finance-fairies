@@ -42,7 +42,7 @@ export interface HitGroup {
 
 export interface Scenario {
   id: string
-  /** short name used inside sentences: "the Tesla sell-off" */
+  /** short name used inside sentences: "the Tesla crash" */
   short: string
   headline: string
   dek: string
@@ -59,7 +59,7 @@ export interface Scenario {
 
 const musk: Scenario = {
   id: 'musk-tesla',
-  short: 'Tesla sell-off',
+  short: 'Tesla crash',
   headline: 'Elon Musk sells 90% of his Tesla shares, and markets panic',
   dek: 'A filing shows Tesla’s founder has dumped almost his whole stake. Traders read it as him losing faith, and the selling spreads well beyond one stock.',
   ticks: 18,
