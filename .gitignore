@@ -35,3 +35,23 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 engine/data/*.parquet
+
+# web interface (Vite)
+logs
+*.log
+pnpm-debug.log*
+lerna-debug.log*
+node_modules
+dist
+dist-ssr
+*.local
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+/dist
+.impeccable/review/
