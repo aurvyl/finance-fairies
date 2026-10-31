@@ -228,6 +228,30 @@ def engine_plan(weights: pd.Series, window: MarketWindow, policy: Policy, max_st
     return plan
 
 
+def approval_route(plan: Plan, policy: Policy) -> tuple[str, list[str]]:
+    """Decide whether a passing plan may run on its own: ("auto" | "ask" | "blocked", reasons).
+
+    Within the user's pre-authorised policy the agent acts automatically; anything larger,
+    new or unusual waits for a human click. Paused mode blocks everything.
+    """
+    if policy.agent_mode == "paused":
+        return "blocked", ["agent is paused"]
+    reasons: list[str] = []
+    if policy.agent_mode == "ask_first":
+        reasons.append("you chose Ask first")
+    allowed = set(policy.holdings) | set(policy.candidates)
+    for a in plan.actions:
+        if a["weight"] > policy.auto_max_trade_weight + 1e-9:
+            reasons.append(f"{a['type']} {a['ticker']} {a['weight']:.0%} of the portfolio is above the {policy.auto_max_trade_weight:.0%} auto limit")
+        if a["type"] == "ADD" and a["ticker"] not in allowed:
+            reasons.append(f"{a['ticker']} is not in the pre-approved universe")
+        if a.get("kind") == "HEDGE":
+            reasons.append("hedges always need approval")
+    if plan.check and policy.daily_var_limit is not None and not plan.check.values.get("budget_met", 1.0):
+        reasons.append("risk budget still above your daily limit after this plan")
+    return ("ask" if reasons else "auto"), reasons
+
+
 def pick_best(plans: list[Plan]) -> Plan | None:
     """Among plans that passed, take the one with the lowest post-trade volatility."""
     passing = [p for p in plans if p.check and p.check.passed]
