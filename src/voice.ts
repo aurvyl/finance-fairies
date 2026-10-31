@@ -51,6 +51,7 @@ export function useListen(onFinal: (text: string) => void) {
   const [level, setLevel] = useState(0)
   const rec = useRef<Recognition | null>(null)
   const finalText = useRef('')
+  const cancelled = useRef(false)
   const audio = useRef<{ ctx: AudioContext; stream: MediaStream; raf: number } | null>(null)
   const cb = useRef(onFinal)
   cb.current = onFinal
@@ -120,8 +121,10 @@ export function useListen(onFinal: (text: string) => void) {
       }
       setInterim((finalText.current + ' ' + live).trim())
     }
+    let failed = false
     r.onerror = (e) => {
       if (e.error === 'aborted') return
+      failed = true
       const map: Record<string, ListenError> = { 'not-allowed': 'not-allowed', 'service-not-allowed': 'not-allowed', 'audio-capture': 'not-allowed', 'no-speech': 'no-speech', network: 'network' }
       setError(map[e.error] ?? null)
     }
@@ -130,6 +133,8 @@ export function useListen(onFinal: (text: string) => void) {
       stopMeter()
       const text = finalText.current.trim()
       if (text) cb.current(text)
+      else if (!failed && !cancelled.current) setError('no-speech')
+      cancelled.current = false
     }
     rec.current = r
     try {
@@ -144,6 +149,7 @@ export function useListen(onFinal: (text: string) => void) {
   const stop = useCallback(() => rec.current?.stop(), [])
   const cancel = useCallback(() => {
     finalText.current = ''
+    cancelled.current = true
     rec.current?.abort()
   }, [])
 
