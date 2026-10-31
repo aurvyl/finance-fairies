@@ -43,7 +43,9 @@ export function PortfolioChart({ s, period, height = 300 }: { s: Snapshot; perio
   const x1 = intraday ? s.dayEnd : s.now
   const vals = pts.map((p) => p.v)
   // the user's limit for this view is always in frame; the other one is pinned if it is far away
-  const must = intraday ? [dailyLine, s.open] : [floor, s.highWater]
+  // on 1D, bring the floor into frame too when it is close enough to matter today
+  const floorNear = intraday && (s.open - floor) / s.open < g.dailyLoss * 2.5
+  const must = intraday ? [dailyLine, s.open, ...(floorNear ? [floor] : [])] : [floor, s.highWater]
   let lo = Math.min(...vals, ...must)
   let hi = Math.max(...vals, ...must)
   const span = hi - lo || hi * 0.01
@@ -78,17 +80,17 @@ export function PortfolioChart({ s, period, height = 300 }: { s: Snapshot; perio
   }
   const base = intraday ? s.open : pts[0].v
 
-  const guide = (v: number, label: string, sub: string, cls: string) => {
+  const guide = (v: number, label: string, sub: string, cls: string, dy = 0) => {
     const off = sy(v) > PAD.top + ih ? 'below' : sy(v) < PAD.top ? 'above' : null
     const y = clampY(v)
     return (
       <g className={`guide ${cls} ${off ? 'off' : ''}`} key={label}>
         <line x1={PAD.left} x2={PAD.left + iw} y1={y} y2={y} />
-        <text x={PAD.left + iw + 10} y={y - 3} className="guide-label">
+        <text x={PAD.left + iw + 10} y={y - 3 + dy} className="guide-label">
           {off === 'below' ? '↓ ' : off === 'above' ? '↑ ' : ''}
           {label}
         </text>
-        <text x={PAD.left + iw + 10} y={y + 11} className="guide-sub">
+        <text x={PAD.left + iw + 10} y={y + 11 + dy} className="guide-sub">
           {sub}
         </text>
       </g>
@@ -104,6 +106,18 @@ export function PortfolioChart({ s, period, height = 300 }: { s: Snapshot; perio
         return d.getTime()
       })
     : Array.from({ length: 5 }, (_, i) => x0 + ((x1 - x0) * (i + 0.5)) / 5)
+
+  // keep the two limit labels apart on 1D; the lines stay where they are
+  let dailyDy = 0
+  let floorDy = 0
+  if (floorNear) {
+    const gap = clampY(floor) - clampY(dailyLine)
+    if (Math.abs(gap) < 30) {
+      const push = (30 - Math.abs(gap)) / 2
+      dailyDy = gap >= 0 ? -push : push
+      floorDy = gap >= 0 ? push : -push
+    }
+  }
 
   const zoneTop = intraday ? dailyAct : floorAct
   const zoneBottom = intraday ? dailyLine : floor
@@ -155,8 +169,9 @@ export function PortfolioChart({ s, period, height = 300 }: { s: Snapshot; perio
         {intraday && guide(s.open, 'Open', compactMoney(s.open), 'open')}
         {!intraday && guide(s.highWater, 'Peak', compactMoney(s.highWater), 'peak')}
         {intraday
-          ? guide(dailyLine, `Daily limit ${pct(-g.dailyLoss, 1)}`, compactMoney(dailyLine), 'limit')
+          ? guide(dailyLine, `Daily limit ${pct(-g.dailyLoss, 1)}`, compactMoney(dailyLine), 'limit', dailyDy)
           : guide(floor, `Floor ${pct(-g.maxDrawdown, 0)}`, compactMoney(floor), 'limit')}
+        {floorNear && guide(floor, `Floor ${pct(-g.maxDrawdown, 0)}`, compactMoney(floor), 'limit second', floorDy)}
 
         <path d={area} fill="url(#area)" className="area" />
         <path d={line} className="value-line" />

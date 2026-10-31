@@ -1861,3 +1861,214 @@ input[type='range']::-moz-range-thumb {
     transform: scale(1.12);
   }
 }
+
+/* ---------------- room to your limits ---------------- */
+
+.summary {
+  padding: 4px 0 16px;
+}
+.summary-room {
+  font-size: 34px;
+  font-weight: 640;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  transition: color var(--mid) var(--ease);
+}
+.summary-room span {
+  font-size: 16px;
+  font-weight: 560;
+  letter-spacing: 0;
+  color: var(--text-2);
+}
+.summary-text {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 14px;
+  max-width: 40ch;
+}
+.summary.tone-near .summary-room {
+  color: var(--warn-text);
+}
+.summary.tone-warn .summary-room,
+.summary.tone-crit .summary-room {
+  color: var(--limit-hi);
+}
+
+.gauge {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 28px minmax(0, 1fr);
+  margin: 8px 0 18px;
+  padding-top: 10px;
+}
+.gauge-scale {
+  position: relative;
+  font-size: 11px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.gauge-scale span {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  transition: top var(--mid) var(--ease);
+}
+.gauge-track {
+  position: relative;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(var(--sunk), oklch(0.93 0.02 235));
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.gauge-now {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: -1px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.gauge-tick {
+  position: absolute;
+  left: 0;
+  width: 6px;
+  height: 1px;
+  background: var(--line-2);
+  transition: top var(--mid) var(--ease);
+}
+.gauge-ward {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  background: repeating-linear-gradient(45deg, oklch(0.53 0.21 352 / 0.22) 0 2px, transparent 2px 5px);
+  transition:
+    top var(--mid) var(--ease),
+    height var(--mid) var(--ease);
+}
+.gauge-line {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--limit);
+  opacity: 0.55;
+  transition: top var(--mid) var(--ease);
+}
+.gauge-limit.lead .gauge-line {
+  opacity: 1;
+  height: 3px;
+}
+.gauge-limit:not(.lead) .gauge-ward {
+  opacity: 0.35;
+}
+.gauge-labels {
+  position: relative;
+  margin-left: 14px;
+}
+.gauge-now-label {
+  position: absolute;
+  top: -10px;
+  font-size: 13px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.gauge-now-label strong {
+  color: var(--text);
+  font-weight: 620;
+  margin-right: 4px;
+}
+.gauge-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: -10px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 8px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  transition: top var(--mid) var(--ease);
+}
+.gauge-label::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 10px;
+  width: 8px;
+  height: 1px;
+  background: var(--limit);
+  opacity: 0.6;
+}
+.gauge-name {
+  font-weight: 600;
+  color: var(--text-2);
+}
+.gauge-label.lead .gauge-name {
+  color: var(--limit-hi);
+}
+.gauge-room {
+  font-weight: 620;
+  text-align: right;
+}
+.gauge-at {
+  color: var(--text-2);
+  font-size: 12px;
+}
+.gauge-label.hit .gauge-room {
+  color: var(--limit-hi);
+}
+
+.rules {
+  border-top: 1px solid var(--line);
+}
+.rules .rule {
+  padding: 14px 0;
+}
+.rule-head {
+  justify-content: flex-start;
+}
+.rule-head h3 {
+  flex: 1;
+}
+.rule-limit {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--limit-hi);
+}
+.icon-btn.sm {
+  width: 28px;
+  height: 28px;
+}
+.rule-quote {
+  font-size: 13px;
+}
+.rule-bar {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+.rule-bar .meter {
+  margin-top: 0;
+  height: 6px;
+}
+.rule-used-text {
+  color: var(--text-2);
+  font-weight: 450;
+}
+
+.guide.limit.second line {
+  stroke-dasharray: 6 4;
+}
+
+.gauge-away {
+  text-align: right;
+}
+
+.k-limit.dashed {
+  background: repeating-linear-gradient(90deg, var(--limit) 0 4px, transparent 4px 7px);
+}
